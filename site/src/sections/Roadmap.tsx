@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 import { colors } from '../tokens/color.stylex';
 import { space } from '../tokens/space.stylex';
 import { type as t } from '../tokens/type.stylex';
-import { stroke } from '../tokens/shape.stylex';
+import { radius, stroke } from '../tokens/shape.stylex';
 import { Section } from '../components/Section';
 import { Text } from '../components/Text';
 import { Badge } from '../components/Badge';
@@ -34,6 +34,19 @@ const styles = stylex.create({
     color: colors.textSubtle,
     textTransform: 'uppercase',
   },
+  state: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: space.tight,
+    fontFamily: t.familyMono,
+    fontSize: t.microSize,
+    letterSpacing: t.trackingWide,
+    textTransform: 'uppercase',
+  },
+  stateDone: { color: colors.pass },
+  stateNow: { color: colors.accentText },
+  stateNext: { color: colors.textSubtle },
+  pip: { width: space.snug, height: space.snug, borderRadius: radius.pill, backgroundColor: 'currentColor' },
   gate: {
     marginBlockStart: space.bay,
     display: 'flex',
@@ -51,10 +64,10 @@ const styles = stylex.create({
 });
 
 const STEPS = [
-  { when: 'Sep · done', name: 'M0 Spike', body: 'Babel visitor, one number, verified against a hand count.', state: 'done' as const },
-  { when: 'Oct', name: 'M1 The number', body: 'CLI, config, dead tokens, contrast on real pairings. Published MIT.', state: 'now' as const },
-  { when: 'Nov', name: 'M2 Graph format', body: 'Versioned assay-graph.json, then diffing and blast radius on top.', state: 'next' as const },
-  { when: 'Dec', name: 'M3 The gate', body: 'GitHub Action, PR comment, fail-on-regression.', state: 'next' as const },
+  { when: 'Sep', name: 'M0 Spike', body: 'Babel visitor, one number, verified against a hand count.', state: 'done' as const },
+  { when: 'Oct', name: 'M1 The number', body: 'CLI, config, dead tokens, contrast on real pairings. Published MIT.', state: 'done' as const },
+  { when: 'Nov', name: 'M2 Graph format', body: 'Versioned assay-graph.json, then diffing and blast radius on top.', state: 'done' as const },
+  { when: 'Dec', name: 'M3 The gate', body: 'GitHub Action, PR comment, fail-on-regression.', state: 'now' as const },
   { when: 'Feb', name: 'M4 The bill', body: '--only change sets feeding Chromatic and Playwright.', state: 'next' as const },
 ];
 
@@ -83,6 +96,10 @@ export function Roadmap() {
               s.state === 'now' && styles.now,
             )}
           >
+            <span {...stylex.props(styles.state, s.state === 'done' ? styles.stateDone : s.state === 'now' ? styles.stateNow : styles.stateNext)}>
+              <span {...stylex.props(styles.pip)} aria-hidden />
+              {s.state === 'done' ? 'shipped' : s.state === 'now' ? 'in progress' : 'planned'}
+            </span>
             <span {...stylex.props(styles.when)}>{s.when}</span>
             <Text role="title">{s.name}</Text>
             <Text role="caption">{s.body}</Text>

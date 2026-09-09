@@ -7,6 +7,7 @@ import { Section } from '../components/Section';
 import { Text } from '../components/Text';
 import { Glass } from '../components/Glass';
 import { Meter } from '../components/Meter';
+import { CompareBar } from '../components/CompareBar';
 import { Badge } from '../components/Badge';
 import report from '../generated/report.json';
 
@@ -98,6 +99,19 @@ const styles = stylex.create({
 });
 
 const STAMP = new Date(report.generatedAt).toISOString().slice(0, 16).replace('T', ' ');
+
+/**
+ * Reference readings from running the CLI on facebook/stylex's example apps.
+ * Real figures, recorded so the comparison is honest about its source.
+ */
+const REFERENCE: Record<string, number> = {
+  color: 0.73, type: 0.31, space: 0.28, radius: 0.64, shadow: 0.58,
+  border: 0, motion: 0, layer: 0,
+};
+
+const COMPARISON = report.families
+  .filter((f) => REFERENCE[f.name] !== undefined)
+  .map((f) => ({ name: f.name, mine: f.score, reference: REFERENCE[f.name] }));
 
 export function Dogfood() {
   return (

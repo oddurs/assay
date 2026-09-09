@@ -64,7 +64,7 @@ const styles = stylex.create({
 const PRIMITIVES = `// LAYER 1 — the only file where a literal is legal
 export const palette = stylex.defineConsts({
   ink000: '#04060A',
-  violet500: '#7C5CFF',
+  violet500: '#7350F5',
   rose500: '#F5468C',
 });
 // defineConsts is inlined at build time: zero runtime cost,

@@ -9,6 +9,7 @@ import { Text } from '../components/Text';
 import { Statement } from '../components/Statement';
 import { Button } from '../components/Button';
 import { StatLine } from '../components/StatLine';
+import { CopyField } from '../components/CopyField';
 import { FactRow } from '../components/FactRow';
 import { Ribbon } from '../components/Ribbon';
 import { GridField } from '../components/GridField';
@@ -150,11 +151,7 @@ export function Hero() {
             </Button>
           </div>
 
-          <div {...stylex.props(styles.command)}>
-            <span {...stylex.props(styles.prompt)}>$</span>
-            npx assay .
-            <span {...stylex.props(styles.copy)}>MIT · no account · no server</span>
-          </div>
+          <CopyField command="npx assay ." note="MIT · no account · no server" />
 
           <div {...stylex.props(styles.facts)}>
             <FactRow facts={FACTS} ruled />

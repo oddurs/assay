@@ -7,6 +7,7 @@ import { Section } from '../components/Section';
 import { Text } from '../components/Text';
 import { Terminal } from '../components/Terminal';
 import { Button } from '../components/Button';
+import { CopyField } from '../components/CopyField';
 import { Glow } from '../components/Glow';
 
 const styles = stylex.create({
@@ -23,6 +24,7 @@ const styles = stylex.create({
   },
   copy: { display: 'flex', flexDirection: 'column', gap: space.gutter, alignItems: 'flex-start' },
   actions: { display: 'flex', gap: space.snug, flexWrap: 'wrap' },
+  commands: { display: 'flex', flexDirection: 'column', gap: space.snug, alignItems: 'flex-start' },
   caveats: {
     display: 'flex',
     flexDirection: 'column',
@@ -67,8 +69,12 @@ export function Install() {
                 happening, caches per file by content hash, and stays under three percent of
                 build time — or it is a command people forget to run.
               </Text>
+              <div {...stylex.props(styles.commands)}>
+                <CopyField command="npx assay ." note="score a repo" />
+                <CopyField command="npx assay diff main HEAD" note="what changed" />
+              </div>
               <div {...stylex.props(styles.actions)}>
-                <Button size="lg">Read the docs</Button>
+                <Button size="lg" chevron>Read the docs</Button>
                 <Button variant="secondary" size="lg">GitHub</Button>
               </div>
               <div {...stylex.props(styles.caveats)}>

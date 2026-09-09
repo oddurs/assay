@@ -6,27 +6,30 @@ import { stroke } from '../tokens/shape.stylex';
 import { Section } from '../components/Section';
 import { Text } from '../components/Text';
 import { Terminal } from '../components/Terminal';
+import { ScoreViz, BlastViz, ChangeSetViz, ContrastViz } from '../components/CapabilityViz';
 
 const styles = stylex.create({
-  layout: {
-    display: 'grid',
-    gridTemplateColumns: {
-      default: 'minmax(0, 1fr) minmax(0, 1.05fr)',
-      '@media (max-width: 960px)': '1fr',
-    },
-    gap: space.bay,
-    alignItems: 'start',
-  },
   list: { display: 'flex', flexDirection: 'column' },
+  // Each capability now carries its own figure, so the section shows four
+  // different shapes of answer rather than four paragraphs and one terminal.
   item: {
     display: 'grid',
-    gridTemplateColumns: 'auto minmax(0, 1fr)',
-    gap: space.gutter,
+    gridTemplateColumns: {
+      default: 'auto minmax(0, 1.1fr) minmax(0, 1fr)',
+      '@media (max-width: 960px)': 'auto minmax(0, 1fr)',
+    },
+    gap: space.roomy,
+    alignItems: 'start',
     paddingBlock: space.roomy,
     borderTopWidth: stroke.hair,
     borderTopStyle: 'solid',
     borderTopColor: colors.border,
   },
+  viz: {
+    gridColumn: { default: 'auto', '@media (max-width: 960px)': '2' },
+    alignSelf: 'center',
+  },
+  terminalWrap: { marginBlockStart: space.bay },
   num: {
     fontFamily: t.familyMono,
     fontSize: t.microSize,
@@ -42,21 +45,25 @@ const styles = stylex.create({
 const CAPS = [
   {
     n: '01',
+    viz: <ScoreViz />,
     title: 'Conformance score',
     body: 'The share of style declarations resolving to a token rather than a literal — per file, per directory, per team, over time. “System adherence 61% → 87% this quarter” is a sentence you can take into a budget review.',
   },
   {
     n: '02',
+    viz: <BlastViz />,
     title: 'Blast radius on every PR',
     body: 'Change one token and the bot tells you it reaches 218 components across 6 teams. Reviewing a token change is blind today, which is exactly why mature systems ossify.',
   },
   {
     n: '03',
+    viz: <ChangeSetViz />,
     title: 'Deterministic visual change sets',
     body: 'Diff the compiled graph between two commits for the exact set of components whose styles changed. It narrows the snapshot set rather than replacing visual regression — and on a large monorepo that is an order of magnitude off the CI bill.',
   },
   {
     n: '04',
+    viz: <ContrastViz />,
     title: 'Dead tokens and real-pairing contrast',
     body: 'Which of your 340 colour tokens anything actually references. And contrast checked on the foreground/background pairings that occur in the compiled output — not every theoretical combination in the palette.',
   },
@@ -95,21 +102,20 @@ export function Measures() {
       title="Four questions, one compiler pass."
       tail="Assay rides the compile that is already happening, so the whole analysis is a build artifact rather than a separate tool you have to remember to run."
     >
-      <div {...stylex.props(styles.layout)}>
-        <div {...stylex.props(styles.list)}>
-          {CAPS.map((c) => (
-            <div key={c.n} {...stylex.props(styles.item)}>
-              <span {...stylex.props(styles.num)}>{c.n}</span>
-              <div {...stylex.props(styles.body)}>
-                <Text role="title">{c.title}</Text>
-                <Text role="body">{c.body}</Text>
-              </div>
+      <div {...stylex.props(styles.list)}>
+        {CAPS.map((c) => (
+          <div key={c.n} {...stylex.props(styles.item)}>
+            <span {...stylex.props(styles.num)}>{c.n}</span>
+            <div {...stylex.props(styles.body)}>
+              <Text role="title">{c.title}</Text>
+              <Text role="body">{c.body}</Text>
             </div>
-          ))}
-        </div>
-        <div {...stylex.props(styles.sticky)}>
-          <Terminal title="StyleX example apps · 85 files" lines={OUTPUT} />
-        </div>
+            <div {...stylex.props(styles.viz)}>{c.viz}</div>
+          </div>
+        ))}
+      </div>
+      <div {...stylex.props(styles.terminalWrap)}>
+        <Terminal title="StyleX example apps · 85 files" lines={OUTPUT} />
       </div>
     </Section>
   );

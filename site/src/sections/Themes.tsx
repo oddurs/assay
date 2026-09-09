@@ -10,6 +10,7 @@ import { Badge } from '../components/Badge';
 import { Meter } from '../components/Meter';
 import { ThemePicker } from '../components/ThemePicker';
 import { Code } from '../components/Code';
+import { Glass } from '../components/Glass';
 import type { ThemeId } from '../themes/themes';
 
 const styles = stylex.create({
@@ -22,17 +23,27 @@ const styles = stylex.create({
     gap: space.gutter,
     alignItems: 'start',
   },
-  stage: {
+  stage: { display: 'flex', flexDirection: 'column', gap: space.gutter },
+  // The picker is the point of the section, so it leads rather than trailing
+  // at the bottom where it read as a footnote to its own demo.
+  control: {
     display: 'flex',
-    flexDirection: 'column',
+    alignItems: 'center',
     gap: space.gutter,
-    padding: space.roomy,
-    borderRadius: radius.loud,
-    borderWidth: stroke.hair,
-    borderStyle: 'solid',
-    borderColor: colors.border,
-    backgroundColor: colors.bgSurface,
+    flexWrap: 'wrap',
+    paddingBlockEnd: space.gutter,
+    borderBottomWidth: stroke.hair,
+    borderBottomStyle: 'solid',
+    borderBottomColor: colors.border,
   },
+  controlLabel: {
+    fontFamily: t.familyMono,
+    fontSize: t.microSize,
+    letterSpacing: t.trackingLabel,
+    textTransform: 'uppercase',
+    color: colors.textSubtle,
+  },
+  specimen: { display: 'flex', flexDirection: 'column', gap: space.gutter },
   row: { display: 'flex', gap: space.snug, flexWrap: 'wrap', alignItems: 'center' },
   swatches: { display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: space.tight },
   swatch: {
@@ -105,11 +116,16 @@ export function Themes({
       }
     >
       <div {...stylex.props(styles.layout)}>
-        <div {...stylex.props(styles.stage)}>
-          <div {...stylex.props(styles.row)}>
-            <Badge tone="accent">Live</Badge>
-            <Text role="caption">every token below is a role, not a colour</Text>
-          </div>
+        <Glass strong>
+          <div {...stylex.props(styles.stage)}>
+            <div {...stylex.props(styles.control)}>
+              <span {...stylex.props(styles.controlLabel)}>Theme</span>
+              <ThemePicker value={theme} onChange={onTheme} />
+              <Badge tone="accent">Live</Badge>
+            </div>
+
+            <div {...stylex.props(styles.specimen)}>
+          <Text role="caption">every token below is a role, not a colour</Text>
 
           <div {...stylex.props(styles.band)} />
 
@@ -130,11 +146,9 @@ export function Themes({
             <Button variant="ghost">Ghost</Button>
           </div>
 
-          <div {...stylex.props(styles.controls)}>
-            <span {...stylex.props(styles.label)}>Theme</span>
-            <ThemePicker value={theme} onChange={onTheme} />
+            </div>
           </div>
-        </div>
+        </Glass>
 
         <Code filename="src/themes/themes.ts">{SNIPPET}</Code>
       </div>

@@ -2,9 +2,10 @@ import * as stylex from '@stylexjs/stylex';
 import { colors } from '../tokens/color.stylex';
 import { space } from '../tokens/space.stylex';
 import { stroke } from '../tokens/shape.stylex';
+import { type as t } from '../tokens/type.stylex';
 import { Section } from '../components/Section';
 import { Text } from '../components/Text';
-import { Card } from '../components/Card';
+import { Glass } from '../components/Glass';
 import { Badge } from '../components/Badge';
 
 const styles = stylex.create({
@@ -25,13 +26,43 @@ const styles = stylex.create({
     borderTopStyle: 'solid',
     borderTopColor: colors.border,
   },
+  // The report figures are the strongest evidence on the page. They were set
+  // at caption size in a flat row; now they are the size of the claim they make.
   stat: {
+    display: 'grid',
+    gridTemplateColumns: {
+      default: 'repeat(3, minmax(0, 1fr))',
+      '@media (max-width: 720px)': '1fr',
+    },
+    gap: space.gutter,
+    marginBlockEnd: space.gutter,
+  },
+  statItem: {
     display: 'flex',
-    gap: space.roomy,
-    flexWrap: 'wrap',
+    flexDirection: 'column',
+    gap: space.snug,
+    paddingBlock: space.gutter,
+    paddingInlineStart: space.gutter,
+    borderInlineStartWidth: stroke.bold,
+    borderInlineStartStyle: 'solid',
+    borderInlineStartColor: colors.gridLineStrong,
+  },
+  statLead: { borderInlineStartColor: colors.signal },
+  statValue: {
+    fontFamily: t.familyBody,
+    fontSize: { default: t.heroSize, '@media (max-width: 720px)': t.displaySize },
+    fontWeight: t.weightSemibold,
+    letterSpacing: t.trackingTight,
+    lineHeight: t.leadingTight,
+    color: colors.textPrimary,
+    fontVariantNumeric: 'tabular-nums',
+  },
+  source: {
+    fontFamily: t.familyMono,
+    fontSize: t.microSize,
+    color: colors.textSubtle,
     marginBlockEnd: space.bay,
   },
-  statItem: { display: 'flex', flexDirection: 'column', gap: space.tight, maxWidth: '260px' },
 });
 
 const LAYERS = [
@@ -76,27 +107,30 @@ export function Gap() {
       }
     >
       <div {...stylex.props(styles.stat)}>
-        <div {...stylex.props(styles.statItem)}>
-          <Text role="heading">44%</Text>
-          <Text role="caption">
+        <div {...stylex.props(styles.statItem, styles.statLead)}>
+          <span {...stylex.props(styles.statValue)}>44%</span>
+          <Text role="body">
             of teams describe their design system as unstable or very unstable
           </Text>
         </div>
         <div {...stylex.props(styles.statItem)}>
-          <Text role="heading">8%</Text>
-          <Text role="caption">say it is very stable</Text>
+          <span {...stylex.props(styles.statValue)}>8%</span>
+          <Text role="body">say it is very stable</Text>
         </div>
         <div {...stylex.props(styles.statItem)}>
-          <Text role="heading">40%</Text>
-          <Text role="caption">
-            have an automated token pipeline — zeroheight Design Systems Report 2026
-          </Text>
+          <span {...stylex.props(styles.statValue)}>40%</span>
+          <Text role="body">have an automated token pipeline</Text>
         </div>
       </div>
+      <p {...stylex.props(styles.source)}>zeroheight · Design Systems Report 2026</p>
 
       <div {...stylex.props(styles.grid)}>
         {LAYERS.map((l) => (
-          <Card key={l.title} style={l.tone === 'accent' ? styles.ours : null}>
+          <Glass
+            key={l.title}
+            strong={l.tone === 'accent'}
+            style={l.tone === 'accent' ? styles.ours : null}
+          >
             <div {...stylex.props(styles.card)}>
               <Badge tone={l.tone === 'accent' ? 'accent' : 'neutral'}>{l.verdict}</Badge>
               <Text role="title">{l.title}</Text>
@@ -105,7 +139,7 @@ export function Gap() {
                 <Text role="body">{l.body}</Text>
               </div>
             </div>
-          </Card>
+          </Glass>
         ))}
       </div>
     </Section>

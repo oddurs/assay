@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-09-09T20:03:46.219Z",
+  "generatedAt": "2026-09-09T20:12:29.865Z",
   "score": 1,
-  "token": 571,
+  "token": 781,
   "literal": 0,
-  "scored": 571,
+  "scored": 781,
   "excluded": {
     "dynamic": 2,
-    "neutral": 18,
+    "neutral": 21,
     "cssvar": 0,
     "expr": 0,
-    "untokenizable": 365
+    "untokenizable": 483
   },
-  "files": 37,
-  "callSites": 30,
+  "files": 40,
+  "callSites": 33,
   "tokensDefined": 176,
   "dead": [
     "colors.borderFocus",
@@ -26,7 +26,6 @@
     "film.dark80",
     "radius.none",
     "blur.none",
-    "blur.veil",
     "elevation.flat",
     "elevation.low",
     "elevation.signalGlow",
@@ -40,54 +39,54 @@
     "level": "AA",
     "checked": 17,
     "failing": 0,
-    "unpaired": 99
+    "unpaired": 146
   },
   "families": [
     {
       "name": "color",
-      "token": 180,
+      "token": 247,
       "literal": 0,
-      "total": 180,
+      "total": 247,
       "score": 1,
       "rule": "no-raw-color"
     },
     {
       "name": "type",
-      "token": 160,
+      "token": 208,
       "literal": 0,
-      "total": 160,
+      "total": 208,
       "score": 1,
       "rule": "no-raw-type"
     },
     {
       "name": "space",
-      "token": 144,
+      "token": 202,
       "literal": 0,
-      "total": 144,
+      "total": 202,
       "score": 1,
       "rule": "no-raw-space"
     },
     {
       "name": "border",
-      "token": 33,
+      "token": 45,
       "literal": 0,
-      "total": 33,
+      "total": 45,
       "score": 1,
       "rule": "no-raw-border-width"
     },
     {
       "name": "radius",
-      "token": 20,
+      "token": 37,
       "literal": 0,
-      "total": 20,
+      "total": 37,
       "score": 1,
       "rule": "no-raw-radius"
     },
     {
       "name": "motion",
-      "token": 18,
+      "token": 26,
       "literal": 0,
-      "total": 18,
+      "total": 26,
       "score": 1,
       "rule": "no-raw-motion"
     },
