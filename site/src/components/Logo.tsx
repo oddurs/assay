@@ -25,8 +25,21 @@ const styles = stylex.create({
 export function Logo({ href = '#top' }: { href?: string }) {
   return (
     <a href={href} {...stylex.props(styles.root)}>
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" {...stylex.props(styles.glyph)}>
-        <circle cx="11" cy="11" r="9.25" stroke="currentColor" strokeWidth="1.5" opacity="0.28" />
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 22 22"
+        fill="none"
+        {...stylex.props(styles.glyph)}
+      >
+        <circle
+          cx="11"
+          cy="11"
+          r="9.25"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          opacity="0.28"
+        />
         <path
           d="M2.4 12.6a8.6 8.6 0 0 0 17.2 0"
           fill="none"

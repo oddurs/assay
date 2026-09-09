@@ -15,12 +15,20 @@ const EXTS = new Set(['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs']);
 
 function collect(dir, cfg, acc = []) {
   let entries;
-  try { entries = readdirSync(dir); } catch { return acc; }
+  try {
+    entries = readdirSync(dir);
+  } catch {
+    return acc;
+  }
   for (const name of entries) {
     if (cfg.skipDirs.includes(name)) continue;
     const full = join(dir, name);
     let st;
-    try { st = statSync(full); } catch { continue; }
+    try {
+      st = statSync(full);
+    } catch {
+      continue;
+    }
     if (st.isDirectory()) collect(full, cfg, acc);
     else if (EXTS.has(extname(name))) {
       if (cfg.skipTests && /\.(test|spec)\./.test(name)) continue;
@@ -38,11 +46,20 @@ export async function analyze(root, opts = {}) {
   const isAllowed = matcher(cfg.allow);
 
   const out = {
-    files: 0, callSites: 0, tokenDefSites: 0, excludedFiles: 0,
-    declarations: 0, untokenizable: 0,
-    byCat: {}, byFamily: {},
-    violations: [], unparsed: [],
-    tokens: new Map(), referenced: new Set(), pairs: new Map(), units: new Map(),
+    files: 0,
+    callSites: 0,
+    tokenDefSites: 0,
+    excludedFiles: 0,
+    declarations: 0,
+    untokenizable: 0,
+    byCat: {},
+    byFamily: {},
+    violations: [],
+    unparsed: [],
+    tokens: new Map(),
+    referenced: new Set(),
+    pairs: new Map(),
+    units: new Map(),
     byFile: new Map(),
   };
 
@@ -51,12 +68,20 @@ export async function analyze(root, opts = {}) {
 
   for (const abs of collect(absRoot, cfg)) {
     const rel = relative(absRoot, abs);
-    if (isExcluded(rel)) { out.excludedFiles += 1; continue; }
+    if (isExcluded(rel)) {
+      out.excludedFiles += 1;
+      continue;
+    }
     const src = readFileSync(abs, 'utf8');
     if (!adapter.matches(rel, src)) continue;
     out.files += 1;
     adapter.analyzeFile({
-      file: rel, absFile: abs, src, families, out, aliases: cfg.aliases ?? {},
+      file: rel,
+      absFile: abs,
+      src,
+      families,
+      out,
+      aliases: cfg.aliases ?? {},
     });
   }
 
@@ -142,7 +167,10 @@ export async function analyze(root, opts = {}) {
     units: out.units,
     rawTokens: out.tokens,
     config: cfg,
-    score, token, literal, scored,
+    score,
+    token,
+    literal,
+    scored,
     excluded: {
       dynamic: out.byCat[CAT.DYNAMIC] || 0,
       neutral: out.byCat[CAT.NEUTRAL] || 0,
@@ -176,4 +204,10 @@ export async function analyze(root, opts = {}) {
 export { FAMILIES, CAT, CAT_DOC } from './taxonomy.js';
 export { loadConfig, DEFAULTS } from './config.js';
 export { parseColor, ratio } from './contrast.js';
-export { buildGraph, diffGraphs, blastRadius, graphHash, GRAPH_VERSION } from './graph.js';
+export {
+  buildGraph,
+  diffGraphs,
+  blastRadius,
+  graphHash,
+  GRAPH_VERSION,
+} from './graph.js';

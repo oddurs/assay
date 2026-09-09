@@ -35,7 +35,12 @@ const styles = stylex.create({
     borderBottomColor: colors.border,
     backgroundColor: colors.bgRaised,
   },
-  dot: { width: space.snug, height: space.snug, borderRadius: radius.pill, backgroundColor: colors.accent },
+  dot: {
+    width: space.snug,
+    height: space.snug,
+    borderRadius: radius.pill,
+    backgroundColor: colors.accent,
+  },
   barTitle: {
     fontFamily: t.familyBody,
     fontSize: t.captionSize,
@@ -54,7 +59,12 @@ const styles = stylex.create({
     paddingBlock: space.hair,
     paddingInline: space.snug,
   },
-  body: { display: 'flex', flexDirection: 'column', gap: space.gutter, padding: space.gutter },
+  body: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: space.gutter,
+    padding: space.gutter,
+  },
 
   headline: { display: 'flex', alignItems: 'baseline', gap: space.snug },
   big: {
@@ -66,7 +76,11 @@ const styles = stylex.create({
     fontVariantNumeric: 'tabular-nums',
   },
   delta: { fontFamily: t.familyMono, fontSize: t.microSize, color: colors.pass },
-  caption: { fontFamily: t.familyBody, fontSize: t.captionSize, color: colors.textMuted },
+  caption: {
+    fontFamily: t.familyBody,
+    fontSize: t.captionSize,
+    color: colors.textMuted,
+  },
 
   plot: { display: 'flex', alignItems: 'flex-end', gap: space.hair, height: space.bay },
   bara: (h: string) => ({
@@ -79,7 +93,12 @@ const styles = stylex.create({
   }),
   peak: { backgroundColor: colors.signal, opacity: 1 },
 
-  controls: { display: 'flex', gap: space.snug, alignItems: 'center', flexWrap: 'wrap' },
+  controls: {
+    display: 'flex',
+    gap: space.snug,
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
   input: {
     flex: '1',
     minWidth: '120px',

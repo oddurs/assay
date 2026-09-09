@@ -46,10 +46,10 @@ the file rather than guess — the CLI does exactly this.
 
 Both id kinds are `"<path>#<name>"`, where `<path>` is relative to `root`.
 
-| | |
-|---|---|
+|             |                                                                                                                                                                                                                                                              |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **tokenId** | `tokens/color.stylex.ts#colors.accent` — the file, the exported namespace, then the token name. Nested tokens dot-join: `#nested.surface.bg`. Token names may contain any characters StyleX allows, including CSS custom property names: `#vars.--color-fg`. |
-| **unitId** | `components/Button.tsx#primary` — the file, then the key inside `stylex.create`. |
+| **unitId**  | `components/Button.tsx#primary` — the file, then the key inside `stylex.create`.                                                                                                                                                                             |
 
 Identity is a **resolved module path**, never a bare namespace name. Two packages
 that both export `colors` must not alias into each other. Producers are expected
@@ -61,17 +61,17 @@ unique rather than silently colliding.
 
 ```jsonc
 {
-  "id":    "tokens/color.stylex.ts#colors.accent",
-  "file":  "tokens/color.stylex.ts",
-  "name":  "colors.accent",
-  "value": "#7350F5",              // fully resolved, or null if not statically knowable
-  "raw":   "palette.violet500",    // source text of the definition
-  "refs":  ["tokens/primitives.stylex.ts#palette.violet500"]
+  "id": "tokens/color.stylex.ts#colors.accent",
+  "file": "tokens/color.stylex.ts",
+  "name": "colors.accent",
+  "value": "#7350F5", // fully resolved, or null if not statically knowable
+  "raw": "palette.violet500", // source text of the definition
+  "refs": ["tokens/primitives.stylex.ts#palette.violet500"],
 }
 ```
 
 `refs` are **token → token edges** and they are the reason blast radius works.
-A primitive like `palette.violet500` is referenced by *no component* — components
+A primitive like `palette.violet500` is referenced by _no component_ — components
 use `colors.accent`, which references the primitive. Without the edge you would
 report a blast radius of zero for the most dangerous change in the system.
 
@@ -103,15 +103,15 @@ A **unit** is one styled thing: one key inside one `stylex.create` call.
 }
 ```
 
-| field | |
-|---|---|
-| `prop` | The CSS property, camelCased as written. |
-| `cond` | `"default"`, or the condition path joined with `" > "` — `":hover"`, `"@media (max-width: 720px)"`, `"default > :hover"` for nested conditions. `(prop, cond)` is unique within a unit. |
-| `cat` | One of the six outcomes below. |
-| `family` | The token-bearing family, or absent if the property carries no tokens. |
-| `token` | Present when `cat` is `token`. |
-| `value` | Present when `cat` is `literal`. |
-| `rule` | The rule that a literal violates, present when `cat` is `literal` and a family applies. |
+| field    |                                                                                                                                                                                         |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prop`   | The CSS property, camelCased as written.                                                                                                                                                |
+| `cond`   | `"default"`, or the condition path joined with `" > "` — `":hover"`, `"@media (max-width: 720px)"`, `"default > :hover"` for nested conditions. `(prop, cond)` is unique within a unit. |
+| `cat`    | One of the six outcomes below.                                                                                                                                                          |
+| `family` | The token-bearing family, or absent if the property carries no tokens.                                                                                                                  |
+| `token`  | Present when `cat` is `token`.                                                                                                                                                          |
+| `value`  | Present when `cat` is `literal`.                                                                                                                                                        |
+| `rule`   | The rule that a literal violates, present when `cat` is `literal` and a family applies.                                                                                                 |
 
 `tokens` is `declarations` denormalised — every distinct token the unit
 references, sorted. It exists so blast radius is a set intersection instead of a
@@ -119,14 +119,14 @@ walk.
 
 ### Outcomes
 
-| `cat` | |
-|---|---|
-| `token` | Resolves to a design token. **The numerator of the score.** |
+| `cat`     |                                                                        |
+| --------- | ---------------------------------------------------------------------- |
+| `token`   | Resolves to a design token. **The numerator of the score.**            |
 | `literal` | A hardcoded design value in a token-bearing family. **The violation.** |
-| `dynamic` | Depends on a runtime parameter. Never a pass *or* a violation. |
-| `neutral` | Keyword, zero, `null`, or layout geometry (`50%`, `calc(…)`). |
-| `cssvar` | A raw `var(--x)` — a variable, just not a traceable one. |
-| `expr` | An expression the producer could not resolve. |
+| `dynamic` | Depends on a runtime parameter. Never a pass _or_ a violation.         |
+| `neutral` | Keyword, zero, `null`, or layout geometry (`50%`, `calc(…)`).          |
+| `cssvar`  | A raw `var(--x)` — a variable, just not a traceable one.               |
+| `expr`    | An expression the producer could not resolve.                          |
 
 A producer that cannot classify a value must emit `expr`, never `token` or
 `literal`. **Guessing corrupts the score in a way nobody can see**, which is
@@ -144,14 +144,14 @@ Two units with equal hashes have identical compiled styles.
 
 A diff compares two graphs of the same `version`.
 
-- A unit is **style-changed** iff its `hash` differs. This is *exact for
-  styling*: equal hashes cannot render differently. It does **not** catch markup
+- A unit is **style-changed** iff its `hash` differs. This is _exact for
+  styling_: equal hashes cannot render differently. It does **not** catch markup
   or logic changes, so a visual change set is this unioned with the set of units whose
   source files changed.
 - A token is **changed** iff its `value` or `raw` differs.
 - **Blast radius** is the transitive closure over `refs` from the changed tokens,
   then every unit whose `tokens` intersects that closure. Removed tokens are
-  closed over the *base* graph, since they have no node in head.
+  closed over the _base_ graph, since they have no node in head.
 
 ## Writing another producer
 

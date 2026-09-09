@@ -50,41 +50,6 @@ const styles = stylex.create({
   countPass: { color: colors.pass },
   countDim: { color: colors.textSubtle },
 
-  famRow: {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(72px, auto) minmax(0, 1fr) auto',
-    alignItems: 'center',
-    gap: space.snug,
-    paddingBlock: space.snug,
-    borderTopWidth: stroke.hair,
-    borderTopStyle: 'solid',
-    borderTopColor: colors.border,
-  },
-  famName: {
-    fontFamily: t.familyMono,
-    fontSize: t.microSize,
-    letterSpacing: t.trackingWide,
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-  },
-  famTrack: {
-    height: space.tight,
-    backgroundColor: colors.bgOverlay,
-    borderRadius: radius.pill,
-    overflow: 'hidden',
-  },
-  famFill: (w: string) => ({
-    height: '100%',
-    width: w,
-    backgroundColor: colors.pass,
-    borderRadius: radius.pill,
-  }),
-  famCount: {
-    fontFamily: t.familyMono,
-    fontSize: t.microSize,
-    color: colors.textSubtle,
-    fontVariantNumeric: 'tabular-nums',
-  },
   note: {
     display: 'flex',
     flexDirection: 'column',
@@ -105,8 +70,14 @@ const STAMP = new Date(report.generatedAt).toISOString().slice(0, 16).replace('T
  * Real figures, recorded so the comparison is honest about its source.
  */
 const REFERENCE: Record<string, number> = {
-  color: 0.73, type: 0.31, space: 0.28, radius: 0.64, shadow: 0.58,
-  border: 0, motion: 0, layer: 0,
+  color: 0.73,
+  type: 0.31,
+  space: 0.28,
+  radius: 0.64,
+  shadow: 0.58,
+  border: 0,
+  motion: 0,
+  layer: 0,
 };
 
 const COMPARISON = report.families
@@ -149,7 +120,9 @@ export function Dogfood() {
 
             <div {...stylex.props(styles.counts)}>
               <div {...stylex.props(styles.count)}>
-                <span {...stylex.props(styles.countValue, styles.countPass)}>{report.token}</span>
+                <span {...stylex.props(styles.countValue, styles.countPass)}>
+                  {report.token}
+                </span>
                 <Text role="caption">token-resolved</Text>
               </div>
               <div {...stylex.props(styles.count)}>
@@ -182,29 +155,30 @@ export function Dogfood() {
 
         <div {...stylex.props(styles.panel)}>
           <Glass>
-            <Text role="title">By family</Text>
-            <div>
-              {report.families.map((f) => (
-                <div key={f.name} {...stylex.props(styles.famRow)}>
-                  <span {...stylex.props(styles.famName)}>{f.name}</span>
-                  <div {...stylex.props(styles.famTrack)}>
-                    <div {...stylex.props(styles.famFill(`${f.score * 100}%`))} />
-                  </div>
-                  <span {...stylex.props(styles.famCount)}>
-                    {f.token}/{f.total}
-                  </span>
-                </div>
-              ))}
+            <div {...stylex.props(styles.panel)}>
+              <div>
+                <Text role="title">By family, against a real codebase</Text>
+                <Text role="caption">
+                  Eight bars at 100% prove nothing on their own. The hatched band behind
+                  each is the same measure taken on StyleX&rsquo;s own example apps.
+                </Text>
+              </div>
+              <CompareBar
+                rows={COMPARISON}
+                mineLabel="this site"
+                referenceLabel="facebook/stylex · examples"
+              />
             </div>
           </Glass>
 
           <div {...stylex.props(styles.note)}>
             <Text role="title">Why the dynamic count is not zero</Text>
             <Text role="body">
-              The meter above sets its own width from a prop, which StyleX compiles to a CSS
-              custom property. That value is genuinely unknowable at build time, so Assay
-              reports it in its own category and never counts it as either a pass or a
-              violation. A metric that hides its blind spot is worse than no metric.
+              The meter above sets its own width from a prop, which StyleX compiles to a
+              CSS custom property. That value is genuinely unknowable at build time, so
+              Assay reports it in its own category and never counts it as either a pass
+              or a violation. A metric that hides its blind spot is worse than no
+              metric.
             </Text>
           </div>
         </div>

@@ -36,7 +36,12 @@ const styles = stylex.create({
     gap: space.bay,
     paddingBlockEnd: space.bay,
   },
-  brand: { display: 'flex', flexDirection: 'column', gap: space.gutter, maxWidth: '360px' },
+  brand: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: space.gutter,
+    maxWidth: '360px',
+  },
   col: { display: 'flex', flexDirection: 'column', gap: space.snug },
   head: {
     fontFamily: t.familyMono,
@@ -80,7 +85,11 @@ const styles = stylex.create({
     fontVariantNumeric: 'tabular-nums',
   },
   stampPass: { color: colors.pass },
-  stampLabel: { fontFamily: t.familyMono, fontSize: t.microSize, color: colors.textSubtle },
+  stampLabel: {
+    fontFamily: t.familyMono,
+    fontSize: t.microSize,
+    color: colors.textSubtle,
+  },
   bottom: {
     display: 'flex',
     gap: space.gutter,
@@ -125,7 +134,11 @@ const STAMP = [
   { value: `${(report.score * 100).toFixed(1)}%`, label: 'conformance', pass: true },
   { value: `${report.token}/${report.scored}`, label: 'declarations' },
   { value: `${report.tokensDefined}`, label: 'tokens' },
-  { value: `${report.contrast.checked} · 0 fail`, label: `contrast ${report.contrast.level}`, pass: true },
+  {
+    value: `${report.contrast.checked} · 0 fail`,
+    label: `contrast ${report.contrast.level}`,
+    pass: true,
+  },
 ];
 
 export function Footer() {
@@ -170,7 +183,8 @@ export function Footer() {
             Built with StyleX · measured by Assay on every build
           </span>
           <span {...stylex.props(styles.fine, styles.spacer)}>
-            {report.files} files · {new Date(report.generatedAt).toISOString().slice(0, 10)}
+            {report.files} files ·{' '}
+            {new Date(report.generatedAt).toISOString().slice(0, 10)}
           </span>
         </div>
       </Container>

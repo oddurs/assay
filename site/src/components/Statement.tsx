@@ -51,7 +51,10 @@ const styles = stylex.create({
 type Scale = 'mega' | 'display' | 'title' | 'body';
 
 const TAG: Record<Scale, ElementType> = {
-  mega: 'h1', display: 'h2', title: 'h3', body: 'p',
+  mega: 'h1',
+  display: 'h2',
+  title: 'h3',
+  body: 'p',
 };
 
 export function Statement({

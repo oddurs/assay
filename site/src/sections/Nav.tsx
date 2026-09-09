@@ -39,7 +39,12 @@ const styles = stylex.create({
     WebkitBackdropFilter: `blur(${blur.veil})`,
     borderBottomColor: colors.border,
   },
-  inner: { display: 'flex', alignItems: 'center', gap: space.gutter, paddingBlock: space.cozy },
+  inner: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: space.gutter,
+    paddingBlock: space.cozy,
+  },
   links: {
     display: { default: 'flex', '@media (max-width: 1040px)': 'none' },
     alignItems: 'center',
@@ -73,7 +78,12 @@ const styles = stylex.create({
     borderRadius: radius.pill,
     backgroundColor: colors.signal,
   },
-  right: { marginInlineStart: 'auto', display: 'flex', alignItems: 'center', gap: space.snug },
+  right: {
+    marginInlineStart: 'auto',
+    display: 'flex',
+    alignItems: 'center',
+    gap: space.snug,
+  },
   // A free MIT tool's real destination is the repository, so it gets the
   // strongest affordance and carries a live figure rather than a bare word.
   repo: {
@@ -147,7 +157,9 @@ export function Nav() {
           <div {...stylex.props(styles.right)}>
             <a href="#install" {...stylex.props(styles.repo)}>
               <span>this page</span>
-              <span {...stylex.props(styles.score)}>{(report.score * 100).toFixed(1)}%</span>
+              <span {...stylex.props(styles.score)}>
+                {(report.score * 100).toFixed(1)}%
+              </span>
             </a>
             <span {...stylex.props(styles.divider)} aria-hidden />
             <Button href="#install" variant="secondary" chevron>

@@ -27,7 +27,13 @@ const styles = stylex.create({
     zIndex: layer.base,
     overflow: 'hidden',
   },
-  svg: { position: 'absolute', insetBlock: space.none, insetInline: space.none, width: '100%', height: '100%' },
+  svg: {
+    position: 'absolute',
+    insetBlock: space.none,
+    insetInline: space.none,
+    width: '100%',
+    height: '100%',
+  },
   soft: { filter: `blur(${blur.ambient})`, opacity: 0.7 },
   stopWarm: { stopColor: colors.gradientWarm },
   stopFrom: { stopColor: colors.gradientFrom },
@@ -58,7 +64,10 @@ export function Ribbon() {
             <stop offset="1" {...stylex.props(styles.stopTo)} />
           </linearGradient>
         </defs>
-        <path d="M600 -60 C 420 120, 380 340, 470 560 C 520 690, 560 760, 600 820 Z" fill="url(#ribbonSoft)" />
+        <path
+          d="M600 -60 C 420 120, 380 340, 470 560 C 520 690, 560 760, 600 820 Z"
+          fill="url(#ribbonSoft)"
+        />
       </svg>
 
       <svg

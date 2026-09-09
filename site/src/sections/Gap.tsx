@@ -132,7 +132,9 @@ export function Gap() {
             style={l.tone === 'accent' ? styles.ours : null}
           >
             <div {...stylex.props(styles.card)}>
-              <Badge tone={l.tone === 'accent' ? 'accent' : 'neutral'}>{l.verdict}</Badge>
+              <Badge tone={l.tone === 'accent' ? 'accent' : 'neutral'}>
+                {l.verdict}
+              </Badge>
               <Text role="title">{l.title}</Text>
               <Text role="caption">{l.who}</Text>
               <div {...stylex.props(styles.reads)}>

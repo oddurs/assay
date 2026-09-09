@@ -97,10 +97,30 @@ const styles = stylex.create({
 });`;
 
 const RUNGS = [
-  { id: 'L1', name: 'Primitives', desc: 'Raw scales as compile-time constants. Ink ramp, spacing scale, type scale, easing curves. Inlined, not themeable, and the only legal home for a literal.', accent: true },
-  { id: 'L2', name: 'Semantic tokens', desc: 'defineVars naming roles: bgSurface, textMuted, accent, signal, pass. Nothing downstream ever learns a hue name, which is the whole reason layer 3 works.', accent: true },
-  { id: 'L3', name: 'Themes', desc: 'createTheme overrides of layer 2. A complete light mode is one object, because layer 2 never committed to a colour.', accent: true },
-  { id: 'L4', name: 'Components & sections', desc: 'Every style in the site. Reads from layer 2 exclusively. Assay fails the build if a single literal appears here.', accent: false },
+  {
+    id: 'L1',
+    name: 'Primitives',
+    desc: 'Raw scales as compile-time constants. Ink ramp, spacing scale, type scale, easing curves. Inlined, not themeable, and the only legal home for a literal.',
+    accent: true,
+  },
+  {
+    id: 'L2',
+    name: 'Semantic tokens',
+    desc: 'defineVars naming roles: bgSurface, textMuted, accent, signal, pass. Nothing downstream ever learns a hue name, which is the whole reason layer 3 works.',
+    accent: true,
+  },
+  {
+    id: 'L3',
+    name: 'Themes',
+    desc: 'createTheme overrides of layer 2. A complete light mode is one object, because layer 2 never committed to a colour.',
+    accent: true,
+  },
+  {
+    id: 'L4',
+    name: 'Components & sections',
+    desc: 'Every style in the site. Reads from layer 2 exclusively. Assay fails the build if a single literal appears here.',
+    accent: false,
+  },
 ];
 
 export function System() {
@@ -125,7 +145,9 @@ export function System() {
           <div {...stylex.props(styles.ladder)}>
             {RUNGS.map((r) => (
               <div key={r.id} {...stylex.props(styles.rung)}>
-                <span {...stylex.props(styles.chip, !r.accent && styles.chipMuted)}>{r.id}</span>
+                <span {...stylex.props(styles.chip, !r.accent && styles.chipMuted)}>
+                  {r.id}
+                </span>
                 <div {...stylex.props(styles.rungBody)}>
                   <Text role="title">{r.name}</Text>
                   <Text role="body">{r.desc}</Text>
@@ -136,10 +158,10 @@ export function System() {
           <div {...stylex.props(styles.rule)}>
             <Badge tone="signal">The enforced rule</Badge>
             <Text role="body">
-              <strong>A literal outside layer 1 fails the build.</strong> Not a lint warning
-              somebody mutes — <code>npm run check</code> runs Assay with a 100% gate, and CI
-              refuses the merge. That is the difference between a design system and a
-              suggestion.
+              <strong>A literal outside layer 1 fails the build.</strong> Not a lint
+              warning somebody mutes — <code>npm run check</code> runs Assay with a 100%
+              gate, and CI refuses the merge. That is the difference between a design
+              system and a suggestion.
             </Text>
           </div>
         </div>

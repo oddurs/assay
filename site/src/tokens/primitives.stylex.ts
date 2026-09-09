@@ -83,28 +83,61 @@ export const blurLength = stylex.defineConsts({
  */
 export const warm = stylex.defineConsts({
   // Graphite with a brown bias — reads as machined metal, not as "dark grey"
-  w000: '#0A0908', w050: '#12100E', w100: '#1A1714', w150: '#221E1A',
-  w200: '#2A2521', w300: '#37312B', w400: '#4A423A', w500: '#635A50',
-  w600: '#8B8175', w700: '#A79B8D', w800: '#CFC5B8', w900: '#EDE6DC',
+  w000: '#0A0908',
+  w050: '#12100E',
+  w100: '#1A1714',
+  w150: '#221E1A',
+  w200: '#2A2521',
+  w300: '#37312B',
+  w400: '#4A423A',
+  w500: '#635A50',
+  w600: '#8B8175',
+  w700: '#A79B8D',
+  w800: '#CFC5B8',
+  w900: '#EDE6DC',
   w950: '#FFFDF9',
-  amber300: '#FCD08A', amber400: '#F0A93C', amber500: '#C77F1B', amber600: '#A36816',
+  amber300: '#FCD08A',
+  amber400: '#F0A93C',
+  amber500: '#C77F1B',
+  amber600: '#A36816',
 });
 
 export const sea = stylex.defineConsts({
   // Deep sea green, the ground oxidised copper sits on
-  s000: '#04100D', s050: '#071813', s100: '#0B211B', s150: '#0F2A22',
-  s200: '#14342B', s300: '#1C4739', s400: '#265C4A', s500: '#377963',
-  s600: '#549A80', s700: '#87BBA6', s800: '#BCDBCD', s900: '#E4F1EA',
-  patina400: '#5FD6B2', patina500: '#2FB891',
-  copper400: '#E39A72', copper500: '#C87A4C',
+  s000: '#04100D',
+  s050: '#071813',
+  s100: '#0B211B',
+  s150: '#0F2A22',
+  s200: '#14342B',
+  s300: '#1C4739',
+  s400: '#265C4A',
+  s500: '#377963',
+  s600: '#549A80',
+  s700: '#87BBA6',
+  s800: '#BCDBCD',
+  s900: '#E4F1EA',
+  patina400: '#5FD6B2',
+  patina500: '#2FB891',
+  copper400: '#E39A72',
+  copper500: '#C87A4C',
 });
 
 export const bone = stylex.defineConsts({
   // Warm paper and printer's ink
-  p000: '#FFFFFF', p050: '#FBF8F2', p100: '#F5F1E8', p200: '#EBE5D9',
-  p300: '#DCD4C4', p400: '#BFB5A2', p500: '#7D7465', p600: '#5F574B',
-  p700: '#3D372F', p800: '#241F1A', p900: '#14100C',
-  ox400: '#C2485A', ox500: '#9B2C3A', indigo500: '#3B3A8C',
+  p000: '#FFFFFF',
+  p050: '#FBF8F2',
+  p100: '#F5F1E8',
+  p200: '#EBE5D9',
+  p300: '#DCD4C4',
+  p400: '#BFB5A2',
+  p500: '#7D7465',
+  p600: '#5F574B',
+  p700: '#3D372F',
+  p800: '#241F1A',
+  p900: '#14100C',
+  ox400: '#C2485A',
+  ox500: '#9B2C3A',
+  indigo500: '#3B3A8C',
 });
 
 export const scale = stylex.defineConsts({

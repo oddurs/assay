@@ -1,0 +1,67 @@
+#!/bin/sh
+# The stack seam.
+#
+# CI, the git hooks and scripts/agent all talk to the project through this file
+# and nothing else. Nothing outside it knows that this project is JavaScript, or
+# that the site is built with Vite. Change toolchain here, once.
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$ROOT"
+
+usage() {
+  cat <<'USAGE'
+usage: scripts/task <target>
+
+  fmt         format in place
+  fmt:check   verify formatting, non-zero on drift
+  lint        lint; warnings are errors
+  test        the tool's test suite, plus the site's own conformance gate
+  build       build the site (also regenerates its measured report)
+  check       fmt:check && lint && test && build
+USAGE
+}
+
+need_site_deps() {
+  if [ ! -d site/node_modules ]; then
+    echo "site dependencies are missing; run scripts/setup" >&2
+    exit 1
+  fi
+}
+
+case "${1:-}" in
+  fmt)
+    npx --no-install prettier --write .
+    ;;
+  fmt:check)
+    npx --no-install prettier --check .
+    ;;
+  lint)
+    npx --no-install eslint . --max-warnings=0 --no-warn-ignored
+    ;;
+  test)
+    node test/run.mjs
+    # Dogfooding is not decoration: the site must stay 100% conformant, and the
+    # gate that enforces that is part of the test suite, not a separate ritual.
+    need_site_deps
+    node bin/assay.js site/src
+    ;;
+  build)
+    need_site_deps
+    npm run build --prefix site
+    ;;
+  check)
+    "$0" fmt:check
+    "$0" lint
+    "$0" test
+    "$0" build
+    ;;
+  ''|-h|--help|help)
+    usage
+    ;;
+  *)
+    echo "unknown target: $1" >&2
+    usage >&2
+    exit 2
+    ;;
+esac

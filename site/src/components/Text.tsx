@@ -88,8 +88,16 @@ const styles = stylex.create({
 type Role = keyof Omit<typeof styles, 'base'>;
 
 const DEFAULT_TAG: Record<string, ElementType> = {
-  eyebrow: 'div', mega: 'h1', hero: 'h1', display: 'h2', heading: 'h3',
-  title: 'h4', lead: 'p', body: 'p', caption: 'p', mono: 'span',
+  eyebrow: 'div',
+  mega: 'h1',
+  hero: 'h1',
+  display: 'h2',
+  heading: 'h3',
+  title: 'h4',
+  lead: 'p',
+  body: 'p',
+  caption: 'p',
+  mono: 'span',
 };
 
 export function Text({

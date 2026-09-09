@@ -1,0 +1,27 @@
+#!/bin/sh
+# Fast gate. Anything slower than a couple of seconds belongs in pre-push.
+set -eu
+
+ROOT=$(git rev-parse --show-toplevel)
+cd "$ROOT"
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(js|mjs|cjs|jsx|ts|tsx|json|md|css|html|yml|yaml)$' || true)
+[ -z "$STAGED" ] && exit 0
+
+# shellcheck disable=SC2086
+if ! npx --no-install prettier --check $STAGED >/dev/null 2>&1; then
+  echo "pre-commit: formatting drift in staged files." >&2
+  echo "  fix with: scripts/task fmt" >&2
+  # shellcheck disable=SC2086
+  npx --no-install prettier --list-different $STAGED >&2 || true
+  exit 1
+fi
+
+LINTABLE=$(printf '%s\n' "$STAGED" | grep -E '\.(js|mjs|cjs|jsx|ts|tsx)$' || true)
+if [ -n "$LINTABLE" ]; then
+  # shellcheck disable=SC2086
+  npx --no-install eslint --max-warnings=0 --no-warn-ignored $LINTABLE || {
+    echo "pre-commit: lint failed." >&2
+    exit 1
+  }
+fi

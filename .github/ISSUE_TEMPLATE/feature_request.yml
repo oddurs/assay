@@ -1,0 +1,37 @@
+name: Feature request
+description: Propose a capability Assay does not have.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: >
+        What you cannot currently find out about your design system. Describe the
+        situation rather than the feature — the best solution is often not the
+        one first imagined.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you have in mind
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried instead
+      description: Existing flags, another tool, or doing it by hand.
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: This can be answered from source alone, without running the project
+          required: false
+        - label: I have read GRAPH.md and this does not already fall out of the graph
+          required: false

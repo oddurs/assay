@@ -1,0 +1,71 @@
+name: Bug report
+description: Something Assay reports is wrong, or it crashes.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A wrong number matters more than a crash here — if Assay scored something
+        incorrectly, the smallest source snippet that reproduces it is the most
+        useful thing you can give us.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What Assay reported, and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: >
+        The smallest StyleX snippet that shows it. Include the token definition
+        as well as the usage if the two are in different files.
+      render: tsx
+    validations:
+      required: true
+
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      placeholder: npx assay ./src --violations
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: Assay version
+      placeholder: 0.2.0
+    validations:
+      required: true
+
+  - type: input
+    id: stylex
+    attributes:
+      label: StyleX version
+      placeholder: 0.19.0
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Scoring / taxonomy
+        - Token resolution
+        - Contrast
+        - Graph, diff or blast radius
+        - CLI or config
+        - Not sure
+    validations:
+      required: true

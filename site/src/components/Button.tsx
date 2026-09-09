@@ -86,12 +86,20 @@ export function Button({
   const body = (
     <>
       {children}
-      {chevron ? <span {...stylex.props(styles.chevron)} aria-hidden>&rsaquo;</span> : null}
+      {chevron ? (
+        <span {...stylex.props(styles.chevron)} aria-hidden>
+          &rsaquo;
+        </span>
+      ) : null}
     </>
   );
   return href ? (
-    <a href={href} {...sx}>{body}</a>
+    <a href={href} {...sx}>
+      {body}
+    </a>
   ) : (
-    <button type="button" onClick={onClick} {...sx}>{body}</button>
+    <button type="button" onClick={onClick} {...sx}>
+      {body}
+    </button>
   );
 }

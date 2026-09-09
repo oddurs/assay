@@ -1,0 +1,208 @@
+#!/bin/sh
+# One unit of work -> one worktree -> one branch -> one PR.
+#
+# Every subcommand is idempotent, says what it is about to do, and fails with a
+# non-zero exit and an actionable message. Nothing here is stack-specific: all
+# building and testing goes through scripts/task.
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$ROOT"
+
+REPO=$(basename "$ROOT")
+WORKTREES="$ROOT/../.worktrees/$REPO"
+BRANCH_PATTERN='^(feat|fix|chore|docs|perf|refactor|test)/[a-z0-9][a-z0-9._-]*$'
+
+say()  { printf '→ %s\n' "$*"; }
+die()  { printf 'error: %s\n' "$*" >&2; exit 1; }
+
+default_branch() {
+  b=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||') || true
+  [ -z "${b:-}" ] && b=$(git config --get init.defaultBranch 2>/dev/null || echo main)
+  echo "$b"
+}
+
+usage() {
+  cat <<'USAGE'
+usage: scripts/agent <command>
+
+  doctor              check the environment and report every problem
+  start <type>/<slug> branch + worktree from origin/<default>
+  check               scripts/task check
+  commit <msg>        validate Conventional Commits, then commit
+  pr [--draft]        check, push, open a PR, print the URL
+  sync                rebase onto origin/<default>
+  done                verify merged, then remove worktree and branches
+  list                worktrees with their branches and PR state
+
+Branch names must match: (feat|fix|chore|docs|perf|refactor|test)/<slug>
+USAGE
+}
+
+cmd_doctor() {
+  problems=0
+  report() { printf '  %-8s %s\n' "$1" "$2"; [ "$1" = "FAIL" ] && problems=$((problems + 1)) || true; }
+
+  say "checking the environment"
+
+  command -v git >/dev/null 2>&1 && report OK "git $(git --version | awk '{print $3}')" \
+    || report FAIL "git is not installed"
+
+  if command -v gh >/dev/null 2>&1; then
+    report OK "gh $(gh --version | head -1 | awk '{print $3}')"
+    if gh auth status >/dev/null 2>&1; then
+      report OK "gh authenticated as $(gh api user --jq .login 2>/dev/null || echo '?')"
+    else
+      report FAIL "gh is not authenticated; run: gh auth login"
+    fi
+  else
+    report FAIL "gh is not installed; see https://cli.github.com"
+  fi
+
+  if command -v node >/dev/null 2>&1; then
+    want=$(cat .node-version 2>/dev/null || echo '')
+    have=$(node -v | sed 's/^v//')
+    case "$have" in
+      "${want}".*|"${want}") report OK "node $have" ;;
+      *) [ -n "$want" ] && report WARN "node $have; .node-version asks for $want" \
+                        || report OK "node $have" ;;
+    esac
+  else
+    report FAIL "node is not installed"
+  fi
+
+  [ -d node_modules ] && report OK "dependencies installed" \
+    || report FAIL "dependencies missing; run: scripts/setup"
+  [ -d site/node_modules ] && report OK "site dependencies installed" \
+    || report FAIL "site dependencies missing; run: scripts/setup"
+
+  hooks=$(git config --get core.hooksPath 2>/dev/null || echo '')
+  if [ "$hooks" = ".githooks" ]; then
+    report OK "hooks wired to .githooks"
+  else
+    report FAIL "hooks not wired; run: git config core.hooksPath .githooks"
+  fi
+
+  for t in fmt fmt:check lint test build check; do
+    grep -q "^  $t)" scripts/task || report FAIL "scripts/task is missing target: $t"
+  done
+  report OK "scripts/task exposes every target"
+
+  if [ -n "$(git status --porcelain)" ]; then
+    report WARN "working tree is dirty"
+  else
+    report OK "working tree is clean"
+  fi
+
+  echo
+  if [ "$problems" -gt 0 ]; then
+    die "$problems problem(s) above"
+  fi
+  say "all good"
+}
+
+cmd_start() {
+  branch=${1:-}
+  [ -n "$branch" ] || die "usage: scripts/agent start <type>/<slug>"
+  echo "$branch" | grep -Eq "$BRANCH_PATTERN" \
+    || die "branch must match $BRANCH_PATTERN (got: $branch)"
+
+  base=$(default_branch)
+  dir="$WORKTREES/$branch"
+
+  git show-ref --verify --quiet "refs/heads/$branch" \
+    && die "branch already exists: $branch"
+  [ -e "$dir" ] && die "worktree path already exists: $dir"
+
+  say "fetching origin"
+  git fetch origin --quiet
+
+  say "creating worktree $dir from origin/$base"
+  mkdir -p "$(dirname "$dir")"
+  git worktree add -b "$branch" "$dir" "origin/$base" >/dev/null
+
+  echo
+  say "ready — move into it yourself:"
+  echo "  cd $dir"
+}
+
+cmd_commit() {
+  msg=${1:-}
+  [ -n "$msg" ] || die "usage: scripts/agent commit <message>"
+  # The commit-msg hook is the real gate; failing here just gives a faster answer.
+  echo "$msg" | grep -Eq '^(feat|fix|chore|docs|perf|refactor|test|build|ci|style|revert)(\([a-z0-9._/-]+\))?!?: .+' \
+    || die "not a Conventional Commit: $msg"
+  say "committing"
+  git commit -m "$msg"
+}
+
+cmd_pr() {
+  draft=''
+  [ "${1:-}" = "--draft" ] && draft='--draft'
+
+  branch=$(git rev-parse --abbrev-ref HEAD)
+  base=$(default_branch)
+  [ "$branch" = "$base" ] && die "$base only advances through a merged pull request"
+
+  say "running scripts/task check"
+  scripts/task check
+
+  say "pushing $branch"
+  git push -u origin "$branch"
+
+  say "opening the pull request"
+  # --fill takes the title and body from the commits; the template covers the rest.
+  gh pr create --base "$base" --head "$branch" --fill $draft
+  gh pr view --json url --jq .url
+}
+
+cmd_sync() {
+  base=$(default_branch)
+  say "fetching origin"
+  git fetch origin --quiet
+  say "rebasing onto origin/$base"
+  git rebase "origin/$base"
+}
+
+cmd_done() {
+  branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')
+  base=$(default_branch)
+  [ "$branch" = "$base" ] && die "run this from the branch's worktree, not $base"
+
+  state=$(gh pr view "$branch" --json state --jq .state 2>/dev/null || echo 'NONE')
+  [ "$state" = "MERGED" ] || die "pull request for $branch is $state, not MERGED"
+
+  dir=$(git rev-parse --show-toplevel)
+  say "removing worktree $dir"
+  cd "$ROOT"
+  git worktree remove "$dir"
+
+  say "deleting local branch $branch"
+  git branch -D "$branch" >/dev/null
+
+  say "pruning"
+  git worktree prune
+  git fetch --prune origin --quiet
+  say "done"
+}
+
+cmd_list() {
+  git worktree list --porcelain | awk '/^worktree /{w=$2} /^branch /{sub("refs/heads/","",$2); print $2"\t"w}' |
+  while IFS="$(printf '\t')" read -r b w; do
+    state=$(gh pr view "$b" --json state --jq .state 2>/dev/null || echo '-')
+    printf '  %-34s %-10s %s\n' "$b" "$state" "$w"
+  done
+}
+
+case "${1:-}" in
+  doctor) shift; cmd_doctor "$@" ;;
+  start)  shift; cmd_start "$@" ;;
+  check)  shift; scripts/task check ;;
+  commit) shift; cmd_commit "$@" ;;
+  pr)     shift; cmd_pr "$@" ;;
+  sync)   shift; cmd_sync "$@" ;;
+  done)   shift; cmd_done "$@" ;;
+  list)   shift; cmd_list "$@" ;;
+  ''|-h|--help|help) usage ;;
+  *) echo "unknown command: $1" >&2; usage >&2; exit 2 ;;
+esac

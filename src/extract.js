@@ -5,7 +5,6 @@
  * Token references are resolved to a MODULE PATH, not a bare namespace name —
  * so two packages that both export `colors` don't alias into each other.
  */
-import { readFileSync, existsSync, statSync } from 'node:fs';
 import { resolveModule } from './resolve.js';
 import { parse } from '@babel/parser';
 import _traverse from '@babel/traverse';
@@ -16,8 +15,10 @@ const traverse = _traverse.default ?? _traverse;
 const TOKEN_MODULE = /\.stylex(\.[cm]?[jt]sx?)?$/;
 const STYLE_APIS = new Set(['create', 'keyframes']);
 const DEFINE_APIS = new Set([
-  'defineVars', 'defineConsts',
-  'unstable_defineVarsNested', 'unstable_defineConstsNested',
+  'defineVars',
+  'defineConsts',
+  'unstable_defineVarsNested',
+  'unstable_defineConstsNested',
 ]);
 const THEME_APIS = new Set(['createTheme', 'unstable_createThemeNested']);
 
@@ -71,7 +72,10 @@ function usesParam(node, params) {
   let found = false;
   const walk = (n) => {
     if (!n || typeof n !== 'object' || found) return;
-    if (n.type === 'Identifier' && params.has(n.name)) { found = true; return; }
+    if (n.type === 'Identifier' && params.has(n.name)) {
+      found = true;
+      return;
+    }
     for (const k of Object.keys(n)) {
       if (k === 'loc' || k === 'type') continue;
       const v = n[k];
@@ -122,13 +126,18 @@ export function analyzeFile({ file, absFile, src, families, out, aliases = {} })
       const fromTokens = TOKEN_MODULE.test(spec);
       const mod = fromTokens ? resolveModule(modId, spec, aliases) : null;
       for (const s of path.node.specifiers) {
-        if (s.type === 'ImportNamespaceSpecifier' || s.type === 'ImportDefaultSpecifier') {
+        if (
+          s.type === 'ImportNamespaceSpecifier' ||
+          s.type === 'ImportDefaultSpecifier'
+        ) {
           if (isStylexPkg(spec)) stylexNames.add(s.local.name);
-          else if (fromTokens) tokenImports.set(s.local.name, { module: mod, exportName: '*' });
+          else if (fromTokens)
+            tokenImports.set(s.local.name, { module: mod, exportName: '*' });
         } else if (s.type === 'ImportSpecifier') {
           const imported = s.imported.name ?? s.imported.value;
           if (isStylexPkg(spec)) bareApis.set(s.local.name, imported);
-          else if (fromTokens) tokenImports.set(s.local.name, { module: mod, exportName: imported });
+          else if (fromTokens)
+            tokenImports.set(s.local.name, { module: mod, exportName: imported });
         }
       }
     },
@@ -140,8 +149,10 @@ export function analyzeFile({ file, absFile, src, families, out, aliases = {} })
       callee.object.type === 'Identifier' &&
       stylexNames.has(callee.object.name) &&
       callee.property.type === 'Identifier'
-    ) return callee.property.name;
-    if (callee.type === 'Identifier' && bareApis.has(callee.name)) return bareApis.get(callee.name);
+    )
+      return callee.property.name;
+    if (callee.type === 'Identifier' && bareApis.has(callee.name))
+      return bareApis.get(callee.name);
     return null;
   };
 
@@ -152,7 +163,10 @@ export function analyzeFile({ file, absFile, src, families, out, aliases = {} })
       if (!init || init.type !== 'CallExpression') return;
       const api = apiOf(init.callee);
       if (api && DEFINE_APIS.has(api) && path.node.id.type === 'Identifier') {
-        tokenImports.set(path.node.id.name, { module: modId, exportName: path.node.id.name });
+        tokenImports.set(path.node.id.name, {
+          module: modId,
+          exportName: path.node.id.name,
+        });
       }
     },
   });
@@ -193,7 +207,8 @@ export function analyzeFile({ file, absFile, src, families, out, aliases = {} })
             p.value.type === 'FunctionExpression'
           ) {
             const params = new Set();
-            for (const par of p.value.params) if (par.type === 'Identifier') params.add(par.name);
+            for (const par of p.value.params)
+              if (par.type === 'Identifier') params.add(par.name);
             if (p.value.body.type === 'ObjectExpression') {
               walkStyle(p.value.body, { ...ctx, params }, families, null, ruleName, {});
             }
@@ -322,7 +337,10 @@ export function classify(node, ctx) {
 
     case 'TemplateLiteral': {
       if (node.expressions.length === 0) {
-        const v = node.quasis.map((q) => q.value.cooked).join('').trim();
+        const v = node.quasis
+          .map((q) => q.value.cooked)
+          .join('')
+          .trim();
         if (NEUTRAL_VALUES.has(v)) return { cat: CAT.NEUTRAL };
         if (ZERO.test(v)) return { cat: CAT.NEUTRAL };
         if (GEOMETRY.test(v)) return { cat: CAT.NEUTRAL };
@@ -382,7 +400,8 @@ function walkStyle(obj, ctx, families, prop, ruleName, pairAcc, cond = []) {
     // property's value, every key is a condition — `:hover`, `@media …`,
     // `default` — and conditions can nest.
     const inCondition = Boolean(prop);
-    const nextProp = inCondition && (name === null || isConditionalKey(name)) ? prop : name;
+    const nextProp =
+      inCondition && (name === null || isConditionalKey(name)) ? prop : name;
     if (!nextProp) continue;
     const nextCond = inCondition && name !== null ? [...cond, name] : cond;
 
@@ -414,7 +433,16 @@ function snippet(node, src) {
   return s.length > 52 ? s.slice(0, 51) + '…' : s;
 }
 
-function record(prop, valueNode, ctx, families, propNode, ruleName, pairAcc, cond = []) {
+function record(
+  prop,
+  valueNode,
+  ctx,
+  families,
+  propNode,
+  ruleName,
+  pairAcc,
+  cond = [],
+) {
   const out = ctx.out;
   const fam = familyOf(prop, families);
   const res = classify(valueNode, ctx);
@@ -427,7 +455,14 @@ function record(prop, valueNode, ctx, families, propNode, ruleName, pairAcc, con
   const unitId = `${ctx.file}#${ruleName}`;
   let unit = out.units.get(unitId);
   if (!unit) {
-    unit = { id: unitId, file: ctx.file, name: ruleName, line, declarations: [], tokens: [] };
+    unit = {
+      id: unitId,
+      file: ctx.file,
+      name: ruleName,
+      line,
+      declarations: [],
+      tokens: [],
+    };
     out.units.set(unitId, unit);
   }
   if (line && line < unit.line) unit.line = line;
@@ -450,7 +485,12 @@ function record(prop, valueNode, ctx, families, propNode, ruleName, pairAcc, con
   // keyed by CONDITION. A `:hover` colour must never be paired with the
   // `default` background — that reports a pass on text that is invisible at
   // rest, which is the worst mistake an accessibility check can make.
-  if (prop === 'color' || prop === 'backgroundColor' || prop === 'fontSize' || prop === 'fontWeight') {
+  if (
+    prop === 'color' ||
+    prop === 'backgroundColor' ||
+    prop === 'fontSize' ||
+    prop === 'fontWeight'
+  ) {
     const key = `${ctx.file}::${ruleName}`;
     pairAcc[key] = pairAcc[key] || { file: ctx.file, rule: ruleName, line, byCond: {} };
     const condKey = cond.length ? cond.join(' > ') : 'default';
@@ -459,7 +499,10 @@ function record(prop, valueNode, ctx, families, propNode, ruleName, pairAcc, con
     out.pairs.set(key, pairAcc[key]);
   }
 
-  if (!fam) { out.untokenizable += 1; return; }
+  if (!fam) {
+    out.untokenizable += 1;
+    return;
+  }
 
   out.byCat[res.cat] = (out.byCat[res.cat] || 0) + 1;
   out.byFamily[fam.id] = out.byFamily[fam.id] || { token: 0, literal: 0 };
@@ -470,7 +513,10 @@ function record(prop, valueNode, ctx, families, propNode, ruleName, pairAcc, con
   // their number by allow-listing their BEST files.
   if (res.cat === CAT.TOKEN || res.cat === CAT.LITERAL) {
     let f = out.byFile.get(ctx.file);
-    if (!f) { f = { token: 0, literal: 0, families: {} }; out.byFile.set(ctx.file, f); }
+    if (!f) {
+      f = { token: 0, literal: 0, families: {} };
+      out.byFile.set(ctx.file, f);
+    }
     f[res.cat] += 1;
     f.families[fam.id] = f.families[fam.id] || { token: 0, literal: 0 };
     f.families[fam.id][res.cat] += 1;

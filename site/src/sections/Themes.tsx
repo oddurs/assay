@@ -19,7 +19,12 @@ const styles = stylex.create({
     flexWrap: 'wrap',
     marginBlockEnd: space.roomy,
   },
-  controlText: { display: 'flex', flexDirection: 'column', gap: space.tight, minWidth: '220px' },
+  controlText: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: space.tight,
+    minWidth: '220px',
+  },
   label: {
     fontFamily: t.familyMono,
     fontSize: t.microSize,
@@ -58,21 +63,19 @@ const styles = stylex.create({
 /** The snippet follows the selection — showing `foundry` while Bone is active
  *  would undercut the very claim the section is making. */
 const SAMPLE: Record<string, string[]> = {
-  midnight: [
-    "stylex.createTheme(colors, { accent: palette.violet500, … })",
-  ],
+  midnight: ['stylex.createTheme(colors, { accent: palette.violet500, … })'],
   foundry: [
-    "stylex.createTheme(colors,    { accent: warm.amber500, … }),",
+    'stylex.createTheme(colors,    { accent: warm.amber500, … }),',
     "stylex.createTheme(radius,    { round: '3px', loud: '4px' }),",
     "stylex.createTheme(elevation, { mid: '0 2px 0 #0A0908' }),",
   ],
   verdigris: [
-    "stylex.createTheme(colors,    { accent: sea.patina500, … }),",
+    'stylex.createTheme(colors,    { accent: sea.patina500, … }),',
     "stylex.createTheme(radius,    { round: '11px', loud: '18px' }),",
     "stylex.createTheme(elevation, { glow: '0 0 56px -14px …' }),",
   ],
   bone: [
-    "stylex.createTheme(colors,    { bgBase: bone.p050, … }),",
+    'stylex.createTheme(colors,    { bgBase: bone.p050, … }),',
     "stylex.createTheme(radius,    { round: '4px', loud: '6px' }),",
     "stylex.createTheme(elevation, { low: 'none', glow: 'none' }),",
     "stylex.createTheme(stroke,    { bold: '3px' }),",
@@ -115,9 +118,9 @@ export function Themes({
       aside={
         <Text role="body">
           <code>createTheme</code> overrides any token group, so these four change
-          colour, corner radius and elevation together. Foundry has square corners
-          and hard shadows because it is industrial; Bone barely casts one, because
-          paper does not float.
+          colour, corner radius and elevation together. Foundry has square corners and
+          hard shadows because it is industrial; Bone barely casts one, because paper
+          does not float.
         </Text>
       }
     >
@@ -145,7 +148,9 @@ export function Themes({
           </div>
         </Glass>
 
-        <Code filename="src/themes/themes.ts">{snippetFor(active.id, active.name)}</Code>
+        <Code filename="src/themes/themes.ts">
+          {snippetFor(active.id, active.name)}
+        </Code>
       </div>
     </Section>
   );

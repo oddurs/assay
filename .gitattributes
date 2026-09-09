@@ -1,0 +1,9 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.woff2 binary
+
+# Generated: keep it out of diffs and language stats.
+site/src/generated/*.json linguist-generated=true
+package-lock.json linguist-generated=true

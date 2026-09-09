@@ -1,0 +1,18 @@
+#!/bin/sh
+# One command to a working checkout. Run once after cloning.
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$ROOT"
+
+echo "→ installing dependencies"
+npm ci --no-audit --no-fund
+npm ci --prefix site --no-audit --no-fund
+
+echo "→ pointing git at the tracked hooks"
+git config core.hooksPath .githooks
+
+echo
+echo "Ready. Next:"
+echo "  scripts/task check          run everything CI runs"
+echo "  scripts/agent start feat/x  begin a unit of work"

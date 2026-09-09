@@ -33,7 +33,14 @@ export function Container({
   style?: stylex.StyleXStyles;
 }) {
   return (
-    <div {...stylex.props(styles.root, narrow && styles.narrow, framed && styles.framed, style)}>
+    <div
+      {...stylex.props(
+        styles.root,
+        narrow && styles.narrow,
+        framed && styles.framed,
+        style,
+      )}
+    >
       {children}
     </div>
   );

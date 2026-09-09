@@ -78,7 +78,11 @@ export function Section({
           <header {...stylex.props(styles.head, !aside && styles.headStacked)}>
             <div {...stylex.props(styles.titleCol)}>
               {eyebrow ? <Text role="eyebrow">{eyebrow}</Text> : null}
-              {title ? <Statement scale="display" tail={tail}>{title}</Statement> : null}
+              {title ? (
+                <Statement scale="display" tail={tail}>
+                  {title}
+                </Statement>
+              ) : null}
               {intro && !aside ? <Text role="lead">{intro}</Text> : null}
             </div>
             {aside ? <div {...stylex.props(styles.asideCol)}>{aside}</div> : null}

@@ -80,7 +80,12 @@ const styles = stylex.create({
     color: colors.textSubtle,
   },
   swatch: { display: 'inline-flex', alignItems: 'center', gap: space.tight },
-  chipMine: { width: space.cozy, height: space.snug, borderRadius: radius.sharp, backgroundColor: colors.pass },
+  chipMine: {
+    width: space.cozy,
+    height: space.snug,
+    borderRadius: radius.sharp,
+    backgroundColor: colors.pass,
+  },
   chipRef: {
     width: space.cozy,
     height: space.snug,
@@ -114,7 +119,9 @@ export function CompareBar({
           </div>
           <span {...stylex.props(styles.values)}>
             <span {...stylex.props(styles.mineText)}>{(r.mine * 100).toFixed(0)}%</span>
-            <span {...stylex.props(styles.refText)}>{(r.reference * 100).toFixed(0)}%</span>
+            <span {...stylex.props(styles.refText)}>
+              {(r.reference * 100).toFixed(0)}%
+            </span>
           </span>
         </div>
       ))}

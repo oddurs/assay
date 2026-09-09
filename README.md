@@ -1,7 +1,14 @@
 # assay
 
+[![ci](https://github.com/oddurs/assay/actions/workflows/ci.yml/badge.svg)](https://github.com/oddurs/assay/actions/workflows/ci.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 **Compile-time design system conformance for StyleX.** Tells you what your design
 system actually shipped — not what the spec says it should have.
+
+**[oddurs.github.io/assay](https://oddurs.github.io/assay/)** — a site built with
+StyleX that measures itself with this tool on every deploy, and refuses to ship
+below 100%.
 
 ```bash
 npx assay .
@@ -33,7 +40,7 @@ npx assay .
 Every other styling system makes the question uncomputable. Tailwind assembles
 class strings at runtime. styled-components interpolates props into template
 literals. CSS Modules hands you opaque class references. You cannot statically
-answer *"did this padding come from a token"* in any of them.
+answer _"did this padding come from a token"_ in any of them.
 
 StyleX is a compiler. `defineVars` makes tokens real module exports with real
 types, and `stylex.create` resolves to atomic classes at build time. **The shipped
@@ -83,7 +90,7 @@ assay diff HEAD ./src --path src        # ref vs working tree, same subdirectory
 ```
 
 Blast radius follows **token → token edges**, which is the whole point. A
-primitive like `palette.violet500` is referenced by *no component* — components
+primitive like `palette.violet500` is referenced by _no component_ — components
 use `colors.accent`, which references the primitive. Without the transitive
 closure you would report a blast radius of zero for the most dangerous change in
 the system.
@@ -110,15 +117,15 @@ Inside Assay the producer sits behind `src/adapters/`. An adapter is
 adapter-agnostic. There is one adapter today; the seam exists so a second stays
 possible, not because writing one now would be useful.
 
-| Option | |
-|---|---|
-| `--json` | machine-readable output |
-| `--violations` | every violation, with the rule that fired |
-| `--exclude <glob>` | skip paths (repeatable) |
-| `--gate [n]` | exit 1 below n percent (default 100) |
-| `--contrast-level AA\|AAA` | default AA |
-| `--no-contrast` | skip contrast analysis |
-| `--publishes-tokens` | this package exports tokens for consumers |
+| Option                     |                                           |
+| -------------------------- | ----------------------------------------- |
+| `--json`                   | machine-readable output                   |
+| `--violations`             | every violation, with the rule that fired |
+| `--exclude <glob>`         | skip paths (repeatable)                   |
+| `--gate [n]`               | exit 1 below n percent (default 100)      |
+| `--contrast-level AA\|AAA` | default AA                                |
+| `--no-contrast`            | skip contrast analysis                    |
+| `--publishes-tokens`       | this package exports tokens for consumers |
 
 Exit codes: `0` passed · `1` below gate · `2` contrast failures under `--gate`.
 
@@ -128,32 +135,32 @@ Exit codes: `0` passed · `1` below gate · `2` contrast failures under `--gate`
 design token, so counting it as a violation would make the score meaningless.
 A property is scored only if it belongs to a token-bearing family:
 
-| Family | Rule | Properties |
-|---|---|---|
-| color | `no-raw-color` | `*Color`, `fill`, `stroke`, … |
-| space | `no-raw-space` | `padding*`, `margin*`, `gap`, `inset*`, … |
-| radius | `no-raw-radius` | `*Radius` |
-| border | `no-raw-border-width` | `border*Width`, `outline*Width`, … |
-| type | `no-raw-type` | `fontSize`, `fontFamily`, `fontWeight`, … |
-| shadow | `no-raw-shadow` | `boxShadow`, `textShadow` |
-| motion | `no-raw-motion` | `transitionDuration`, `*TimingFunction`, … |
-| layer | `no-raw-z-index` | `zIndex` |
+| Family | Rule                  | Properties                                 |
+| ------ | --------------------- | ------------------------------------------ |
+| color  | `no-raw-color`        | `*Color`, `fill`, `stroke`, …              |
+| space  | `no-raw-space`        | `padding*`, `margin*`, `gap`, `inset*`, …  |
+| radius | `no-raw-radius`       | `*Radius`                                  |
+| border | `no-raw-border-width` | `border*Width`, `outline*Width`, …         |
+| type   | `no-raw-type`         | `fontSize`, `fontFamily`, `fontWeight`, …  |
+| shadow | `no-raw-shadow`       | `boxShadow`, `textShadow`                  |
+| motion | `no-raw-motion`       | `transitionDuration`, `*TimingFunction`, … |
+| layer  | `no-raw-z-index`      | `zIndex`                                   |
 
 Every declaration lands in one of five outcomes, and **only two move the number**:
 
-| | |
-|---|---|
-| `token` | Resolves to a `*.stylex` module export. **The numerator.** |
-| `literal` | A hardcoded design value in a scored family. **The violation.** |
-| `dynamic` | Runtime value → CSS custom property. Never a pass *or* a violation. |
-| `neutral` | Keyword, `null`, zero in any unit (`0`, `0px`, `0rem`), or layout geometry (`50%`, `calc()`). |
-| `cssvar` / `expr` | A raw `var(--x)`, or an expression we could not resolve. |
+|                   |                                                                                               |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| `token`           | Resolves to a `*.stylex` module export. **The numerator.**                                    |
+| `literal`         | A hardcoded design value in a scored family. **The violation.**                               |
+| `dynamic`         | Runtime value → CSS custom property. Never a pass _or_ a violation.                           |
+| `neutral`         | Keyword, `null`, zero in any unit (`0`, `0px`, `0rem`), or layout geometry (`50%`, `calc()`). |
+| `cssvar` / `expr` | A raw `var(--x)`, or an expression we could not resolve.                                      |
 
 `dynamic` is the important one. It is genuinely unknowable at compile time, and
 it gets its own count on every report. **A metric that hides its blind spot is
 worse than no metric.**
 
-Token *definitions* are never violations. The literals inside `defineVars` and
+Token _definitions_ are never violations. The literals inside `defineVars` and
 `defineConsts` are the design system.
 
 Run `assay rules` for the full table with the reasoning for each rule.
@@ -191,16 +198,16 @@ resolved statically. Those are reported as `unpaired` — never as passes.
 ```jsonc
 {
   "exclude": ["generated", "**/*.gen.ts"],
-  "allow": ["src/legacy/**"],        // reported, but out of the score entirely
+  "allow": ["src/legacy/**"], // reported, but out of the score entirely
   "disableFamilies": ["motion"],
-  "threshold": 0.95,                  // gate without passing --gate
-  "publishesTokens": false,           // true disables dead-token analysis
+  "threshold": 0.95, // gate without passing --gate
+  "publishesTokens": false, // true disables dead-token analysis
   "contrast": { "level": "AA", "enabled": true },
-  "aliases": { "@/*": ["./src/*"] },  // tsconfig paths are auto-detected
+  "aliases": { "@/*": ["./src/*"] }, // tsconfig paths are auto-detected
   "owners": {
     "@acme/growth": ["src/features/billing/**"],
-    "@acme/core": ["src/components/**"]
-  }
+    "@acme/core": ["src/components/**"],
+  },
 }
 ```
 
@@ -223,7 +230,7 @@ console.log(r.score, r.violations, r.contrast.failing, r.tokens.dead);
 ## Known limits
 
 - **Dead-token analysis only makes sense inside an application.** Run against a
-  package that *publishes* tokens for consumers and it reports nearly all of them
+  package that _publishes_ tokens for consumers and it reports nearly all of them
   dead, because the consumers are not in the tree. Use `--publishes-tokens`.
 - **One generated file can dominate a score.** A synthetic benchmark fixture once
   produced 98.4% of a repo's declarations. Assay warns when any single file
@@ -237,10 +244,27 @@ console.log(r.score, r.violations, r.contrast.failing, r.tokens.dead);
 
 ## Development
 
-```bash
-npm test        # 76 assertions, including the original hand count
-npm run assay   # run the CLI from source
+```sh
+git clone git@github.com:oddurs/assay.git
+cd assay
+scripts/setup          # dependencies + git hooks, once
+scripts/task check     # everything CI runs
 ```
+
+All automation talks to the project through one interface, so CI, the git hooks
+and you cannot drift:
+
+|                          |                                              |
+| ------------------------ | -------------------------------------------- |
+| `scripts/task fmt`       | format in place                              |
+| `scripts/task fmt:check` | verify formatting                            |
+| `scripts/task lint`      | lint; warnings are errors                    |
+| `scripts/task test`      | test suite, plus the site's conformance gate |
+| `scripts/task build`     | build the site                               |
+| `scripts/task check`     | all of the above                             |
+
+`main` only advances through a merged pull request, and one unit of work gets one
+worktree. `scripts/agent` drives that loop — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 The scoring tests are the original hand count from the first spike — every number
 was counted by hand from `test/fixtures`, with the per-declaration reasoning

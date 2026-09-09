@@ -23,12 +23,36 @@ const styles = stylex.create({
     borderStyle: 'solid',
     whiteSpace: 'nowrap',
   },
-  neutral: { color: colors.textMuted, borderColor: colors.border, backgroundColor: colors.bgRaised },
-  accent: { color: colors.accentText, borderColor: colors.accentSubtle, backgroundColor: colors.bgRaised },
-  signal: { color: colors.signalBright, borderColor: colors.signal, backgroundColor: colors.bgRaised },
-  pass: { color: colors.pass, borderColor: colors.pass, backgroundColor: colors.bgRaised },
-  warn: { color: colors.warn, borderColor: colors.warn, backgroundColor: colors.bgRaised },
-  fail: { color: colors.fail, borderColor: colors.fail, backgroundColor: colors.bgRaised },
+  neutral: {
+    color: colors.textMuted,
+    borderColor: colors.border,
+    backgroundColor: colors.bgRaised,
+  },
+  accent: {
+    color: colors.accentText,
+    borderColor: colors.accentSubtle,
+    backgroundColor: colors.bgRaised,
+  },
+  signal: {
+    color: colors.signalBright,
+    borderColor: colors.signal,
+    backgroundColor: colors.bgRaised,
+  },
+  pass: {
+    color: colors.pass,
+    borderColor: colors.pass,
+    backgroundColor: colors.bgRaised,
+  },
+  warn: {
+    color: colors.warn,
+    borderColor: colors.warn,
+    backgroundColor: colors.bgRaised,
+  },
+  fail: {
+    color: colors.fail,
+    borderColor: colors.fail,
+    backgroundColor: colors.bgRaised,
+  },
 });
 
 export function Badge({

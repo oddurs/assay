@@ -21,7 +21,10 @@ export function useActiveSection(ids: string[]) {
         let bestRatio = 0;
         for (const id of ids) {
           const r = ratios.get(id) ?? 0;
-          if (r > bestRatio) { bestRatio = r; best = id; }
+          if (r > bestRatio) {
+            bestRatio = r;
+            best = id;
+          }
         }
         setActive(best);
       },

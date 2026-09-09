@@ -4,7 +4,8 @@
   "description": "Compile-time design system conformance for StyleX. Tells you what your design system actually shipped.",
   "scripts": {
     "test": "node test/run.mjs",
-    "assay": "node bin/assay.js"
+    "assay": "node bin/assay.js",
+    "check": "scripts/task check"
   },
   "dependencies": {
     "@babel/parser": "^7.26.0",
@@ -39,5 +40,21 @@
     "lint",
     "a11y",
     "contrast"
-  ]
+  ],
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^15.15.0",
+    "prettier": "^3.9.6",
+    "typescript-eslint": "^8.70.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oddurs/assay.git"
+  },
+  "bugs": {
+    "url": "https://github.com/oddurs/assay/issues"
+  },
+  "homepage": "https://oddurs.github.io/assay/",
+  "author": "Oddur Sigurdsson"
 }

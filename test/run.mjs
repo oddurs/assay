@@ -7,7 +7,8 @@ import { analyze, parseColor, ratio } from '../src/index.js';
 import { buildGraph, diffGraphs, blastRadius, graphHash } from '../src/graph.js';
 import { globToRegExp } from '../src/config.js';
 
-let pass = 0, fail = 0;
+let pass = 0,
+  fail = 0;
 const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 function check(name, got, want) {
@@ -15,7 +16,9 @@ function check(name, got, want) {
   ok ? pass++ : fail++;
   const g = Array.isArray(got) ? got.join(',') : got;
   const w = Array.isArray(want) ? want.join(',') : want;
-  console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${name.padEnd(34)} ${ok ? '' : `expected ${w}, got ${g}`}`);
+  console.log(
+    `  ${ok ? 'PASS' : 'FAIL'}  ${name.padEnd(34)} ${ok ? '' : `expected ${w}, got ${g}`}`,
+  );
 }
 
 console.log('\n  scoring — the M0 hand count');
@@ -29,17 +32,30 @@ console.log('\n  scoring — the M0 hand count');
   check('neutral', r.excluded.neutral, 3);
   check('untokenizable', r.excluded.untokenizable, 5);
   check('tokens defined', r.tokens.defined.length, 7);
-  check('dead tokens', r.tokens.dead.map((d) => d.split('#')[1]).sort(),
-    ['colors.bg', 'colors.unusedBorder']);
+  check('dead tokens', r.tokens.dead.map((d) => d.split('#')[1]).sort(), [
+    'colors.bg',
+    'colors.unusedBorder',
+  ]);
   check('no parse failures', r.stats.unparsed.length, 0);
-  check('every violation cites a rule', r.violations.every((v) => !!v.rule), true);
-  check('token values resolve', r.tokens.values[
-    r.tokens.defined.find((d) => d.endsWith('colors.fg'))], '#101317');
+  check(
+    'every violation cites a rule',
+    r.violations.every((v) => !!v.rule),
+    true,
+  );
+  check(
+    'token values resolve',
+    r.tokens.values[r.tokens.defined.find((d) => d.endsWith('colors.fg'))],
+    '#101317',
+  );
 }
 
 console.log('\n  colour maths');
 {
-  check('white on black', Math.round(ratio(parseColor('#fff'), parseColor('#000'))), 21);
+  check(
+    'white on black',
+    Math.round(ratio(parseColor('#fff'), parseColor('#000'))),
+    21,
+  );
   check('hex shorthand', parseColor('#fff'), { r: 255, g: 255, b: 255, a: 1 });
   check('rgba alpha', parseColor('rgba(0,0,0,0.5)').a, 0.5);
   check('hsl parses', parseColor('hsl(0,0%,100%)').r, 255);
@@ -75,7 +91,11 @@ console.log('\n  module resolution');
   check('computed string key resolves', r.literal, 1);
   check('score', Number(r.score.toFixed(4)), 0.6667);
   check('unresolved expressions', r.excluded.expr, 0);
-  check('dead token found', r.tokens.dead.map((d) => d.split('#')[1]), ['vars.unusedOne']);
+  check(
+    'dead token found',
+    r.tokens.dead.map((d) => d.split('#')[1]),
+    ['vars.unusedOne'],
+  );
 }
 
 console.log('\n  config');
@@ -94,7 +114,11 @@ console.log('\n  config');
   const d = await analyze('./test/fixtures', {
     overrides: { disableFamilies: ['color'] },
   });
-  check('disabling a family rescopes', d.families.some((f) => f.name === 'color'), false);
+  check(
+    'disabling a family rescopes',
+    d.families.some((f) => f.name === 'color'),
+    false,
+  );
 
   const p = await analyze('./test/fixtures', {
     overrides: { publishesTokens: true },
@@ -108,16 +132,34 @@ console.log('\n  graph v1');
   const g = buildGraph(r);
   check('version', g.version, 1);
   check('adapter recorded', g.generator.adapter, 'stylex');
-  check('ids are root-relative', Object.keys(g.units).includes('Widget.tsx#button'), true);
-  check('token ids are root-relative',
-    Object.keys(g.tokens).includes('tokens.stylex.ts#colors.accent'), true);
-  check('token resolves through chain', g.tokens['tokens.stylex.ts#colors.accent'].value, '#7C5CFF');
-  check('token -> token edge recorded',
-    g.tokens['tokens.stylex.ts#colors.accent'].refs, ['tokens.stylex.ts#palette.brand']);
-  check('conditions distinguish declarations',
-    g.units['Widget.tsx#button'].declarations.filter((d) => d.prop === 'backgroundColor').length, 2);
-  check('unit denormalises its tokens',
-    g.units['Widget.tsx#button'].tokens.length, 2);
+  check(
+    'ids are root-relative',
+    Object.keys(g.units).includes('Widget.tsx#button'),
+    true,
+  );
+  check(
+    'token ids are root-relative',
+    Object.keys(g.tokens).includes('tokens.stylex.ts#colors.accent'),
+    true,
+  );
+  check(
+    'token resolves through chain',
+    g.tokens['tokens.stylex.ts#colors.accent'].value,
+    '#7C5CFF',
+  );
+  check(
+    'token -> token edge recorded',
+    g.tokens['tokens.stylex.ts#colors.accent'].refs,
+    ['tokens.stylex.ts#palette.brand'],
+  );
+  check(
+    'conditions distinguish declarations',
+    g.units['Widget.tsx#button'].declarations.filter(
+      (d) => d.prop === 'backgroundColor',
+    ).length,
+    2,
+  );
+  check('unit denormalises its tokens', g.units['Widget.tsx#button'].tokens.length, 2);
 
   // Determinism: two builds of the same tree must be identical apart from time.
   const g2 = buildGraph(await analyze('./test/graph-fixtures/base'));
@@ -130,14 +172,20 @@ console.log('\n  blast radius');
   const g = buildGraph(await analyze('./test/graph-fixtures/base'));
   // The primitive is referenced by NO unit directly — only via colors.accent.
   const direct = Object.values(g.units).filter((u) =>
-    u.tokens.includes('tokens.stylex.ts#palette.brand'));
+    u.tokens.includes('tokens.stylex.ts#palette.brand'),
+  );
   check('primitive has no direct unit refs', direct.length, 0);
 
   const r = blastRadius(g, ['tokens.stylex.ts#palette.brand']);
-  check('closure follows token edges',
-    r.tokens.includes('tokens.stylex.ts#colors.accent'), true);
-  check('reaches units via the semantic layer', r.units.map((u) => u.id).sort(),
-    ['Widget.tsx#button', 'Widget.tsx#gone']);
+  check(
+    'closure follows token edges',
+    r.tokens.includes('tokens.stylex.ts#colors.accent'),
+    true,
+  );
+  check('reaches units via the semantic layer', r.units.map((u) => u.id).sort(), [
+    'Widget.tsx#button',
+    'Widget.tsx#gone',
+  ]);
   check('reports files', r.files, ['Widget.tsx']);
 }
 
@@ -148,19 +196,34 @@ console.log('\n  diff');
   const d = diffGraphs(base, head);
 
   check('token value change detected', d.tokens.changed.length, 2);
-  check('changed token reports both values',
-    d.tokens.changed.find((t) => t.id.endsWith('palette.brand')).to, '#22AA88');
+  check(
+    'changed token reports both values',
+    d.tokens.changed.find((t) => t.id.endsWith('palette.brand')).to,
+    '#22AA88',
+  );
   check('unit added', d.units.added, ['Widget.tsx#added']);
   check('unit removed', d.units.removed, ['Widget.tsx#gone']);
-  check('style change found', d.units.styleChanged.map((u) => u.id), ['Widget.tsx#label']);
-  check('the change is the added declaration',
-    d.units.styleChanged[0].changes.map((c) => c.kind), ['added']);
+  check(
+    'style change found',
+    d.units.styleChanged.map((u) => u.id),
+    ['Widget.tsx#label'],
+  );
+  check(
+    'the change is the added declaration',
+    d.units.styleChanged[0].changes.map((c) => c.kind),
+    ['added'],
+  );
   // The unchanged unit moved two lines down in head. Hash covers what renders,
   // not where it sits, so it must NOT appear as changed.
-  check('moved code is not a style change',
-    d.units.styleChanged.some((u) => u.id === 'Widget.tsx#button'), false);
-  check('blast radius from the diff',
-    d.blastRadius.units.map((u) => u.id).sort(), ['Widget.tsx#added', 'Widget.tsx#button']);
+  check(
+    'moved code is not a style change',
+    d.units.styleChanged.some((u) => u.id === 'Widget.tsx#button'),
+    false,
+  );
+  check('blast radius from the diff', d.blastRadius.units.map((u) => u.id).sort(), [
+    'Widget.tsx#added',
+    'Widget.tsx#button',
+  ]);
 
   const same = diffGraphs(base, base);
   check('identical graphs diff empty', same.summary.unitsStyleChanged, 0);
@@ -186,21 +249,32 @@ console.log('\n  regressions');
   // Allow-listing must remove a file's tokens AND its literals. Removing only
   // the literals lets a team raise the score by allow-listing good files.
   const all = await analyze('./test/bug-fixtures');
-  const allowed = await analyze('./test/bug-fixtures', { overrides: { allow: ['Cases.tsx'] } });
+  const allowed = await analyze('./test/bug-fixtures', {
+    overrides: { allow: ['Cases.tsx'] },
+  });
   check('allow-list removes tokens too', allowed.token, 0);
   check('allow-list removes literals too', allowed.literal, 0);
   check('unallowed baseline has both', all.token > 0 && all.literal > 0, true);
 
   // A glass panel over a dark page was reported as a contrast FAILURE because
   // the near-transparent white film was treated as an opaque near-white ground.
-  check('translucent bg is not judged',
-    r.contrast.results.some((x) => x.styleRule === 'plate'), false);
+  check(
+    'translucent bg is not judged',
+    r.contrast.results.some((x) => x.styleRule === 'plate'),
+    false,
+  );
   check('translucent bg counts as unresolvable', r.contrast.unpaired >= 1, true);
 
   // rgb(0 0 0 / 50%) is legal CSS; parseFloat made alpha 50 instead of 0.5.
   check('percentage alpha', parseColor('rgb(0 0 0 / 50%)').a, 0.5);
-  check('percentage alpha composites', Math.round(ratio(parseColor('rgb(0 0 0 / 50%)'), parseColor('#fff'))), 4);
+  check(
+    'percentage alpha composites',
+    Math.round(ratio(parseColor('rgb(0 0 0 / 50%)'), parseColor('#fff'))),
+    4,
+  );
 }
 
-console.log(`\n  ${fail === 0 ? `✓ ${pass} passed` : `✗ ${fail} failed, ${pass} passed`}\n`);
+console.log(
+  `\n  ${fail === 0 ? `✓ ${pass} passed` : `✗ ${fail} failed, ${pass} passed`}\n`,
+);
 process.exit(fail === 0 ? 0 : 1);

@@ -80,10 +80,13 @@ export function Meter({
   const auto = pct >= 0.9 ? 'pass' : pct >= 0.6 ? 'warn' : 'fail';
   const t2 = tone ?? auto;
   const toneStyle =
-    t2 === 'pass' ? styles.tonePass
-    : t2 === 'warn' ? styles.toneWarn
-    : t2 === 'fail' ? styles.toneFail
-    : styles.toneAccent;
+    t2 === 'pass'
+      ? styles.tonePass
+      : t2 === 'warn'
+        ? styles.toneWarn
+        : t2 === 'fail'
+          ? styles.toneFail
+          : styles.toneAccent;
 
   return (
     <div {...stylex.props(styles.wrap)}>

@@ -43,45 +43,81 @@ const styles = stylex.create({
     color: colors.pass,
     fontVariantNumeric: 'tabular-nums',
   },
-  scoreWas: { fontFamily: t.familyMono, fontSize: t.captionSize, color: colors.textSubtle },
+  scoreWas: {
+    fontFamily: t.familyMono,
+    fontSize: t.captionSize,
+    color: colors.textSubtle,
+  },
   track: {
-    position: 'relative', height: space.snug, borderRadius: radius.pill,
-    backgroundColor: colors.bgOverlay, overflow: 'hidden',
+    position: 'relative',
+    height: space.snug,
+    borderRadius: radius.pill,
+    backgroundColor: colors.bgOverlay,
+    overflow: 'hidden',
   },
   was: (w: string) => ({
-    position: 'absolute', insetBlock: space.none, insetInlineStart: space.none,
-    width: w, backgroundColor: colors.textSubtle, opacity: 0.45,
+    position: 'absolute',
+    insetBlock: space.none,
+    insetInlineStart: space.none,
+    width: w,
+    backgroundColor: colors.textSubtle,
+    opacity: 0.45,
   }),
   now: (w: string) => ({
-    position: 'absolute', insetBlock: space.none, insetInlineStart: space.none,
-    width: w, backgroundColor: colors.pass, borderRadius: radius.pill,
+    position: 'absolute',
+    insetBlock: space.none,
+    insetInlineStart: space.none,
+    width: w,
+    backgroundColor: colors.pass,
+    borderRadius: radius.pill,
   }),
 
   // 02 — one token fanning out to many components
   fan: { display: 'flex', alignItems: 'center', gap: space.snug },
   seed: {
-    fontFamily: t.familyMono, fontSize: t.microSize, color: colors.signalBright,
-    borderWidth: stroke.hair, borderStyle: 'solid', borderColor: colors.signal,
-    borderRadius: radius.sharp, paddingBlock: space.hair, paddingInline: space.tight,
+    fontFamily: t.familyMono,
+    fontSize: t.microSize,
+    color: colors.signalBright,
+    borderWidth: stroke.hair,
+    borderStyle: 'solid',
+    borderColor: colors.signal,
+    borderRadius: radius.sharp,
+    paddingBlock: space.hair,
+    paddingInline: space.tight,
     whiteSpace: 'nowrap',
   },
   arrow: { color: colors.textSubtle, fontFamily: t.familyMono, fontSize: t.microSize },
   dots: { display: 'flex', flexWrap: 'wrap', gap: space.hair, flex: '1' },
-  dot: { width: space.snug, height: space.snug, borderRadius: radius.sharp, backgroundColor: colors.accent },
+  dot: {
+    width: space.snug,
+    height: space.snug,
+    borderRadius: radius.sharp,
+    backgroundColor: colors.accent,
+  },
   dotFaint: { backgroundColor: colors.gridLineStrong },
 
   // 03 — the changed subset of a grid of units
   matrix: { display: 'grid', gridTemplateColumns: 'repeat(14, 1fr)', gap: space.hair },
-  cell: { aspectRatio: '1', borderRadius: radius.sharp, backgroundColor: colors.gridLineStrong },
+  cell: {
+    aspectRatio: '1',
+    borderRadius: radius.sharp,
+    backgroundColor: colors.gridLineStrong,
+  },
   cellHit: { backgroundColor: colors.warn },
 
   // 04 — a contrast pairing, pass and fail
   swatches: { display: 'flex', gap: space.snug, flexWrap: 'wrap' },
   chip: {
-    display: 'inline-flex', alignItems: 'center', gap: space.tight,
-    fontFamily: t.familyMono, fontSize: t.microSize,
-    paddingBlock: space.tight, paddingInline: space.snug,
-    borderRadius: radius.soft, borderWidth: stroke.hair, borderStyle: 'solid',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: space.tight,
+    fontFamily: t.familyMono,
+    fontSize: t.microSize,
+    paddingBlock: space.tight,
+    paddingInline: space.snug,
+    borderRadius: radius.soft,
+    borderWidth: stroke.hair,
+    borderStyle: 'solid',
   },
   chipPass: { color: colors.pass, borderColor: colors.pass },
   chipFail: { color: colors.fail, borderColor: colors.fail },
@@ -115,7 +151,9 @@ export function BlastViz() {
           ))}
         </span>
       </div>
-      <span {...stylex.props(styles.mono)}>218 components · 6 teams · 3 outside your org</span>
+      <span {...stylex.props(styles.mono)}>
+        218 components · 6 teams · 3 outside your org
+      </span>
     </div>
   );
 }
@@ -127,10 +165,15 @@ export function ChangeSetViz() {
     <div {...stylex.props(styles.frame)}>
       <div {...stylex.props(styles.matrix)}>
         {Array.from({ length: 70 }, (_, i) => (
-          <span key={i} {...stylex.props(styles.cell, CHANGED.has(i) && styles.cellHit)} />
+          <span
+            key={i}
+            {...stylex.props(styles.cell, CHANGED.has(i) && styles.cellHit)}
+          />
         ))}
       </div>
-      <span {...stylex.props(styles.mono)}>10 of 70 units changed · screenshot only those</span>
+      <span {...stylex.props(styles.mono)}>
+        10 of 70 units changed · screenshot only those
+      </span>
     </div>
   );
 }
@@ -142,7 +185,9 @@ export function ContrastViz() {
         <span {...stylex.props(styles.chip, styles.chipPass)}>12.30:1 pass</span>
         <span {...stylex.props(styles.chip, styles.chipFail)}>2.87:1 fail</span>
       </div>
-      <span {...stylex.props(styles.mono)}>pairings that actually render, not the palette</span>
+      <span {...stylex.props(styles.mono)}>
+        pairings that actually render, not the palette
+      </span>
     </div>
   );
 }

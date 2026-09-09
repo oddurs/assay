@@ -20,14 +20,20 @@ export function isGitRepo(dir) {
 }
 
 export function refExists(dir, ref) {
-  const r = spawnSync('git', ['-C', dir, 'rev-parse', '--verify', '--quiet', `${ref}^{commit}`], {
-    encoding: 'utf8',
-  });
+  const r = spawnSync(
+    'git',
+    ['-C', dir, 'rev-parse', '--verify', '--quiet', `${ref}^{commit}`],
+    {
+      encoding: 'utf8',
+    },
+  );
   return r.status === 0;
 }
 
 export function repoRoot(dir) {
-  const r = spawnSync('git', ['-C', dir, 'rev-parse', '--show-toplevel'], { encoding: 'utf8' });
+  const r = spawnSync('git', ['-C', dir, 'rev-parse', '--show-toplevel'], {
+    encoding: 'utf8',
+  });
   return r.status === 0 ? String(r.stdout).trim() : null;
 }
 
@@ -46,7 +52,10 @@ export function materialize(cwd, ref, subpath = null) {
   try {
     const tar = execFileSync('git', args, { maxBuffer: 512 * 1024 * 1024 });
     mkdirSync(dir, { recursive: true });
-    execFileSync('tar', ['-x', '-C', dir], { input: tar, maxBuffer: 512 * 1024 * 1024 });
+    execFileSync('tar', ['-x', '-C', dir], {
+      input: tar,
+      maxBuffer: 512 * 1024 * 1024,
+    });
   } catch (e) {
     rmSync(dir, { recursive: true, force: true });
     throw new Error(`could not read ref '${ref}': ${e.message.split('\n')[0]}`);

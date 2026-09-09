@@ -31,7 +31,12 @@ const styles = stylex.create({
     transitionTimingFunction: motion.easeStandard,
   },
   active: { borderColor: colors.accent, backgroundColor: colors.bgOverlay },
-  strip: { display: 'flex', height: space.gutter, borderRadius: radius.sharp, overflow: 'hidden' },
+  strip: {
+    display: 'flex',
+    height: space.gutter,
+    borderRadius: radius.sharp,
+    overflow: 'hidden',
+  },
   band: (bg: string) => ({ flex: '1', backgroundColor: bg }),
   name: {
     fontFamily: t.familyBody,

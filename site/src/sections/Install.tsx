@@ -22,9 +22,19 @@ const styles = stylex.create({
     gap: space.bay,
     alignItems: 'center',
   },
-  copy: { display: 'flex', flexDirection: 'column', gap: space.gutter, alignItems: 'flex-start' },
+  copy: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: space.gutter,
+    alignItems: 'flex-start',
+  },
   actions: { display: 'flex', gap: space.snug, flexWrap: 'wrap' },
-  commands: { display: 'flex', flexDirection: 'column', gap: space.snug, alignItems: 'flex-start' },
+  commands: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: space.snug,
+    alignItems: 'flex-start',
+  },
   caveats: {
     display: 'flex',
     flexDirection: 'column',
@@ -65,22 +75,26 @@ export function Install() {
             <div {...stylex.props(styles.copy)}>
               <Text role="display">No account. No server. One number.</Text>
               <Text role="lead">
-                Point it at a repo that uses StyleX. It rides the compile that is already
-                happening, caches per file by content hash, and stays under three percent of
-                build time — or it is a command people forget to run.
+                Point it at a repo that uses StyleX. It rides the compile that is
+                already happening, caches per file by content hash, and stays under
+                three percent of build time — or it is a command people forget to run.
               </Text>
               <div {...stylex.props(styles.commands)}>
                 <CopyField command="npx assay ." note="score a repo" />
                 <CopyField command="npx assay diff main HEAD" note="what changed" />
               </div>
               <div {...stylex.props(styles.actions)}>
-                <Button size="lg" chevron>Read the docs</Button>
-                <Button variant="secondary" size="lg">GitHub</Button>
+                <Button size="lg" chevron>
+                  Read the docs
+                </Button>
+                <Button variant="secondary" size="lg">
+                  GitHub
+                </Button>
               </div>
               <div {...stylex.props(styles.caveats)}>
                 <Text role="caption">
-                  Requires StyleX 0.15+. Works with the Babel plugin, the unplugin, and the CLI.
-                  Reads your source; sends nothing anywhere.
+                  Requires StyleX 0.15+. Works with the Babel plugin, the unplugin, and
+                  the CLI. Reads your source; sends nothing anywhere.
                 </Text>
               </div>
             </div>

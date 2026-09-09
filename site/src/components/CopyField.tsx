@@ -74,10 +74,15 @@ export function CopyField({ command, note }: { command: string; note?: string })
       aria-label={`Copy ${command} to the clipboard`}
       {...stylex.props(styles.root)}
     >
-      <span {...stylex.props(styles.prompt)} aria-hidden>$</span>
+      <span {...stylex.props(styles.prompt)} aria-hidden>
+        $
+      </span>
       <span {...stylex.props(styles.cmd)}>{command}</span>
       {note ? <span {...stylex.props(styles.note)}>{note}</span> : null}
-      <span {...stylex.props(styles.action, copied && styles.copied)} aria-live="polite">
+      <span
+        {...stylex.props(styles.action, copied && styles.copied)}
+        aria-live="polite"
+      >
         {copied ? 'copied' : 'copy'}
       </span>
     </button>

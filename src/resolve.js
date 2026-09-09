@@ -11,8 +11,19 @@
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, resolve as resolvePath, join, parse as parsePath } from 'node:path';
 
-const EXTS = ['', '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs',
-  '/index.ts', '/index.tsx', '/index.js', '/index.jsx'];
+const EXTS = [
+  '',
+  '.ts',
+  '.tsx',
+  '.js',
+  '.jsx',
+  '.mjs',
+  '.cjs',
+  '/index.ts',
+  '/index.tsx',
+  '/index.js',
+  '/index.jsx',
+];
 
 /** tsconfig allows comments and trailing commas; JSON.parse does not. */
 function parseJsonc(text) {
@@ -43,7 +54,8 @@ function findConfig(dir, stopAt, depth = 0) {
           if (basePath && existsSync(basePath + ext)) {
             const base = parseJsonc(readFileSync(basePath + ext, 'utf8'));
             cfg = {
-              ...base, ...cfg,
+              ...base,
+              ...cfg,
               compilerOptions: {
                 ...(base.compilerOptions ?? {}),
                 ...(cfg.compilerOptions ?? {}),
@@ -57,7 +69,9 @@ function findConfig(dir, stopAt, depth = 0) {
       if (co.paths) {
         result = { dir, baseUrl: resolvePath(dir, co.baseUrl ?? '.'), paths: co.paths };
       }
-    } catch { /* malformed config: fall through to the parent */ }
+    } catch {
+      /* malformed config: fall through to the parent */
+    }
     break;
   }
 
@@ -78,7 +92,9 @@ function tryExtensions(base) {
     const cand = base + ext;
     try {
       if (existsSync(cand) && statSync(cand).isFile()) return cand;
-    } catch { /* keep trying */ }
+    } catch {
+      /* keep trying */
+    }
   }
   return null;
 }

@@ -1,0 +1,7 @@
+node_modules/
+dist/
+site/src/generated/
+package-lock.json
+# Deliberately holds comments and a trailing comma: it is the fixture that
+# proves the tsconfig parser copes with JSONC. Formatting it defeats the test.
+test/resolve-fixtures/tsconfig.json

@@ -42,7 +42,11 @@ const report = {
   },
   families,
   violations: r.violations.map((v) => ({
-    file: v.file, line: v.line, prop: v.prop, family: v.family, value: v.value,
+    file: v.file,
+    line: v.line,
+    prop: v.prop,
+    family: v.family,
+    value: v.value,
   })),
 };
 
@@ -52,10 +56,18 @@ writeFileSync(OUT, JSON.stringify(report, null, 2));
 const pct = (report.score * 100).toFixed(1);
 console.log(`\n  assay · this site`);
 console.log(`  ${'─'.repeat(46)}`);
-console.log(`  ${pct}%  ${report.token}/${report.scored} scored declarations use a token`);
-console.log(`  ${report.tokensDefined} tokens defined · ${report.dead.length} unreferenced · ${report.files} files`);
-console.log(`  contrast ${report.contrast.level}: ${report.contrast.checked} real pairings, ${report.contrast.failing} failing`);
-console.log(`  excluded: ${report.excluded.dynamic} dynamic · ${report.excluded.untokenizable} non-token props\n`);
+console.log(
+  `  ${pct}%  ${report.token}/${report.scored} scored declarations use a token`,
+);
+console.log(
+  `  ${report.tokensDefined} tokens defined · ${report.dead.length} unreferenced · ${report.files} files`,
+);
+console.log(
+  `  contrast ${report.contrast.level}: ${report.contrast.checked} real pairings, ${report.contrast.failing} failing`,
+);
+console.log(
+  `  excluded: ${report.excluded.dynamic} dynamic · ${report.excluded.untokenizable} non-token props\n`,
+);
 
 if (report.violations.length) {
   console.log('  literals outside the primitives layer:');

@@ -6,7 +6,12 @@ import { stroke } from '../tokens/shape.stylex';
 import { Section } from '../components/Section';
 import { Text } from '../components/Text';
 import { Terminal } from '../components/Terminal';
-import { ScoreViz, BlastViz, ChangeSetViz, ContrastViz } from '../components/CapabilityViz';
+import {
+  ScoreViz,
+  BlastViz,
+  ChangeSetViz,
+  ContrastViz,
+} from '../components/CapabilityViz';
 
 const styles = stylex.create({
   list: { display: 'flex', flexDirection: 'column' },
@@ -79,9 +84,15 @@ const OUTPUT = [
   { text: '     948  scored declarations', tone: 'bright' as const },
   { text: '' },
   { text: '  excluded from the score', tone: 'dim' as const },
-  { text: '       1  dynamic (runtime)   ← unknowable, by design', tone: 'dim' as const },
+  {
+    text: '       1  dynamic (runtime)   ← unknowable, by design',
+    tone: 'dim' as const,
+  },
   { text: '     105  keyword / zero / null', tone: 'dim' as const },
-  { text: '     622  non-token property  ← display, position, …', tone: 'dim' as const },
+  {
+    text: '     622  non-token property  ← display, position, …',
+    tone: 'dim' as const,
+  },
   { text: '' },
   { text: '  by family', tone: 'dim' as const },
   { text: '  color    █████████████░░░░░   73%   212/290' },

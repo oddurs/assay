@@ -18,12 +18,12 @@ is typed in.** Hardcode a hex tomorrow and the homepage score drops on the next 
 
 ## Stack
 
-| | | |
-|---|---|---|
-| Vite 7 | build | Static site, no server needs. StyleX integration is one unplugin line, and the whole build is verifiable end to end in under a second. Next.js would add a compile model with more moving parts and nothing this site uses. |
-| React 19 | UI | Pinned to `19.2.8` — `react-dom@19.3.0` shipped stable before `react@19.3.0` did, so the caret ranges don't resolve. |
-| StyleX 0.19 | styling | `@stylexjs/unplugin`, atomic CSS, `createTheme` for the four themes. |
-| TypeScript | types | `strict`, `verbatimModuleSyntax`, `resolveJsonModule` for the report import. |
+|             |         |                                                                                                                                                                                                                             |
+| ----------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vite 7      | build   | Static site, no server needs. StyleX integration is one unplugin line, and the whole build is verifiable end to end in under a second. Next.js would add a compile model with more moving parts and nothing this site uses. |
+| React 19    | UI      | Pinned to `19.2.8` — `react-dom@19.3.0` shipped stable before `react@19.3.0` did, so the caret ranges don't resolve.                                                                                                        |
+| StyleX 0.19 | styling | `@stylexjs/unplugin`, atomic CSS, `createTheme` for the four themes.                                                                                                                                                        |
+| TypeScript  | types   | `strict`, `verbatimModuleSyntax`, `resolveJsonModule` for the report import.                                                                                                                                                |
 
 ## The four layers
 

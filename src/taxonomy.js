@@ -69,9 +69,21 @@ export const FAMILIES = [
 
 /** Values that need no token: absences, resets, and CSS-wide keywords. */
 export const NEUTRAL_VALUES = new Set([
-  'inherit', 'initial', 'unset', 'revert', 'revert-layer',
-  'auto', 'none', 'normal', 'transparent', 'currentColor', 'currentcolor',
-  '0', 'fit-content', 'max-content', 'min-content',
+  'inherit',
+  'initial',
+  'unset',
+  'revert',
+  'revert-layer',
+  'auto',
+  'none',
+  'normal',
+  'transparent',
+  'currentColor',
+  'currentcolor',
+  '0',
+  'fit-content',
+  'max-content',
+  'min-content',
 ]);
 
 /**
@@ -99,7 +111,8 @@ export const CAT_DOC = {
   literal: 'A hardcoded design value in a token-bearing family. The violation.',
   dynamic:
     'Depends on a runtime parameter, so StyleX compiles it to a CSS custom property. Genuinely unknowable at build time — never counted as a pass OR a violation.',
-  cssvar: 'A raw var(--x) reference. Excluded: it is a variable, just not one we can trace.',
+  cssvar:
+    'A raw var(--x) reference. Excluded: it is a variable, just not one we can trace.',
   expr: 'An expression we could not resolve. Excluded, and reported so the blind spot is visible.',
   neutral: 'A keyword, zero, null, or layout geometry. Needs no token.',
 };

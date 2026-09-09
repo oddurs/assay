@@ -66,7 +66,12 @@ const foundryColors = stylex.createTheme(colors, {
 });
 
 const foundryShape = stylex.createTheme(radius, {
-  none: '0px', sharp: '0px', soft: '2px', round: '3px', loud: '4px', pill: '999px',
+  none: '0px',
+  sharp: '0px',
+  soft: '2px',
+  round: '3px',
+  loud: '4px',
+  pill: '999px',
 });
 
 const foundryElevation = stylex.createTheme(elevation, {
@@ -128,7 +133,12 @@ const verdigrisColors = stylex.createTheme(colors, {
 });
 
 const verdigrisShape = stylex.createTheme(radius, {
-  none: '0px', sharp: '3px', soft: '7px', round: '11px', loud: '18px', pill: '999px',
+  none: '0px',
+  sharp: '3px',
+  soft: '7px',
+  round: '11px',
+  loud: '18px',
+  pill: '999px',
 });
 
 const verdigrisElevation = stylex.createTheme(elevation, {
@@ -191,7 +201,12 @@ const boneColors = stylex.createTheme(colors, {
 });
 
 const boneShape = stylex.createTheme(radius, {
-  none: '0px', sharp: '1px', soft: '2px', round: '4px', loud: '6px', pill: '999px',
+  none: '0px',
+  sharp: '1px',
+  soft: '2px',
+  round: '4px',
+  loud: '6px',
+  pill: '999px',
 });
 
 const boneElevation = stylex.createTheme(elevation, {
@@ -229,14 +244,21 @@ export const THEMES: ThemeDef[] = [
     name: 'Midnight',
     blurb: 'Cold, precise, glassy. Indigo on blue-black.',
     className: '',
-    swatches: [palette.ink000, palette.ink200, palette.violet500, palette.rose500, palette.teal400],
+    swatches: [
+      palette.ink000,
+      palette.ink200,
+      palette.violet500,
+      palette.rose500,
+      palette.teal400,
+    ],
     overrides: ['colors'],
   },
   {
     id: 'foundry',
     name: 'Foundry',
     blurb: 'Warm graphite and a single amber. Square corners, hard shadows.',
-    className: stylex.props(foundryColors, foundryShape, foundryElevation).className ?? '',
+    className:
+      stylex.props(foundryColors, foundryShape, foundryElevation).className ?? '',
     swatches: [warm.w000, warm.w200, warm.amber500, warm.amber300, warm.w700],
     overrides: ['colors', 'radius', 'elevation'],
   },
@@ -244,7 +266,8 @@ export const THEMES: ThemeDef[] = [
     id: 'verdigris',
     name: 'Verdigris',
     blurb: 'Oxidised copper on deep sea green. Softer corners, deep glow.',
-    className: stylex.props(verdigrisColors, verdigrisShape, verdigrisElevation).className ?? '',
+    className:
+      stylex.props(verdigrisColors, verdigrisShape, verdigrisElevation).className ?? '',
     swatches: [sea.s000, sea.s200, sea.patina500, sea.copper400, sea.s600],
     overrides: ['colors', 'radius', 'elevation'],
   },
@@ -252,7 +275,8 @@ export const THEMES: ThemeDef[] = [
     id: 'bone',
     name: 'Bone',
     blurb: 'Warm paper, printer’s ink, oxblood. Hairlines, not shadows.',
-    className: stylex.props(boneColors, boneShape, boneElevation, boneStroke).className ?? '',
+    className:
+      stylex.props(boneColors, boneShape, boneElevation, boneStroke).className ?? '',
     swatches: [bone.p050, bone.p200, bone.ox500, bone.indigo500, bone.p600],
     overrides: ['colors', 'radius', 'elevation', 'stroke'],
   },

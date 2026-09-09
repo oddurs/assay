@@ -56,24 +56,44 @@ const KEYWORDS =
 
 function tint(line: string, i: number) {
   const trimmed = line.trimStart();
-  if (trimmed.startsWith('//') || trimmed.startsWith('#') || trimmed.startsWith('*') || trimmed.startsWith('/*')) {
-    return <span key={i} {...stylex.props(styles.comment)}>{line}{'\n'}</span>;
+  if (
+    trimmed.startsWith('//') ||
+    trimmed.startsWith('#') ||
+    trimmed.startsWith('*') ||
+    trimmed.startsWith('/*')
+  ) {
+    return (
+      <span key={i} {...stylex.props(styles.comment)}>
+        {line}
+        {'\n'}
+      </span>
+    );
   }
   const parts = line.split(/('[^']*'|"[^"]*"|`[^`]*`)/g);
   return (
     <span key={i}>
       {parts.map((part, j) => {
         if (/^['"`]/.test(part)) {
-          return <span key={j} {...stylex.props(styles.string)}>{part}</span>;
+          return (
+            <span key={j} {...stylex.props(styles.string)}>
+              {part}
+            </span>
+          );
         }
         const words = part.split(/(\s+)/);
         return (
           <span key={j}>
             {words.map((w, k) =>
               KEYWORDS.test(w) ? (
-                <span key={k} {...stylex.props(styles.keyword)}>{w}</span>
-              ) : /^(palette|colors|space|type|radius|stroke|elevation|motion|layer|scale|size|font|curve)\./.test(w) ? (
-                <span key={k} {...stylex.props(styles.token)}>{w}</span>
+                <span key={k} {...stylex.props(styles.keyword)}>
+                  {w}
+                </span>
+              ) : /^(palette|colors|space|type|radius|stroke|elevation|motion|layer|scale|size|font|curve)\./.test(
+                  w,
+                ) ? (
+                <span key={k} {...stylex.props(styles.token)}>
+                  {w}
+                </span>
               ) : (
                 <span key={k}>{w}</span>
               ),

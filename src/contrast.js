@@ -14,8 +14,14 @@ import { CAT } from './taxonomy.js';
 /* --------------------------- colour parsing --------------------------- */
 
 const NAMED = {
-  white: '#ffffff', black: '#000000', red: '#ff0000', blue: '#0000ff',
-  green: '#008000', gray: '#808080', grey: '#808080', silver: '#c0c0c0',
+  white: '#ffffff',
+  black: '#000000',
+  red: '#ff0000',
+  blue: '#0000ff',
+  green: '#008000',
+  gray: '#808080',
+  grey: '#808080',
+  silver: '#c0c0c0',
 };
 
 /** `rgb(0 0 0 / 50%)` is legal CSS; a bare parseFloat turns 50% into alpha 50. */
@@ -48,9 +54,12 @@ export function parseColor(input) {
   if (m) {
     const parts = m[1].split(/[,\s/]+/).filter(Boolean);
     if (parts.length >= 3) {
-      const num = (p) => (p.endsWith('%') ? (parseFloat(p) / 100) * 255 : parseFloat(p));
+      const num = (p) =>
+        p.endsWith('%') ? (parseFloat(p) / 100) * 255 : parseFloat(p);
       return {
-        r: num(parts[0]), g: num(parts[1]), b: num(parts[2]),
+        r: num(parts[0]),
+        g: num(parts[1]),
+        b: num(parts[2]),
         a: parts[3] != null ? alphaOf(parts[3]) : 1,
       };
     }
@@ -68,8 +77,13 @@ export function parseColor(input) {
       const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
       const mm = l - c / 2;
       const seg = [
-        [c, x, 0], [x, c, 0], [0, c, x], [0, x, c], [x, 0, c], [c, 0, x],
-      ][Math.floor(((h % 360) + 360) % 360 / 60)];
+        [c, x, 0],
+        [x, c, 0],
+        [0, c, x],
+        [0, x, c],
+        [x, 0, c],
+        [c, 0, x],
+      ][Math.floor((((h % 360) + 360) % 360) / 60)];
       return {
         r: Math.round((seg[0] + mm) * 255),
         g: Math.round((seg[1] + mm) * 255),
@@ -136,8 +150,12 @@ export function makeResolver(tokens) {
         // conditional: take `default`
         for (const p of node.properties) {
           if (p.type !== 'ObjectProperty') continue;
-          const k = !p.computed && p.key.type === 'Identifier' ? p.key.name
-            : p.key.type === 'StringLiteral' ? p.key.value : null;
+          const k =
+            !p.computed && p.key.type === 'Identifier'
+              ? p.key.name
+              : p.key.type === 'StringLiteral'
+                ? p.key.value
+                : null;
           if (k === 'default') return valueOfNode(p.value, def, depth + 1);
         }
         return null;
@@ -182,7 +200,8 @@ export function analyzeContrast(pairs, resolve, opts = {}) {
   const results = [];
   let unpaired = 0;
 
-  const valueOf = (slot) => (slot ? (slot.token ? resolve(slot.token) : slot.literal) : undefined);
+  const valueOf = (slot) =>
+    slot ? (slot.token ? resolve(slot.token) : slot.literal) : undefined;
 
   for (const p of pairs.values()) {
     const byCond = p.byCond ?? {};
@@ -198,20 +217,29 @@ export function analyzeContrast(pairs, resolve, opts = {}) {
       const eff = { ...base, ...byCond[cond] };
       const fgRaw = eff.color;
       const bgRaw = eff.backgroundColor;
-      if (!fgRaw || !bgRaw) { if (fgRaw || bgRaw) unpaired += 1; continue; }
+      if (!fgRaw || !bgRaw) {
+        if (fgRaw || bgRaw) unpaired += 1;
+        continue;
+      }
 
       const fgVal = valueOf(fgRaw);
       const bgVal = valueOf(bgRaw);
       const fg = parseColor(fgVal);
       const bg = parseColor(bgVal);
-      if (!fg || !bg) { unpaired += 1; continue; }
+      if (!fg || !bg) {
+        unpaired += 1;
+        continue;
+      }
 
       // A TRANSLUCENT background is as unknowable as an inherited one: the
       // effective colour depends on whatever is painted behind it, which is not
       // in this style rule. Treating the film itself as the backdrop makes a
       // glass panel over a dark page look like light text on near-white.
       // Report it as unresolvable rather than inventing a verdict.
-      if (bg.a < 1) { unpaired += 1; continue; }
+      if (bg.a < 1) {
+        unpaired += 1;
+        continue;
+      }
 
       // The same colours under several conditions are one pairing, not three.
       const dedupe = `${fgVal}|${bgVal}`;
@@ -221,7 +249,8 @@ export function analyzeContrast(pairs, resolve, opts = {}) {
       const sizePx = pxOf(valueOf(eff.fontSize));
       const weight = valueOf(eff.fontWeight);
       const bold = weight != null && (Number(weight) >= 700 || weight === 'bold');
-      const large = sizePx != null && (sizePx >= LARGE_PX || (bold && sizePx >= LARGE_BOLD_PX));
+      const large =
+        sizePx != null && (sizePx >= LARGE_PX || (bold && sizePx >= LARGE_BOLD_PX));
 
       const need = level === 'AAA' ? (large ? 4.5 : 7) : large ? 3 : 4.5;
       const r = ratio(fg, bg);
@@ -231,7 +260,8 @@ export function analyzeContrast(pairs, resolve, opts = {}) {
         line: p.line,
         styleRule: p.rule,
         cond,
-        fg: fgVal, bg: bgVal,
+        fg: fgVal,
+        bg: bgVal,
         fgToken: fgRaw.token ?? null,
         bgToken: bgRaw.token ?? null,
         large,

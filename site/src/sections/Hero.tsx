@@ -5,7 +5,6 @@ import { type as t } from '../tokens/type.stylex';
 import { radius, stroke, blur } from '../tokens/shape.stylex';
 import { layer } from '../tokens/motion.stylex';
 import { Container } from '../components/Container';
-import { Text } from '../components/Text';
 import { Statement } from '../components/Statement';
 import { Button } from '../components/Button';
 import { StatLine } from '../components/StatLine';
@@ -27,7 +26,11 @@ const styles = stylex.create({
   // The content column is deliberately narrower than the container: the ribbon
   // needs the right half, and text that runs under it is unreadable.
   column: {
-    maxWidth: { default: '66%', '@media (max-width: 1080px)': '80%', '@media (max-width: 860px)': '100%' },
+    maxWidth: {
+      default: '66%',
+      '@media (max-width: 1080px)': '80%',
+      '@media (max-width: 860px)': '100%',
+    },
     paddingBlockStart: space.chapter,
     paddingBlockEnd: space.bay,
     display: 'flex',
@@ -139,13 +142,18 @@ export function Hero() {
             note={`${report.token}/${report.scored}`}
           />
 
-          <Statement scale="mega" tail="Assay reads the style graph the StyleX compiler already builds, and tells you what actually shipped.">
+          <Statement
+            scale="mega"
+            tail="Assay reads the style graph the StyleX compiler already builds, and tells you what actually shipped."
+          >
             Your design system is the only thing you{' '}
             <span {...stylex.props(styles.gradientWord)}>can&rsquo;t measure</span>.
           </Statement>
 
           <div {...stylex.props(styles.actions)}>
-            <Button href="#install" size="lg" chevron>Run it on your repo</Button>
+            <Button href="#install" size="lg" chevron>
+              Run it on your repo
+            </Button>
             <Button href="#dogfood" variant="secondary" size="lg">
               See it measure this page
             </Button>

@@ -37,7 +37,9 @@ function portableId(id, absRoot) {
 }
 
 function sortObject(obj) {
-  return Object.fromEntries(Object.entries(obj).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
+  return Object.fromEntries(
+    Object.entries(obj).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)),
+  );
 }
 
 export function hashOf(value) {
@@ -79,7 +81,8 @@ export function buildGraph(result, opts = {}) {
       })
       // Sorted so declaration order in source does not churn the hash.
       .sort((a, b) =>
-        a.prop === b.prop ? (a.cond < b.cond ? -1 : 1) : a.prop < b.prop ? -1 : 1);
+        a.prop === b.prop ? (a.cond < b.cond ? -1 : 1) : a.prop < b.prop ? -1 : 1,
+      );
 
     units[key] = {
       id: key,
@@ -189,7 +192,10 @@ function diffDeclarations(a, b) {
 
   for (const [k, db] of B) {
     const da = A.get(k);
-    if (!da) { changes.push({ kind: 'added', decl: db }); continue; }
+    if (!da) {
+      changes.push({ kind: 'added', decl: db });
+      continue;
+    }
     const va = da.token ?? da.value ?? da.cat;
     const vb = db.token ?? db.value ?? db.cat;
     if (va !== vb || da.cat !== db.cat) {
@@ -220,7 +226,10 @@ export function diffGraphs(base, head) {
   const styleChanged = [];
 
   for (const id of Object.keys(unitsB)) {
-    if (!unitsA[id]) { added.push(id); continue; }
+    if (!unitsA[id]) {
+      added.push(id);
+      continue;
+    }
     if (unitsA[id].hash !== unitsB[id].hash) {
       styleChanged.push({
         id,
@@ -236,18 +245,24 @@ export function diffGraphs(base, head) {
   const tokensRemoved = [];
   const tokensChanged = [];
   for (const id of Object.keys(tokensB)) {
-    if (!tokensA[id]) { tokensAdded.push(id); continue; }
-    if (tokensA[id].value !== tokensB[id].value || tokensA[id].raw !== tokensB[id].raw) {
+    if (!tokensA[id]) {
+      tokensAdded.push(id);
+      continue;
+    }
+    if (
+      tokensA[id].value !== tokensB[id].value ||
+      tokensA[id].raw !== tokensB[id].raw
+    ) {
       tokensChanged.push({ id, from: tokensA[id].value, to: tokensB[id].value });
     }
   }
   for (const id of Object.keys(tokensA)) if (!tokensB[id]) tokensRemoved.push(id);
 
-  const touchedTokens = [
-    ...tokensChanged.map((t) => t.id),
-    ...tokensRemoved,
-  ];
-  const radius = blastRadius(head, touchedTokens.filter((t) => head.tokens[t]));
+  const touchedTokens = [...tokensChanged.map((t) => t.id), ...tokensRemoved];
+  const radius = blastRadius(
+    head,
+    touchedTokens.filter((t) => head.tokens[t]),
+  );
   // A removed token has no node in `head`, so reach it from the base graph.
   const removedRadius = tokensRemoved.length
     ? blastRadius(base, tokensRemoved)

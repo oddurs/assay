@@ -23,15 +23,19 @@ const styles = stylex.create({
   },
   fadeTop: {
     maskImage: 'radial-gradient(ellipse 85% 70% at 50% 0%, black 30%, transparent 75%)',
-    WebkitMaskImage: 'radial-gradient(ellipse 85% 70% at 50% 0%, black 30%, transparent 75%)',
+    WebkitMaskImage:
+      'radial-gradient(ellipse 85% 70% at 50% 0%, black 30%, transparent 75%)',
   },
   fadeCentre: {
-    maskImage: 'radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 80%)',
-    WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 80%)',
+    maskImage:
+      'radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 80%)',
+    WebkitMaskImage:
+      'radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 80%)',
   },
   fadeSide: {
     maskImage: 'linear-gradient(90deg, transparent, black 40%, black 60%, transparent)',
-    WebkitMaskImage: 'linear-gradient(90deg, transparent, black 40%, black 60%, transparent)',
+    WebkitMaskImage:
+      'linear-gradient(90deg, transparent, black 40%, black 60%, transparent)',
   },
 });
 

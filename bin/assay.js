@@ -6,7 +6,14 @@ import { analyze } from '../src/index.js';
 import { loadConfig } from '../src/config.js';
 import { FAMILIES, CAT_DOC } from '../src/taxonomy.js';
 import {
-  renderSummary, renderTokens, renderContrast, renderDiff, bold, dim, green, red,
+  renderSummary,
+  renderTokens,
+  renderContrast,
+  renderDiff,
+  bold,
+  dim,
+  green,
+  red,
 } from '../src/report.js';
 import { buildGraph, diffGraphs, blastRadius, GRAPH_VERSION } from '../src/graph.js';
 import { resolveSide } from '../src/gitref.js';
@@ -86,22 +93,40 @@ const VERSION = JSON.parse(
   readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
 ).version;
 
-const COMMANDS = new Set(['tokens', 'contrast', 'rules', 'explain', 'graph', 'diff', 'impact']);
+const COMMANDS = new Set([
+  'tokens',
+  'contrast',
+  'rules',
+  'explain',
+  'graph',
+  'diff',
+  'impact',
+]);
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
 
-  if (args.flags.has('help') || args.flags.has('h')) { console.log(HELP); return 0; }
-  if (args.flags.has('version')) { console.log(VERSION); return 0; }
+  if (args.flags.has('help') || args.flags.has('h')) {
+    console.log(HELP);
+    return 0;
+  }
+  if (args.flags.has('version')) {
+    console.log(VERSION);
+    return 0;
+  }
 
   const cmd = COMMANDS.has(args._[0]) ? args._.shift() : 'score';
-  if (cmd === 'rules') { console.log(renderRules()); return 0; }
+  if (cmd === 'rules') {
+    console.log(renderRules());
+    return 0;
+  }
 
   const buildOverrides = () => {
     const o = {};
     if (args.exclude.length) o.exclude = args.exclude;
     if (args.contrastLevel) o.contrast = { level: args.contrastLevel };
-    if (args.flags.has('no-contrast')) o.contrast = { ...(o.contrast ?? {}), enabled: false };
+    if (args.flags.has('no-contrast'))
+      o.contrast = { ...(o.contrast ?? {}), enabled: false };
     if (args.flags.has('publishes-tokens')) o.publishesTokens = true;
     return o;
   };
@@ -117,7 +142,9 @@ async function main() {
     if (arg.endsWith('.json')) {
       const g = JSON.parse(readFileSync(arg, 'utf8'));
       if (g.version !== GRAPH_VERSION) {
-        throw new Error(`${arg} is assay-graph v${g.version}; this build reads v${GRAPH_VERSION}`);
+        throw new Error(
+          `${arg} is assay-graph v${g.version}; this build reads v${GRAPH_VERSION}`,
+        );
       }
       return { graph: g, label: arg, cleanup: () => {} };
     }
@@ -131,13 +158,17 @@ async function main() {
   };
 
   if (cmd === 'diff') {
-    if (args._.length < 2) throw new Error('diff needs two arguments: assay diff <base> <head>');
+    if (args._.length < 2)
+      throw new Error('diff needs two arguments: assay diff <base> <head>');
     const [baseArg, headArg] = args._;
     const base = await loadSide(baseArg);
     let head;
     try {
       head = await loadSide(headArg);
-    } catch (e) { base.cleanup(); throw e; }
+    } catch (e) {
+      base.cleanup();
+      throw e;
+    }
 
     try {
       const d = diffGraphs(base.graph, head.graph);
@@ -161,31 +192,44 @@ async function main() {
       const last = parts[parts.length - 1];
       if (existsSync(last) && statSync(last).isDirectory()) dir = parts.pop();
     }
-    if (!parts.length) throw new Error('impact needs a token name: assay impact colors.accent [path]');
+    if (!parts.length)
+      throw new Error('impact needs a token name: assay impact colors.accent [path]');
 
     const graph = await graphOf(dir);
     const nameOf = (id) => id.split('#').pop();
     // Prefer exact names. Otherwise `colors.accent` silently drags in
     // accentHover, accentSubtle and accentText and reports their union.
     const exact = Object.keys(graph.tokens).filter((id) =>
-      parts.some((p) => id === p || nameOf(id) === p));
+      parts.some((p) => id === p || nameOf(id) === p),
+    );
     const seeds = exact.length
       ? exact
-      : Object.keys(graph.tokens).filter((id) => parts.some((p) => nameOf(id).includes(p)));
+      : Object.keys(graph.tokens).filter((id) =>
+          parts.some((p) => nameOf(id).includes(p)),
+        );
 
     if (!seeds.length) {
       console.error(`no token matches ${parts.join(', ')}`);
       return 1;
     }
     if (!exact.length && !args.flags.has('json')) {
-      console.log(dim(`\n  no exact match; matching by substring on ${seeds.length} token(s)`));
+      console.log(
+        dim(`\n  no exact match; matching by substring on ${seeds.length} token(s)`),
+      );
     }
     const r = blastRadius(graph, seeds);
-    if (args.flags.has('json')) { console.log(JSON.stringify(r, null, 2)); return 0; }
+    if (args.flags.has('json')) {
+      console.log(JSON.stringify(r, null, 2));
+      return 0;
+    }
     console.log('');
-    console.log(`  ${bold('blast radius')}  ${dim(seeds.map((s) => s.split('#').pop()).join(', '))}`);
+    console.log(
+      `  ${bold('blast radius')}  ${dim(seeds.map((s) => s.split('#').pop()).join(', '))}`,
+    );
     console.log('  ' + dim('─'.repeat(58)));
-    console.log(`  ${r.units.length} units · ${r.files.length} files · ${r.tokens.length} tokens in the closure`);
+    console.log(
+      `  ${r.units.length} units · ${r.files.length} files · ${r.tokens.length} tokens in the closure`,
+    );
     console.log('');
     for (const u of r.units) {
       console.log(`  ${u.id}  ${dim(u.via.map((v) => v.split('#').pop()).join(', '))}`);
@@ -218,7 +262,11 @@ async function main() {
     if (args.out) {
       writeFileSync(args.out, json);
       console.log(`  assay-graph v${g.version} → ${args.out}`);
-      console.log(dim(`  ${g.summary.units} units · ${g.summary.tokens} tokens · ${g.summary.files} files`));
+      console.log(
+        dim(
+          `  ${g.summary.units} units · ${g.summary.tokens} tokens · ${g.summary.files} files`,
+        ),
+      );
     } else {
       console.log(json);
     }
@@ -253,14 +301,22 @@ async function main() {
   if (pct + 1e-9 < gate) {
     if (!args.flags.has('json')) {
       console.log(red(`  ✗ conformance ${pct.toFixed(1)}% is below the ${gate}% gate`));
-      console.log(dim(`    ${result.literal} literal${result.literal === 1 ? '' : 's'} to fix. Run with --violations to list them.`));
+      console.log(
+        dim(
+          `    ${result.literal} literal${result.literal === 1 ? '' : 's'} to fix. Run with --violations to list them.`,
+        ),
+      );
       console.log('');
     }
     return 1;
   }
   if (contrastFails) {
     if (!args.flags.has('json')) {
-      console.log(red(`  ✗ ${contrastFails} contrast failure${contrastFails === 1 ? '' : 's'} on real pairings`));
+      console.log(
+        red(
+          `  ✗ ${contrastFails} contrast failure${contrastFails === 1 ? '' : 's'} on real pairings`,
+        ),
+      );
       console.log('');
     }
     return 2;

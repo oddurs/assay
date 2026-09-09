@@ -15,15 +15,26 @@ export const DEFAULTS = {
   owners: {},
   contrast: { level: 'AA', enabled: true },
   skipDirs: [
-    'node_modules', '.git', 'dist', 'build', 'out', '.next', 'coverage',
-    '.turbo', '.yarn', '__snapshots__',
+    'node_modules',
+    '.git',
+    'dist',
+    'build',
+    'out',
+    '.next',
+    'coverage',
+    '.turbo',
+    '.yarn',
+    '__snapshots__',
   ],
   skipTests: true,
   publishesTokens: false,
 };
 
 const NAMES = [
-  'assay.config.js', 'assay.config.mjs', 'assay.config.json', '.assayrc.json',
+  'assay.config.js',
+  'assay.config.mjs',
+  'assay.config.json',
+  '.assayrc.json',
 ];
 
 /**
@@ -94,7 +105,10 @@ export function globToRegExp(glob) {
       src += '[^/]';
     } else if (c === '{') {
       const end = glob.indexOf('}', i);
-      if (end === -1) { src += '\\{'; continue; }
+      if (end === -1) {
+        src += '\\{';
+        continue;
+      }
       const alts = glob.slice(i + 1, end).split(',');
       src += `(?:${alts.map((a) => a.replace(/[.+^${}()|[\]\\]/g, '\\$&')).join('|')})`;
       i = end;
@@ -110,7 +124,9 @@ export function globToRegExp(glob) {
 export function matcher(globs) {
   if (!globs || globs.length === 0) return () => false;
   const res = globs.map(globToRegExp);
-  return (p) => res.some((re) => re.test(p)) || globs.some((g) => !g.includes('*') && p.includes(g));
+  return (p) =>
+    res.some((re) => re.test(p)) ||
+    globs.some((g) => !g.includes('*') && p.includes(g));
 }
 
 /** Map a file to its owning team, first match wins. */
