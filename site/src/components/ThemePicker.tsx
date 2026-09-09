@@ -6,41 +6,41 @@ import { radius, stroke } from '../tokens/shape.stylex';
 import { motion } from '../tokens/motion.stylex';
 import { THEMES, type ThemeId } from '../themes/themes';
 
+/**
+ * The picker shows each theme as a strip of its own colours rather than a
+ * single dot, because a theme is a palette and a dot cannot say which one.
+ */
 const styles = stylex.create({
-  row: { display: 'flex', gap: space.tight, flexWrap: 'wrap', alignItems: 'center' },
+  row: { display: 'flex', gap: space.snug, flexWrap: 'wrap', alignItems: 'stretch' },
   chip: {
-    display: 'inline-flex',
-    alignItems: 'center',
+    display: 'flex',
+    flexDirection: 'column',
     gap: space.snug,
-    paddingBlock: space.tight,
+    minWidth: '132px',
+    textAlign: 'start',
+    paddingBlock: space.snug,
     paddingInline: space.snug,
-    borderRadius: radius.pill,
+    borderRadius: radius.soft,
     borderWidth: stroke.hair,
     borderStyle: 'solid',
     borderColor: { default: colors.border, ':hover': colors.borderStrong },
-    backgroundColor: { default: colors.bgRaised, ':hover': colors.bgHover },
-    color: { default: colors.textMuted, ':hover': colors.textPrimary },
-    fontFamily: t.familyBody,
-    fontSize: t.captionSize,
-    fontWeight: t.weightMedium,
-    lineHeight: t.leadingSnug,
+    backgroundColor: { default: 'transparent', ':hover': colors.bgHover },
     cursor: 'pointer',
-    transitionProperty: 'color, background-color, border-color',
+    transitionProperty: 'border-color, background-color',
     transitionDuration: motion.quick,
     transitionTimingFunction: motion.easeStandard,
   },
-  active: {
-    borderColor: colors.accent,
-    color: colors.textPrimary,
-    backgroundColor: colors.bgOverlay,
+  active: { borderColor: colors.accent, backgroundColor: colors.bgOverlay },
+  strip: { display: 'flex', height: space.gutter, borderRadius: radius.sharp, overflow: 'hidden' },
+  band: (bg: string) => ({ flex: '1', backgroundColor: bg }),
+  name: {
+    fontFamily: t.familyBody,
+    fontSize: t.captionSize,
+    fontWeight: t.weightMedium,
+    color: colors.textMuted,
+    lineHeight: t.leadingSnug,
   },
-  swatch: (bg: string) => ({
-    width: space.snug,
-    height: space.snug,
-    borderRadius: radius.pill,
-    backgroundColor: bg,
-    flexShrink: 0,
-  }),
+  nameActive: { color: colors.textPrimary },
 });
 
 export function ThemePicker({
@@ -60,8 +60,14 @@ export function ThemePicker({
           onClick={() => onChange(th.id)}
           {...stylex.props(styles.chip, value === th.id && styles.active)}
         >
-          <span {...stylex.props(styles.swatch(th.swatch))} />
-          {th.name}
+          <span {...stylex.props(styles.strip)} aria-hidden>
+            {th.swatches.map((c, i) => (
+              <span key={i} {...stylex.props(styles.band(c))} />
+            ))}
+          </span>
+          <span {...stylex.props(styles.name, value === th.id && styles.nameActive)}>
+            {th.name}
+          </span>
         </button>
       ))}
     </div>

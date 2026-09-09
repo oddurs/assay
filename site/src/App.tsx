@@ -36,8 +36,14 @@ export function App() {
   const [theme, setTheme] = useState<ThemeId>('midnight');
   const active = THEMES.find((th) => th.id === theme);
 
+  // The theme bundle is a class name; merge it with the app's own styles.
+  const app = stylex.props(styles.app);
+
   return (
-    <div {...stylex.props(active?.className, styles.app)}>
+    <div
+      className={[active?.className, app.className].filter(Boolean).join(' ')}
+      style={app.style}
+    >
       <Nav />
       <main {...stylex.props(styles.main)}>
         <Hero />

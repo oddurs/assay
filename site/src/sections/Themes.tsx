@@ -5,74 +5,21 @@ import { type as t } from '../tokens/type.stylex';
 import { radius, stroke } from '../tokens/shape.stylex';
 import { Section } from '../components/Section';
 import { Text } from '../components/Text';
-import { Button } from '../components/Button';
-import { Badge } from '../components/Badge';
-import { Meter } from '../components/Meter';
-import { ThemePicker } from '../components/ThemePicker';
-import { Code } from '../components/Code';
 import { Glass } from '../components/Glass';
-import type { ThemeId } from '../themes/themes';
+import { ThemePicker } from '../components/ThemePicker';
+import { ThemeSpecimen } from '../components/ThemeSpecimen';
+import { Code } from '../components/Code';
+import { THEMES, type ThemeId } from '../themes/themes';
 
 const styles = stylex.create({
-  layout: {
-    display: 'grid',
-    gridTemplateColumns: {
-      default: 'minmax(0, 1fr) minmax(0, 1fr)',
-      '@media (max-width: 960px)': '1fr',
-    },
-    gap: space.gutter,
-    alignItems: 'start',
-  },
-  stage: { display: 'flex', flexDirection: 'column', gap: space.gutter },
-  // The picker is the point of the section, so it leads rather than trailing
-  // at the bottom where it read as a footnote to its own demo.
   control: {
     display: 'flex',
-    alignItems: 'center',
-    gap: space.gutter,
+    alignItems: 'flex-end',
+    gap: space.roomy,
     flexWrap: 'wrap',
-    paddingBlockEnd: space.gutter,
-    borderBottomWidth: stroke.hair,
-    borderBottomStyle: 'solid',
-    borderBottomColor: colors.border,
+    marginBlockEnd: space.roomy,
   },
-  controlLabel: {
-    fontFamily: t.familyMono,
-    fontSize: t.microSize,
-    letterSpacing: t.trackingLabel,
-    textTransform: 'uppercase',
-    color: colors.textSubtle,
-  },
-  specimen: { display: 'flex', flexDirection: 'column', gap: space.gutter },
-  row: { display: 'flex', gap: space.snug, flexWrap: 'wrap', alignItems: 'center' },
-  swatches: { display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: space.tight },
-  swatch: {
-    height: space.loose,
-    borderRadius: radius.soft,
-    borderWidth: stroke.hair,
-    borderStyle: 'solid',
-    borderColor: colors.border,
-  },
-  sBase: { backgroundColor: colors.bgBase },
-  sSurface: { backgroundColor: colors.bgOverlay },
-  sAccent: { backgroundColor: colors.accent },
-  sSignal: { backgroundColor: colors.signal },
-  sPass: { backgroundColor: colors.pass },
-  sWarn: { backgroundColor: colors.warn },
-  band: {
-    height: space.section,
-    borderRadius: radius.round,
-    backgroundImage: `linear-gradient(96deg, ${colors.gradientFrom}, ${colors.gradientVia} 50%, ${colors.gradientTo})`,
-  },
-  controls: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: space.snug,
-    paddingBlockStart: space.gutter,
-    borderTopWidth: stroke.hair,
-    borderTopStyle: 'solid',
-    borderTopColor: colors.border,
-  },
+  controlText: { display: 'flex', flexDirection: 'column', gap: space.tight, minWidth: '220px' },
   label: {
     fontFamily: t.familyMono,
     fontSize: t.microSize,
@@ -80,18 +27,74 @@ const styles = stylex.create({
     textTransform: 'uppercase',
     color: colors.textSubtle,
   },
+  layout: {
+    display: 'grid',
+    gridTemplateColumns: {
+      default: 'minmax(0, 0.95fr) minmax(0, 1.05fr)',
+      '@media (max-width: 960px)': '1fr',
+    },
+    gap: space.gutter,
+    alignItems: 'start',
+  },
+  panel: { display: 'flex', flexDirection: 'column', gap: space.gutter },
+  // What the selected bundle actually overrides. A theme that only changes
+  // colour is a palette; these change the shape of the system too.
+  overrides: { display: 'flex', gap: space.tight, flexWrap: 'wrap' },
+  group: {
+    fontFamily: t.familyMono,
+    fontSize: t.microSize,
+    letterSpacing: t.trackingWide,
+    color: colors.accentText,
+    borderWidth: stroke.hair,
+    borderStyle: 'solid',
+    borderColor: colors.accentSubtle,
+    borderRadius: radius.sharp,
+    paddingBlock: space.hair,
+    paddingInline: space.tight,
+  },
+  blurb: { minHeight: space.roomy },
 });
 
-const SNIPPET = `export const daylight = stylex.createTheme(colors, {
-  bgBase:      palette.ink950,
-  bgSurface:   palette.ink950,
-  textPrimary: palette.ink100,
-  accent:      palette.violet600,
-  signal:      palette.rose600,
-});
+/** The snippet follows the selection — showing `foundry` while Bone is active
+ *  would undercut the very claim the section is making. */
+const SAMPLE: Record<string, string[]> = {
+  midnight: [
+    "stylex.createTheme(colors, { accent: palette.violet500, … })",
+  ],
+  foundry: [
+    "stylex.createTheme(colors,    { accent: warm.amber500, … }),",
+    "stylex.createTheme(radius,    { round: '3px', loud: '4px' }),",
+    "stylex.createTheme(elevation, { mid: '0 2px 0 #0A0908' }),",
+  ],
+  verdigris: [
+    "stylex.createTheme(colors,    { accent: sea.patina500, … }),",
+    "stylex.createTheme(radius,    { round: '11px', loud: '18px' }),",
+    "stylex.createTheme(elevation, { glow: '0 0 56px -14px …' }),",
+  ],
+  bone: [
+    "stylex.createTheme(colors,    { bgBase: bone.p050, … }),",
+    "stylex.createTheme(radius,    { round: '4px', loud: '6px' }),",
+    "stylex.createTheme(elevation, { low: 'none', glow: 'none' }),",
+    "stylex.createTheme(stroke,    { bold: '3px' }),",
+  ],
+};
 
-// Applied once, at the root:
-<div {...stylex.props(daylight)}>`;
+function snippetFor(id: string, name: string) {
+  const lines = SAMPLE[id] ?? SAMPLE.midnight;
+  const isBundle = lines.length > 1;
+  return [
+    '// A theme is a BUNDLE, not a palette. createTheme works',
+    '// on any defineVars group, so a theme changes the shape',
+    '// of the system — not only its colour.',
+    '',
+    `export const ${id} = ${isBundle ? '[' : ''}`,
+    ...lines.map((l) => '  ' + l),
+    isBundle ? '];' : ';',
+    '',
+    '// Applied once, at the root. No component is aware.',
+    `<div className={${id}}>  // ${name}`,
+  ].join('\n');
+}
 
 export function Themes({
   theme,
@@ -100,57 +103,49 @@ export function Themes({
   theme: ThemeId;
   onTheme: (id: ThemeId) => void;
 }) {
+  const active = THEMES.find((th) => th.id === theme) ?? THEMES[0];
+
   return (
     <Section
       id="themes"
       ruled
       eyebrow="Why StyleX"
-      title="One object re-skins everything. Including this page."
-      tail="The capability no other styling system matches cleanly."
+      title="A theme is not a palette."
+      tail="It is the whole system’s personality, and one object carries it."
       aside={
         <Text role="body">
-          It is also why a conformance score is definable at all. Because layer 2 names
-          roles instead of hues, a theme is a data change — not a find-and-replace
-          across class strings.
+          <code>createTheme</code> overrides any token group, so these four change
+          colour, corner radius and elevation together. Foundry has square corners
+          and hard shadows because it is industrial; Bone barely casts one, because
+          paper does not float.
         </Text>
       }
     >
+      <div {...stylex.props(styles.control)}>
+        <div {...stylex.props(styles.controlText)}>
+          <span {...stylex.props(styles.label)}>Theme · {active.name}</span>
+          <div {...stylex.props(styles.blurb)}>
+            <Text role="caption">{active.blurb}</Text>
+          </div>
+        </div>
+        <ThemePicker value={theme} onChange={onTheme} />
+      </div>
+
       <div {...stylex.props(styles.layout)}>
         <Glass strong>
-          <div {...stylex.props(styles.stage)}>
-            <div {...stylex.props(styles.control)}>
-              <span {...stylex.props(styles.controlLabel)}>Theme</span>
-              <ThemePicker value={theme} onChange={onTheme} />
-              <Badge tone="accent">Live</Badge>
+          <div {...stylex.props(styles.panel)}>
+            <div {...stylex.props(styles.overrides)}>
+              {active.overrides.map((g) => (
+                <span key={g} {...stylex.props(styles.group)}>
+                  createTheme({g})
+                </span>
+              ))}
             </div>
-
-            <div {...stylex.props(styles.specimen)}>
-          <Text role="caption">every token below is a role, not a colour</Text>
-
-          <div {...stylex.props(styles.band)} />
-
-          <div {...stylex.props(styles.swatches)}>
-            <div {...stylex.props(styles.swatch, styles.sBase)} />
-            <div {...stylex.props(styles.swatch, styles.sSurface)} />
-            <div {...stylex.props(styles.swatch, styles.sAccent)} />
-            <div {...stylex.props(styles.swatch, styles.sSignal)} />
-            <div {...stylex.props(styles.swatch, styles.sPass)} />
-            <div {...stylex.props(styles.swatch, styles.sWarn)} />
-          </div>
-
-          <Meter value={0.874} label="sample component" denom="87/100" />
-
-          <div {...stylex.props(styles.row)}>
-            <Button>Primary</Button>
-            <Button variant="secondary">Secondary</Button>
-            <Button variant="ghost">Ghost</Button>
-          </div>
-
-            </div>
+            <ThemeSpecimen />
           </div>
         </Glass>
 
-        <Code filename="src/themes/themes.ts">{SNIPPET}</Code>
+        <Code filename="src/themes/themes.ts">{snippetFor(active.id, active.name)}</Code>
       </div>
     </Section>
   );
