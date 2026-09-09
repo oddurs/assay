@@ -4,6 +4,7 @@
  * fixture comments. They are the regression net for every refactor since.
  */
 import { analyze, parseColor, ratio } from '../src/index.js';
+import { buildGraph, diffGraphs, blastRadius, graphHash } from '../src/graph.js';
 import { globToRegExp } from '../src/config.js';
 
 let pass = 0, fail = 0;
@@ -99,6 +100,71 @@ console.log('\n  config');
     overrides: { publishesTokens: true },
   });
   check('publishesTokens disables dead', p.tokens.dead.length, 0);
+}
+
+console.log('\n  graph v1');
+{
+  const r = await analyze('./test/graph-fixtures/base');
+  const g = buildGraph(r);
+  check('version', g.version, 1);
+  check('adapter recorded', g.generator.adapter, 'stylex');
+  check('ids are root-relative', Object.keys(g.units).includes('Widget.tsx#button'), true);
+  check('token ids are root-relative',
+    Object.keys(g.tokens).includes('tokens.stylex.ts#colors.accent'), true);
+  check('token resolves through chain', g.tokens['tokens.stylex.ts#colors.accent'].value, '#7C5CFF');
+  check('token -> token edge recorded',
+    g.tokens['tokens.stylex.ts#colors.accent'].refs, ['tokens.stylex.ts#palette.brand']);
+  check('conditions distinguish declarations',
+    g.units['Widget.tsx#button'].declarations.filter((d) => d.prop === 'backgroundColor').length, 2);
+  check('unit denormalises its tokens',
+    g.units['Widget.tsx#button'].tokens.length, 2);
+
+  // Determinism: two builds of the same tree must be identical apart from time.
+  const g2 = buildGraph(await analyze('./test/graph-fixtures/base'));
+  check('graph hash is stable', graphHash(g), graphHash(g2));
+  check('generatedAt is not hashed', g.generatedAt === g2.generatedAt, false);
+}
+
+console.log('\n  blast radius');
+{
+  const g = buildGraph(await analyze('./test/graph-fixtures/base'));
+  // The primitive is referenced by NO unit directly — only via colors.accent.
+  const direct = Object.values(g.units).filter((u) =>
+    u.tokens.includes('tokens.stylex.ts#palette.brand'));
+  check('primitive has no direct unit refs', direct.length, 0);
+
+  const r = blastRadius(g, ['tokens.stylex.ts#palette.brand']);
+  check('closure follows token edges',
+    r.tokens.includes('tokens.stylex.ts#colors.accent'), true);
+  check('reaches units via the semantic layer', r.units.map((u) => u.id).sort(),
+    ['Widget.tsx#button', 'Widget.tsx#gone']);
+  check('reports files', r.files, ['Widget.tsx']);
+}
+
+console.log('\n  diff');
+{
+  const base = buildGraph(await analyze('./test/graph-fixtures/base'));
+  const head = buildGraph(await analyze('./test/graph-fixtures/head'));
+  const d = diffGraphs(base, head);
+
+  check('token value change detected', d.tokens.changed.length, 2);
+  check('changed token reports both values',
+    d.tokens.changed.find((t) => t.id.endsWith('palette.brand')).to, '#22AA88');
+  check('unit added', d.units.added, ['Widget.tsx#added']);
+  check('unit removed', d.units.removed, ['Widget.tsx#gone']);
+  check('style change found', d.units.styleChanged.map((u) => u.id), ['Widget.tsx#label']);
+  check('the change is the added declaration',
+    d.units.styleChanged[0].changes.map((c) => c.kind), ['added']);
+  // The unchanged unit moved two lines down in head. Hash covers what renders,
+  // not where it sits, so it must NOT appear as changed.
+  check('moved code is not a style change',
+    d.units.styleChanged.some((u) => u.id === 'Widget.tsx#button'), false);
+  check('blast radius from the diff',
+    d.blastRadius.units.map((u) => u.id).sort(), ['Widget.tsx#added', 'Widget.tsx#button']);
+
+  const same = diffGraphs(base, base);
+  check('identical graphs diff empty', same.summary.unitsStyleChanged, 0);
+  check('identical graphs: no token churn', same.summary.tokensChanged, 0);
 }
 
 console.log(`\n  ${fail === 0 ? `✓ ${pass} passed` : `✗ ${fail} failed, ${pass} passed`}\n`);

@@ -43,12 +43,72 @@ Assay reads.
 ## Commands
 
 ```bash
-assay [path]              score a tree
-assay tokens [path]       inventory, resolved values, dead tokens
-assay contrast [path]     contrast on pairings that actually occur
-assay rules               the taxonomy: every rule and why it exists
-assay explain             how the score is defined, and what it excludes
+assay [path]                  score a tree
+assay tokens [path]           inventory, resolved values, dead tokens
+assay contrast [path]         contrast on pairings that actually occur
+assay graph [path]            emit assay-graph.json v1
+assay diff <base> <head>      what changed, and what it reaches
+assay impact <token…> [path]  blast radius of changing a token
+assay rules                   the taxonomy: every rule and why it exists
+assay explain                 how the score is defined, and what it excludes
 ```
+
+### Diff and blast radius
+
+`base` and `head` may each be a path on disk, a git ref, or a previously
+emitted graph file.
+
+```bash
+assay diff main HEAD
+assay diff base.json head.json --out diff.json
+assay diff HEAD ./src --path src        # ref vs working tree, same subdirectory
+```
+
+```
+  conformance  100.0% → 100.0%   no change
+
+  tokens
+  ~ colors.accent        #7350F5 → #3D8BFF
+  ~ palette.violet500    #7350F5 → #3D8BFF
+
+  blast radius
+  7 units across 7 files reference the changed tokens
+    components/Button.tsx#primary   colors.accent
+    components/Glow.tsx#a           colors.gradientVia
+    …
+
+  styles changed  1 unit
+  components/Card.tsx#root:10
+      ~ padding: space.roomy → space.loose
+```
+
+Blast radius follows **token → token edges**, which is the whole point. A
+primitive like `palette.violet500` is referenced by *no component* — components
+use `colors.accent`, which references the primitive. Without the transitive
+closure you would report a blast radius of zero for the most dangerous change in
+the system.
+
+Style changes are computed from per-unit content hashes, so they are **exact for
+styling** and ignore code movement — shifting a block twenty lines down is not a
+change. They do not catch markup or logic changes; a visual change set is this
+unioned with the units whose source files changed.
+
+Git refs are materialised with `git archive` into a temp directory: read-only,
+and it cannot disturb uncommitted work.
+
+## The graph format
+
+Everything above is an application built on one artifact: a versioned JSON
+description of every style in the codebase and where each value came from.
+
+**[GRAPH.md](./GRAPH.md) is the specification.** It is written so a second
+producer can be built from it without asking a question — the format is the
+durable thing, and this tool is one implementation of it.
+
+Inside Assay the producer sits behind `src/adapters/`. An adapter is
+`{ name, matches(file, src), analyzeFile(params) }` and the rest of the tool is
+adapter-agnostic. There is one adapter today; the seam exists so a second stays
+possible, not because writing one now would be useful.
 
 | Option | |
 |---|---|
@@ -159,7 +219,7 @@ console.log(r.score, r.violations, r.contrast.failing, r.tokens.dead);
 ## Development
 
 ```bash
-npm test        # 42 assertions, including the original hand count
+npm test        # 66 assertions, including the original hand count
 npm run assay   # run the CLI from source
 ```
 

@@ -246,16 +246,36 @@ function collectTokenDefs(obj, prefix, nsId, ctx) {
         continue;
       }
     }
+    const refs = [];
+    collectRefIds(p.value, ctx, refs);
     ctx.out.tokens.set(`${nsId}.${path}`, {
       id: `${nsId}.${path}`,
       file: ctx.file,
       name: path,
       value: p.value,
+      raw: snippet(p.value, ctx.src),
+      refs,
       src: ctx.src,
       // Bound to THIS file's imports, so a semantic token can resolve the
       // primitive it points at even though that lives in another module.
       resolveRef: ctx.tokenIdOf,
     });
+  }
+}
+
+/** Token ids referenced inside a node, for token -> token edges. */
+function collectRefIds(node, ctx, acc) {
+  if (!node || typeof node !== 'object') return;
+  if (node.type === 'MemberExpression') {
+    const id = ctx.tokenIdOf(node);
+    if (id && !acc.includes(id)) acc.push(id);
+    return;
+  }
+  for (const k of Object.keys(node)) {
+    if (k === 'loc' || k === 'type') continue;
+    const v = node[k];
+    if (Array.isArray(v)) v.forEach((n) => collectRefIds(n, ctx, acc));
+    else if (v && typeof v.type === 'string') collectRefIds(v, ctx, acc);
   }
 }
 
@@ -352,17 +372,22 @@ export function classify(node, ctx) {
  * Declaration walking
  * ------------------------------------------------------------------ */
 
-function walkStyle(obj, ctx, families, prop, ruleName, pairAcc) {
+function walkStyle(obj, ctx, families, prop, ruleName, pairAcc, cond = []) {
   for (const p of obj.properties) {
     if (p.type !== 'ObjectProperty') continue;
     const name = propName(p);
-    const nextProp = prop && (name === null || isConditionalKey(name)) ? prop : name;
+    // At the top of a style object every key is a property. Once inside a
+    // property's value, every key is a condition — `:hover`, `@media …`,
+    // `default` — and conditions can nest.
+    const inCondition = Boolean(prop);
+    const nextProp = inCondition && (name === null || isConditionalKey(name)) ? prop : name;
     if (!nextProp) continue;
+    const nextCond = inCondition && name !== null ? [...cond, name] : cond;
 
     const val = p.value;
 
     if (val.type === 'ObjectExpression') {
-      walkStyle(val, ctx, families, nextProp, ruleName, pairAcc);
+      walkStyle(val, ctx, families, nextProp, ruleName, pairAcc, nextCond);
       continue;
     }
     if (val.type === 'ArrowFunctionExpression' || val.type === 'FunctionExpression') {
@@ -370,14 +395,14 @@ function walkStyle(obj, ctx, families, prop, ruleName, pairAcc) {
       for (const par of val.params) if (par.type === 'Identifier') params.add(par.name);
       const sub = { ...ctx, params };
       if (val.body.type === 'ObjectExpression') {
-        walkStyle(val.body, sub, families, nextProp, ruleName, pairAcc);
+        walkStyle(val.body, sub, families, nextProp, ruleName, pairAcc, nextCond);
       } else {
-        record(nextProp, val.body, sub, families, p, ruleName, pairAcc);
+        record(nextProp, val.body, sub, families, p, ruleName, pairAcc, nextCond);
       }
       continue;
     }
 
-    record(nextProp, val, ctx, families, p, ruleName, pairAcc);
+    record(nextProp, val, ctx, families, p, ruleName, pairAcc, nextCond);
   }
 }
 
@@ -387,13 +412,37 @@ function snippet(node, src) {
   return s.length > 52 ? s.slice(0, 51) + '…' : s;
 }
 
-function record(prop, valueNode, ctx, families, propNode, ruleName, pairAcc) {
+function record(prop, valueNode, ctx, families, propNode, ruleName, pairAcc, cond = []) {
   const out = ctx.out;
   const fam = familyOf(prop, families);
   const res = classify(valueNode, ctx);
   const line = propNode.loc ? propNode.loc.start.line : 0;
 
   out.declarations += 1;
+
+  // The styled unit — one entry per `stylex.create` key. This is the node the
+  // graph is built from and the thing a diff reports as changed.
+  const unitId = `${ctx.file}#${ruleName}`;
+  let unit = out.units.get(unitId);
+  if (!unit) {
+    unit = { id: unitId, file: ctx.file, name: ruleName, line, declarations: [], tokens: [] };
+    out.units.set(unitId, unit);
+  }
+  if (line && line < unit.line) unit.line = line;
+  const decl = {
+    prop,
+    cond: cond.length ? cond.join(' > ') : 'default',
+    cat: res.cat,
+    family: fam ? fam.id : null,
+  };
+  if (res.cat === CAT.TOKEN) {
+    decl.token = res.token;
+    if (!unit.tokens.includes(res.token)) unit.tokens.push(res.token);
+  } else if (res.cat === CAT.LITERAL) {
+    decl.value = res.value;
+    if (fam) decl.rule = fam.rule;
+  }
+  unit.declarations.push(decl);
 
   // Collect co-declared foreground/background/size for contrast analysis.
   if (prop === 'color' || prop === 'backgroundColor' || prop === 'fontSize' || prop === 'fontWeight') {

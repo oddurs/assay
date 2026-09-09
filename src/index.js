@@ -6,7 +6,7 @@
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, extname, resolve as resolvePath } from 'node:path';
-import { analyzeFile } from './extract.js';
+import { stylexAdapter } from './adapters/stylex.js';
 import { buildFamilies, CAT, CAT_DOC, FAMILIES } from './taxonomy.js';
 import { loadConfig, matcher, ownerOf } from './config.js';
 import { analyzeContrast, makeResolver } from './contrast.js';
@@ -32,6 +32,7 @@ function collect(dir, cfg, acc = []) {
 
 export async function analyze(root, opts = {}) {
   const cfg = opts.config ?? (await loadConfig(root, opts.overrides ?? {}));
+  const adapter = opts.adapter ?? stylexAdapter;
   const families = buildFamilies(cfg.disableFamilies);
   const isExcluded = matcher(cfg.exclude);
   const isAllowed = matcher(cfg.allow);
@@ -41,7 +42,7 @@ export async function analyze(root, opts = {}) {
     declarations: 0, untokenizable: 0,
     byCat: {}, byFamily: {},
     violations: [], unparsed: [],
-    tokens: new Map(), referenced: new Set(), pairs: new Map(),
+    tokens: new Map(), referenced: new Set(), pairs: new Map(), units: new Map(),
   };
 
   // Absolute, so module identity matches between definitions and references.
@@ -51,9 +52,11 @@ export async function analyze(root, opts = {}) {
     const rel = relative(absRoot, abs);
     if (isExcluded(rel)) { out.excludedFiles += 1; continue; }
     const src = readFileSync(abs, 'utf8');
-    if (!src.includes('stylex')) continue;
+    if (!adapter.matches(rel, src)) continue;
     out.files += 1;
-    analyzeFile({ file: rel, absFile: abs, src, families, out, aliases: cfg.aliases ?? {} });
+    adapter.analyzeFile({
+      file: rel, absFile: abs, src, families, out, aliases: cfg.aliases ?? {},
+    });
   }
 
   // Allow-listed paths stay visible in the result, just out of the score.
@@ -112,6 +115,10 @@ export async function analyze(root, opts = {}) {
 
   return {
     root,
+    absRoot,
+    adapter: adapter.name,
+    units: out.units,
+    rawTokens: out.tokens,
     config: cfg,
     score, token, literal, scored,
     excluded: {
@@ -147,3 +154,4 @@ export async function analyze(root, opts = {}) {
 export { FAMILIES, CAT, CAT_DOC } from './taxonomy.js';
 export { loadConfig, DEFAULTS } from './config.js';
 export { parseColor, ratio } from './contrast.js';
+export { buildGraph, diffGraphs, blastRadius, graphHash, GRAPH_VERSION } from './graph.js';

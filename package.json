@@ -10,7 +10,7 @@
     "@babel/parser": "^7.26.0",
     "@babel/traverse": "^7.26.0"
   },
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "bin": {
     "assay": "./bin/assay.js"
@@ -24,6 +24,7 @@
     "bin",
     "src",
     "README.md",
+    "GRAPH.md",
     "LICENSE"
   ],
   "engines": {

@@ -6,8 +6,11 @@ import { analyze } from '../src/index.js';
 import { loadConfig } from '../src/config.js';
 import { FAMILIES, CAT_DOC } from '../src/taxonomy.js';
 import {
-  renderSummary, renderTokens, renderContrast, bold, dim, green, red,
+  renderSummary, renderTokens, renderContrast, renderDiff, bold, dim, green, red,
 } from '../src/report.js';
+import { buildGraph, diffGraphs, blastRadius, GRAPH_VERSION } from '../src/graph.js';
+import { resolveSide } from '../src/gitref.js';
+import { readFileSync, writeFileSync } from 'node:fs';
 
 const HELP = `
   assay — what your design system actually shipped
@@ -16,11 +19,22 @@ const HELP = `
     assay [path]                 score a tree (default: .)
     assay tokens [path]          token inventory, resolved values, dead tokens
     assay contrast [path]        contrast on pairings that actually occur
+    assay graph [path]           emit assay-graph.json v1
+    assay diff <base> <head>     what changed, and what it reaches
+    assay impact <token…> [path] blast radius of changing a token
     assay rules                  the taxonomy: every rule and why it exists
     assay explain                how the score is defined, and what it excludes
 
+  diff / impact
+    base and head may each be a path on disk or a git ref:
+      assay diff main HEAD
+      assay diff base-graph.json head-graph.json
+      assay diff ./old-src ./src
+    --out <file>                 write the graph (graph) or the diff (diff) as JSON
+
   Options
     --json                       machine-readable output
+    --path <dir>                 subdirectory to analyse when diffing refs
     --violations                 list every violation with its rule
     --exclude <glob>             skip paths (repeatable)
     --gate [n]                   exit 1 below n percent (default 100)
@@ -42,6 +56,8 @@ function parseArgs(argv) {
     else if (a === '--gate') {
       args.gate = /^\d+(\.\d+)?$/.test(argv[i + 1] ?? '') ? Number(argv[++i]) : 100;
     } else if (a === '--contrast-level') args.contrastLevel = argv[++i];
+    else if (a === '--out') args.out = argv[++i];
+    else if (a === '--path') args.path = argv[++i];
     else if (a.startsWith('--')) args.flags.add(a.slice(2));
     else args._.push(a);
   }
@@ -66,22 +82,101 @@ function renderRules() {
   return L.join('\n');
 }
 
-const COMMANDS = new Set(['tokens', 'contrast', 'rules', 'explain']);
+const VERSION = JSON.parse(
+  readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+).version;
+
+const COMMANDS = new Set(['tokens', 'contrast', 'rules', 'explain', 'graph', 'diff', 'impact']);
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
 
   if (args.flags.has('help') || args.flags.has('h')) { console.log(HELP); return 0; }
-  if (args.flags.has('version')) {
-    const { readFileSync } = await import('node:fs');
-    const { fileURLToPath } = await import('node:url');
-    const p = fileURLToPath(new URL('../package.json', import.meta.url));
-    console.log(JSON.parse(readFileSync(p, 'utf8')).version);
-    return 0;
-  }
+  if (args.flags.has('version')) { console.log(VERSION); return 0; }
 
   const cmd = COMMANDS.has(args._[0]) ? args._.shift() : 'score';
   if (cmd === 'rules') { console.log(renderRules()); return 0; }
+
+  const buildOverrides = () => {
+    const o = {};
+    if (args.exclude.length) o.exclude = args.exclude;
+    if (args.contrastLevel) o.contrast = { level: args.contrastLevel };
+    if (args.flags.has('no-contrast')) o.contrast = { ...(o.contrast ?? {}), enabled: false };
+    if (args.flags.has('publishes-tokens')) o.publishesTokens = true;
+    return o;
+  };
+
+  const graphOf = async (dir) => {
+    const cfg = await loadConfig(dir, buildOverrides());
+    const res = await analyze(dir, { config: cfg });
+    return buildGraph(res, { version: VERSION, adapter: res.adapter });
+  };
+
+  const loadSide = async (arg) => {
+    // A .json argument is an already-built graph.
+    if (arg.endsWith('.json')) {
+      const g = JSON.parse(readFileSync(arg, 'utf8'));
+      if (g.version !== GRAPH_VERSION) {
+        throw new Error(`${arg} is assay-graph v${g.version}; this build reads v${GRAPH_VERSION}`);
+      }
+      return { graph: g, label: arg, cleanup: () => {} };
+    }
+    const side = resolveSide(arg, { subpath: args.path });
+    try {
+      return { graph: await graphOf(side.dir), label: arg, cleanup: side.cleanup };
+    } catch (e) {
+      side.cleanup();
+      throw e;
+    }
+  };
+
+  if (cmd === 'diff') {
+    if (args._.length < 2) throw new Error('diff needs two arguments: assay diff <base> <head>');
+    const [baseArg, headArg] = args._;
+    const base = await loadSide(baseArg);
+    let head;
+    try {
+      head = await loadSide(headArg);
+    } catch (e) { base.cleanup(); throw e; }
+
+    try {
+      const d = diffGraphs(base.graph, head.graph);
+      if (args.out) writeFileSync(args.out, JSON.stringify(d, null, 2));
+      if (args.flags.has('json')) console.log(JSON.stringify(d, null, 2));
+      else console.log(renderDiff(d, { base: baseArg, head: headArg }));
+      return 0;
+    } finally {
+      base.cleanup();
+      head.cleanup();
+    }
+  }
+
+  if (cmd === 'impact') {
+    // Everything before the last arg is a token pattern; the last may be a path.
+    const parts = [...args._];
+    let dir = '.';
+    if (parts.length > 1) dir = parts.pop();
+    if (!parts.length) throw new Error('impact needs a token name: assay impact colors.accent [path]');
+    const graph = await graphOf(dir);
+    const seeds = Object.keys(graph.tokens).filter((id) =>
+      parts.some((p) => id === p || id.split('#').pop().includes(p)));
+    if (!seeds.length) {
+      console.error(`no token matches ${parts.join(', ')}`);
+      return 1;
+    }
+    const r = blastRadius(graph, seeds);
+    if (args.flags.has('json')) { console.log(JSON.stringify(r, null, 2)); return 0; }
+    console.log('');
+    console.log(`  ${bold('blast radius')}  ${dim(seeds.map((s) => s.split('#').pop()).join(', '))}`);
+    console.log('  ' + dim('─'.repeat(58)));
+    console.log(`  ${r.units.length} units · ${r.files.length} files · ${r.tokens.length} tokens in the closure`);
+    console.log('');
+    for (const u of r.units) {
+      console.log(`  ${u.id}  ${dim(u.via.map((v) => v.split('#').pop()).join(', '))}`);
+    }
+    console.log('');
+    return 0;
+  }
 
   const root = args._[0] ?? '.';
 
@@ -100,6 +195,19 @@ async function main() {
   }
 
   const result = await analyze(root, { config });
+
+  if (cmd === 'graph') {
+    const g = buildGraph(result, { version: VERSION, adapter: result.adapter });
+    const json = JSON.stringify(g, null, 2);
+    if (args.out) {
+      writeFileSync(args.out, json);
+      console.log(`  assay-graph v${g.version} → ${args.out}`);
+      console.log(dim(`  ${g.summary.units} units · ${g.summary.tokens} tokens · ${g.summary.files} files`));
+    } else {
+      console.log(json);
+    }
+    return 0;
+  }
 
   if (cmd === 'explain') {
     const { renderExplain } = await import('../src/report.js');

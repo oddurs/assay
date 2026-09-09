@@ -218,3 +218,100 @@ export function renderExplain() {
   push();
   return L.join('\n');
 }
+
+/* ------------------------------------------------------------------ *
+ * Diff
+ * ------------------------------------------------------------------ */
+
+export function renderDiff(d, labels = {}) {
+  const L = [];
+  const push = (s = '') => L.push(s);
+  const s = d.summary;
+
+  push();
+  push(`  ${bold('assay diff')}  ${dim(`${labels.base ?? 'base'} → ${labels.head ?? 'head'}`)}`);
+  push('  ' + dim('─'.repeat(58)));
+
+  if (s.scoreDelta != null) {
+    const pts = s.scoreDelta * 100;
+    const arrow = pts > 0.05 ? green(`+${pts.toFixed(1)} pts`)
+      : pts < -0.05 ? red(`${pts.toFixed(1)} pts`)
+      : dim('no change');
+    push(`  conformance  ${(s.baseScore * 100).toFixed(1)}% → ${bold((s.headScore * 100).toFixed(1) + '%')}   ${arrow}`);
+    push();
+  }
+
+  const none =
+    s.unitsStyleChanged === 0 && s.unitsAdded === 0 && s.unitsRemoved === 0 &&
+    s.tokensChanged === 0 && s.tokensAdded === 0 && s.tokensRemoved === 0;
+  if (none) {
+    push(green('  ✓ no style changes'));
+    push(dim('    Every unit hashes identically. Nothing rendered differently.'));
+    push();
+    return L.join('\n');
+  }
+
+  if (s.tokensChanged || s.tokensAdded || s.tokensRemoved) {
+    push(bold('  tokens'));
+    for (const t of d.tokens.changed) {
+      push(`  ${yellow('~')} ${t.id.split('#').pop().padEnd(30)} ${dim(String(t.from))} → ${bold(String(t.to))}`);
+    }
+    for (const id of d.tokens.added) push(`  ${green('+')} ${id.split('#').pop()}`);
+    for (const id of d.tokens.removed) push(`  ${red('-')} ${id.split('#').pop()}`);
+    push();
+  }
+
+  if (d.blastRadius.units.length) {
+    const files = d.blastRadius.files.length;
+    push(bold('  blast radius'));
+    push(
+      `  ${d.blastRadius.units.length} unit${d.blastRadius.units.length === 1 ? '' : 's'} ` +
+      `across ${files} file${files === 1 ? '' : 's'} reference the changed tokens`,
+    );
+    if (d.blastRadius.tokens.length > d.tokens.changed.length + d.tokens.removed.length) {
+      push(dim(`  (via ${d.blastRadius.tokens.length} tokens once semantic aliases are followed)`));
+    }
+    for (const u of d.blastRadius.units.slice(0, 12)) {
+      push(`    ${u.id}  ${dim(u.via.map((v) => v.split('#').pop()).join(', '))}`);
+    }
+    if (d.blastRadius.units.length > 12) {
+      push(dim(`    … and ${d.blastRadius.units.length - 12} more`));
+    }
+    push();
+  }
+
+  if (s.unitsStyleChanged) {
+    push(bold(`  styles changed  ${dim(`${s.unitsStyleChanged} unit${s.unitsStyleChanged === 1 ? '' : 's'}`)}`));
+    for (const u of d.units.styleChanged.slice(0, 20)) {
+      push(`  ${u.id}${u.line ? dim(':' + u.line) : ''}`);
+      for (const ch of u.changes.slice(0, 6)) {
+        const label = (x) => `${x.prop}${x.cond !== 'default' ? dim('@' + x.cond) : ''}`;
+        const val = (x) => (x.token ? x.token.split('#').pop() : x.value ?? x.cat);
+        if (ch.kind === 'changed') {
+          push(`      ${yellow('~')} ${label(ch.to)}: ${dim(val(ch.from))} → ${val(ch.to)}`);
+        } else if (ch.kind === 'added') {
+          push(`      ${green('+')} ${label(ch.decl)}: ${val(ch.decl)}`);
+        } else {
+          push(`      ${red('-')} ${label(ch.decl)}: ${dim(val(ch.decl))}`);
+        }
+      }
+      if (u.changes.length > 6) push(dim(`      … ${u.changes.length - 6} more`));
+    }
+    if (d.units.styleChanged.length > 20) {
+      push(dim(`  … and ${d.units.styleChanged.length - 20} more units`));
+    }
+    push();
+  }
+
+  if (s.unitsAdded || s.unitsRemoved) {
+    push(bold('  units'));
+    for (const id of d.units.added.slice(0, 10)) push(`  ${green('+')} ${id}`);
+    for (const id of d.units.removed.slice(0, 10)) push(`  ${red('-')} ${id}`);
+    push();
+  }
+
+  push(dim('  Style changes are exact for styling. They do not catch markup or'));
+  push(dim('  logic changes — union with changed source files for a visual set.'));
+  push();
+  return L.join('\n');
+}
