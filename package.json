@@ -1,0 +1,42 @@
+{
+  "name": "assay",
+  "type": "module",
+  "description": "Compile-time design system conformance for StyleX. Tells you what your design system actually shipped.",
+  "scripts": {
+    "test": "node test/run.mjs",
+    "assay": "node bin/assay.js"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.26.0",
+    "@babel/traverse": "^7.26.0"
+  },
+  "version": "0.1.0",
+  "license": "MIT",
+  "bin": {
+    "assay": "./bin/assay.js"
+  },
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./taxonomy": "./src/taxonomy.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "stylex",
+    "design-system",
+    "design-tokens",
+    "conformance",
+    "css",
+    "lint",
+    "a11y",
+    "contrast"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "assay-site",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "prebuild": "node scripts/assay-report.mjs",
+    "predev": "node scripts/assay-report.mjs",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "node ../bin/assay.js src --violations"
+  },
+  "dependencies": {
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "@stylexjs/stylex": "0.19.0"
+  },
+  "devDependencies": {
+    "@stylexjs/unplugin": "0.19.0",
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.0.4",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}

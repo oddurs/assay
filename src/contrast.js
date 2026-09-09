@@ -1,0 +1,227 @@
+/**
+ * Contrast on REAL pairings.
+ *
+ * Not every theoretical combination in the palette — only the foreground and
+ * background that are declared together in the same style rule and therefore
+ * actually render together. That is a much smaller set, and every failure in
+ * it is a real one.
+ *
+ * The honest limit: a component whose background comes from a parent cannot be
+ * checked statically. Those pairs are reported as `unpaired`, never as passes.
+ */
+import { CAT } from './taxonomy.js';
+
+/* --------------------------- colour parsing --------------------------- */
+
+const NAMED = {
+  white: '#ffffff', black: '#000000', red: '#ff0000', blue: '#0000ff',
+  green: '#008000', gray: '#808080', grey: '#808080', silver: '#c0c0c0',
+};
+
+export function parseColor(input) {
+  if (typeof input !== 'string') return null;
+  const s = input.trim().toLowerCase();
+
+  if (NAMED[s]) return parseColor(NAMED[s]);
+
+  let m = /^#([0-9a-f]{3,8})$/.exec(s);
+  if (m) {
+    const h = m[1];
+    if (h.length === 3 || h.length === 4) {
+      const [r, g, b] = [h[0], h[1], h[2]].map((c) => parseInt(c + c, 16));
+      const a = h.length === 4 ? parseInt(h[3] + h[3], 16) / 255 : 1;
+      return { r, g, b, a };
+    }
+    if (h.length === 6 || h.length === 8) {
+      const r = parseInt(h.slice(0, 2), 16);
+      const g = parseInt(h.slice(2, 4), 16);
+      const b = parseInt(h.slice(4, 6), 16);
+      const a = h.length === 8 ? parseInt(h.slice(6, 8), 16) / 255 : 1;
+      return { r, g, b, a };
+    }
+  }
+
+  m = /^rgba?\(([^)]+)\)$/.exec(s);
+  if (m) {
+    const parts = m[1].split(/[,\s/]+/).filter(Boolean);
+    if (parts.length >= 3) {
+      const num = (p) => (p.endsWith('%') ? (parseFloat(p) / 100) * 255 : parseFloat(p));
+      return {
+        r: num(parts[0]), g: num(parts[1]), b: num(parts[2]),
+        a: parts[3] != null ? parseFloat(parts[3]) : 1,
+      };
+    }
+  }
+
+  m = /^hsla?\(([^)]+)\)$/.exec(s);
+  if (m) {
+    const parts = m[1].split(/[,\s/]+/).filter(Boolean);
+    if (parts.length >= 3) {
+      const h = parseFloat(parts[0]);
+      const sat = parseFloat(parts[1]) / 100;
+      const l = parseFloat(parts[2]) / 100;
+      const a = parts[3] != null ? parseFloat(parts[3]) : 1;
+      const c = (1 - Math.abs(2 * l - 1)) * sat;
+      const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+      const mm = l - c / 2;
+      const seg = [
+        [c, x, 0], [x, c, 0], [0, c, x], [0, x, c], [x, 0, c], [c, 0, x],
+      ][Math.floor(((h % 360) + 360) % 360 / 60)];
+      return {
+        r: Math.round((seg[0] + mm) * 255),
+        g: Math.round((seg[1] + mm) * 255),
+        b: Math.round((seg[2] + mm) * 255),
+        a,
+      };
+    }
+  }
+
+  return null;
+}
+
+const chan = (v) => {
+  const c = Math.min(255, Math.max(0, v)) / 255;
+  return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+};
+
+export function luminance({ r, g, b }) {
+  return 0.2126 * chan(r) + 0.7152 * chan(g) + 0.0722 * chan(b);
+}
+
+/** Composite a translucent foreground over an opaque background. */
+export function flatten(fg, bg) {
+  if (fg.a >= 1) return fg;
+  return {
+    r: fg.r * fg.a + bg.r * (1 - fg.a),
+    g: fg.g * fg.a + bg.g * (1 - fg.a),
+    b: fg.b * fg.a + bg.b * (1 - fg.a),
+    a: 1,
+  };
+}
+
+export function ratio(fg, bg) {
+  const f = luminance(flatten(fg, bg));
+  const b = luminance(bg);
+  const [hi, lo] = f > b ? [f, b] : [b, f];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/* ------------------------ token value resolution ------------------------ */
+
+/**
+ * Resolve a token id to a concrete colour string by following the chain
+ * through defineVars -> defineConsts. Conditional objects resolve to their
+ * `default` branch, which is what renders unless a media query overrides it.
+ */
+export function makeResolver(tokens) {
+  const cache = new Map();
+
+  function valueOfNode(node, def, depth) {
+    if (!node || depth > 12) return null;
+
+    switch (node.type) {
+      case 'StringLiteral':
+        return node.value;
+      case 'NumericLiteral':
+        return String(node.value);
+      case 'TemplateLiteral':
+        if (node.expressions.length === 0) {
+          return node.quasis.map((q) => q.value.cooked).join('');
+        }
+        return null;
+      case 'ObjectExpression': {
+        // conditional: take `default`
+        for (const p of node.properties) {
+          if (p.type !== 'ObjectProperty') continue;
+          const k = !p.computed && p.key.type === 'Identifier' ? p.key.name
+            : p.key.type === 'StringLiteral' ? p.key.value : null;
+          if (k === 'default') return valueOfNode(p.value, def, depth + 1);
+        }
+        return null;
+      }
+      case 'MemberExpression': {
+        const id = def.resolveRef ? def.resolveRef(node) : null;
+        if (!id) return null;
+        return resolve(id, depth + 1);
+      }
+      default:
+        return null;
+    }
+  }
+
+  function resolve(id, depth = 0) {
+    if (cache.has(id)) return cache.get(id);
+    if (depth > 12) return null;
+    const tok = tokens.get(id);
+    if (!tok) return null;
+    cache.set(id, null); // cycle guard
+    const v = valueOfNode(tok.value, tok, depth);
+    cache.set(id, v);
+    return v;
+  }
+
+  return resolve;
+}
+
+/* ----------------------------- the analysis ----------------------------- */
+
+const LARGE_PX = 24;
+const LARGE_BOLD_PX = 18.66;
+
+function pxOf(value) {
+  if (value == null) return null;
+  const m = /^(-?\d*\.?\d+)px$/.exec(String(value).trim());
+  return m ? parseFloat(m[1]) : null;
+}
+
+export function analyzeContrast(pairs, resolve, opts = {}) {
+  const level = opts.level === 'AAA' ? 'AAA' : 'AA';
+  const results = [];
+  let unpaired = 0;
+
+  for (const p of pairs.values()) {
+    const fgRaw = p.color;
+    const bgRaw = p.backgroundColor;
+    if (!fgRaw || !bgRaw) { if (fgRaw || bgRaw) unpaired += 1; continue; }
+
+    const fgVal = fgRaw.token ? resolve(fgRaw.token) : fgRaw.literal;
+    const bgVal = bgRaw.token ? resolve(bgRaw.token) : bgRaw.literal;
+    const fg = parseColor(fgVal);
+    const bg = parseColor(bgVal);
+    if (!fg || !bg) { unpaired += 1; continue; }
+
+    const sizePx = pxOf(p.fontSize?.token ? resolve(p.fontSize.token) : p.fontSize?.literal);
+    const weight = p.fontWeight?.token ? resolve(p.fontWeight.token) : p.fontWeight?.literal;
+    const bold = weight != null && (Number(weight) >= 700 || weight === 'bold');
+    const large = sizePx != null && (sizePx >= LARGE_PX || (bold && sizePx >= LARGE_BOLD_PX));
+
+    const need = level === 'AAA' ? (large ? 4.5 : 7) : large ? 3 : 4.5;
+    const r = ratio(fg, bg);
+
+    results.push({
+      file: p.file,
+      line: p.line,
+      styleRule: p.rule,
+      fg: fgVal, bg: bgVal,
+      fgToken: fgRaw.token ?? null,
+      bgToken: bgRaw.token ?? null,
+      large,
+      ratio: Math.round(r * 100) / 100,
+      required: need,
+      passes: r >= need,
+      level,
+      rule: 'contrast-below-threshold',
+    });
+  }
+
+  results.sort((a, b) => a.ratio - b.ratio);
+  return {
+    level,
+    checked: results.length,
+    failing: results.filter((r) => !r.passes),
+    results,
+    unpaired,
+  };
+}
+
+export { CAT };

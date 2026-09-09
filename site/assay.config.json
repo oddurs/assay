@@ -1,0 +1,9 @@
+{
+  "exclude": ["generated"],
+  "threshold": 1,
+  "contrast": { "level": "AA" },
+  "owners": {
+    "design-system": ["components/**", "tokens/**", "themes/**"],
+    "marketing": ["sections/**"]
+  }
+}

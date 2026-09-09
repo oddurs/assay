@@ -1,0 +1,7 @@
+{
+  // tsconfig allows comments — the parser has to cope.
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] },
+  }
+}

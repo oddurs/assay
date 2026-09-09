@@ -1,0 +1,158 @@
+#!/usr/bin/env node
+/**
+ * assay — compile-time design system conformance for StyleX.
+ */
+import { analyze } from '../src/index.js';
+import { loadConfig } from '../src/config.js';
+import { FAMILIES, CAT_DOC } from '../src/taxonomy.js';
+import {
+  renderSummary, renderTokens, renderContrast, bold, dim, green, red,
+} from '../src/report.js';
+
+const HELP = `
+  assay — what your design system actually shipped
+
+  Usage
+    assay [path]                 score a tree (default: .)
+    assay tokens [path]          token inventory, resolved values, dead tokens
+    assay contrast [path]        contrast on pairings that actually occur
+    assay rules                  the taxonomy: every rule and why it exists
+    assay explain                how the score is defined, and what it excludes
+
+  Options
+    --json                       machine-readable output
+    --violations                 list every violation with its rule
+    --exclude <glob>             skip paths (repeatable)
+    --gate [n]                   exit 1 below n percent (default 100)
+    --contrast-level <AA|AAA>    default AA
+    --no-contrast                skip contrast analysis
+    --publishes-tokens           this package exports tokens for consumers,
+                                 so disable dead-token analysis
+    --help, --version
+
+  Exit codes
+    0  passed        1  below gate        2  contrast failures with --gate
+`;
+
+function parseArgs(argv) {
+  const args = { _: [], exclude: [], flags: new Set() };
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--exclude') args.exclude.push(argv[++i]);
+    else if (a === '--gate') {
+      args.gate = /^\d+(\.\d+)?$/.test(argv[i + 1] ?? '') ? Number(argv[++i]) : 100;
+    } else if (a === '--contrast-level') args.contrastLevel = argv[++i];
+    else if (a.startsWith('--')) args.flags.add(a.slice(2));
+    else args._.push(a);
+  }
+  return args;
+}
+
+function renderRules() {
+  const L = ['', `  ${bold('The taxonomy')}`, '  ' + dim('─'.repeat(58)), ''];
+  L.push('  A property is scored only if it belongs to a token-bearing family.');
+  L.push('  Everything else is counted and reported, never scored.');
+  L.push('');
+  for (const f of FAMILIES) {
+    L.push(`  ${bold(f.rule)}  ${dim(`family: ${f.id}`)}`);
+    L.push(`      ${f.why}`);
+    L.push('');
+  }
+  L.push(`  ${bold('Outcomes')}`);
+  for (const [k, v] of Object.entries(CAT_DOC)) {
+    L.push(`  ${bold(k.padEnd(9))} ${v}`);
+  }
+  L.push('');
+  return L.join('\n');
+}
+
+const COMMANDS = new Set(['tokens', 'contrast', 'rules', 'explain']);
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+
+  if (args.flags.has('help') || args.flags.has('h')) { console.log(HELP); return 0; }
+  if (args.flags.has('version')) {
+    const { readFileSync } = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
+    const p = fileURLToPath(new URL('../package.json', import.meta.url));
+    console.log(JSON.parse(readFileSync(p, 'utf8')).version);
+    return 0;
+  }
+
+  const cmd = COMMANDS.has(args._[0]) ? args._.shift() : 'score';
+  if (cmd === 'rules') { console.log(renderRules()); return 0; }
+
+  const root = args._[0] ?? '.';
+
+  const overrides = {};
+  if (args.exclude.length) overrides.exclude = args.exclude;
+  if (args.contrastLevel) overrides.contrast = { level: args.contrastLevel };
+  if (args.flags.has('no-contrast')) {
+    overrides.contrast = { ...(overrides.contrast ?? {}), enabled: false };
+  }
+  if (args.flags.has('publishes-tokens')) overrides.publishesTokens = true;
+
+  const config = await loadConfig(root, overrides);
+  // A config `exclude` and a CLI `--exclude` should add up, not replace.
+  if (args.exclude.length && config.configFile) {
+    config.exclude = [...new Set([...(config.exclude ?? []), ...args.exclude])];
+  }
+
+  const result = await analyze(root, { config });
+
+  if (cmd === 'explain') {
+    const { renderExplain } = await import('../src/report.js');
+    console.log(renderExplain());
+    console.log(renderRules());
+    return 0;
+  }
+
+  if (args.flags.has('json')) {
+    const { config: _cfg, ...rest } = result;
+    console.log(JSON.stringify({ ...rest, configFile: config.configFile }, null, 2));
+  } else if (cmd === 'tokens') {
+    console.log(renderTokens(result));
+  } else if (cmd === 'contrast') {
+    console.log(renderContrast(result));
+  } else {
+    console.log(renderSummary(result, { violations: args.flags.has('violations') }));
+  }
+
+  // Gate
+  const gate = args.gate ?? (config.threshold != null ? config.threshold * 100 : null);
+  if (gate == null) return 0;
+
+  const pct = (result.score ?? 1) * 100;
+  const contrastFails = result.contrast.failing.length;
+
+  if (pct + 1e-9 < gate) {
+    if (!args.flags.has('json')) {
+      console.log(red(`  ✗ conformance ${pct.toFixed(1)}% is below the ${gate}% gate`));
+      console.log(dim(`    ${result.literal} literal${result.literal === 1 ? '' : 's'} to fix. Run with --violations to list them.`));
+      console.log('');
+    }
+    return 1;
+  }
+  if (contrastFails) {
+    if (!args.flags.has('json')) {
+      console.log(red(`  ✗ ${contrastFails} contrast failure${contrastFails === 1 ? '' : 's'} on real pairings`));
+      console.log('');
+    }
+    return 2;
+  }
+  if (!args.flags.has('json')) {
+    console.log(green(`  ✓ conformance gate passed`));
+    console.log('');
+  }
+  return 0;
+}
+
+main().then(
+  (code) => process.exit(code),
+  (err) => {
+    console.error(`assay: ${err.message}`);
+    if (process.env.ASSAY_DEBUG) console.error(err.stack);
+    process.exit(1);
+  },
+);
