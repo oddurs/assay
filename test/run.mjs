@@ -191,6 +191,12 @@ console.log('\n  regressions');
   check('allow-list removes literals too', allowed.literal, 0);
   check('unallowed baseline has both', all.token > 0 && all.literal > 0, true);
 
+  // A glass panel over a dark page was reported as a contrast FAILURE because
+  // the near-transparent white film was treated as an opaque near-white ground.
+  check('translucent bg is not judged',
+    r.contrast.results.some((x) => x.styleRule === 'plate'), false);
+  check('translucent bg counts as unresolvable', r.contrast.unpaired >= 1, true);
+
   // rgb(0 0 0 / 50%) is legal CSS; parseFloat made alpha 50 instead of 0.5.
   check('percentage alpha', parseColor('rgb(0 0 0 / 50%)').a, 0.5);
   check('percentage alpha composites', Math.round(ratio(parseColor('rgb(0 0 0 / 50%)'), parseColor('#fff'))), 4);

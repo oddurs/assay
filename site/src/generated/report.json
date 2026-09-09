@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-09-09T19:44:24.323Z",
+  "generatedAt": "2026-09-09T20:03:46.219Z",
   "score": 1,
-  "token": 473,
+  "token": 571,
   "literal": 0,
-  "scored": 473,
+  "scored": 571,
   "excluded": {
     "dynamic": 2,
-    "neutral": 16,
+    "neutral": 18,
     "cssvar": 0,
     "expr": 0,
-    "untokenizable": 284
+    "untokenizable": 365
   },
-  "files": 30,
-  "callSites": 23,
-  "tokensDefined": 149,
+  "files": 37,
+  "callSites": 30,
+  "tokensDefined": 176,
   "dead": [
     "colors.borderFocus",
     "motion.instant",
@@ -21,84 +21,89 @@
     "motion.easeLinear",
     "layer.overlay",
     "palette.rose300",
+    "film.light02",
+    "film.dark40",
+    "film.dark80",
     "radius.none",
+    "blur.none",
+    "blur.veil",
     "elevation.flat",
     "elevation.low",
     "elevation.signalGlow",
+    "space.act",
     "space.vista",
-    "type.labelSize",
     "type.colossalSize",
     "type.weightBold",
     "type.trackingNormal"
   ],
   "contrast": {
     "level": "AA",
-    "checked": 18,
+    "checked": 17,
     "failing": 0,
-    "unpaired": 84
+    "unpaired": 99
   },
   "families": [
     {
       "name": "color",
-      "token": 155,
+      "token": 180,
       "literal": 0,
-      "total": 155,
+      "total": 180,
       "score": 1,
       "rule": "no-raw-color"
     },
     {
       "name": "type",
-      "token": 127,
+      "token": 160,
       "literal": 0,
-      "total": 127,
+      "total": 160,
       "score": 1,
       "rule": "no-raw-type"
     },
     {
       "name": "space",
-      "token": 120,
+      "token": 144,
       "literal": 0,
-      "total": 120,
+      "total": 144,
       "score": 1,
       "rule": "no-raw-space"
     },
     {
       "name": "border",
-      "token": 28,
+      "token": 33,
       "literal": 0,
-      "total": 28,
+      "total": 33,
       "score": 1,
       "rule": "no-raw-border-width"
     },
     {
       "name": "radius",
-      "token": 19,
+      "token": 20,
       "literal": 0,
-      "total": 19,
+      "total": 20,
       "score": 1,
       "rule": "no-raw-radius"
     },
     {
       "name": "motion",
-      "token": 14,
+      "token": 18,
       "literal": 0,
-      "total": 14,
+      "total": 18,
       "score": 1,
       "rule": "no-raw-motion"
     },
     {
       "name": "shadow",
-      "token": 6,
+      "token": 9,
       "literal": 0,
-      "total": 6,
+      "total": 9,
       "score": 1,
       "rule": "no-raw-shadow"
     },
     {
       "name": "layer",
-      "token": 4,
+      "token": 7,
       "literal": 0,
-      "total": 4,
+      "total": 7,
       "score": 1,
       "rule": "no-raw-z-index"
     }

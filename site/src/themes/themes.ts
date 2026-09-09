@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { colors } from '../tokens/color.stylex';
-import { palette } from '../tokens/primitives.stylex';
+import { palette, film } from '../tokens/primitives.stylex';
 
 /**
  * LAYER 3 — THEMES
@@ -19,6 +19,7 @@ export const ember = stylex.createTheme(colors, {
   signal: palette.amber400,
   signalBright: palette.amber400,
   borderFocus: palette.rose400,
+  gradientWarm: palette.amber500,
   gradientFrom: palette.amber400,
   gradientVia: palette.rose500,
   gradientTo: palette.violet500,
@@ -33,6 +34,7 @@ export const aurora = stylex.createTheme(colors, {
   signalBright: palette.violet300,
   borderFocus: palette.teal400,
   textOnAccent: palette.ink000,
+  gradientWarm: palette.teal500,
   gradientFrom: palette.teal400,
   gradientVia: palette.violet500,
   gradientTo: palette.rose500,
@@ -68,6 +70,16 @@ export const daylight = stylex.createTheme(colors, {
   warn: palette.amber500,
   fail: palette.red500,
 
+  // On a light ground the film has to darken, not lighten, or glass vanishes.
+  gridLine: film.dark04,
+  gridLineStrong: film.dark04,
+  glassFill: film.dark04,
+  glassFillStrong: film.dark04,
+  glassEdge: film.dark04,
+  glassHighlight: film.light16,
+  scrim: film.light16,
+
+  gradientWarm: palette.amber500,
   gradientFrom: palette.rose600,
   gradientVia: palette.violet600,
   gradientTo: palette.teal500,

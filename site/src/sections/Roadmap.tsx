@@ -65,7 +65,13 @@ export function Roadmap() {
       ruled
       eyebrow="Roadmap"
       title="Every milestone ships alone. Every gate can be lost."
-      intro="The dates are commitments about sequence, not calendar. What must not slip is the order — the launch happens before the CI work, so the first gate can kill the project before anyone builds infrastructure for nobody."
+      tail="The dates are commitments about sequence, not calendar."
+      aside={
+        <Text role="body">
+          What must not slip is the order — the launch happens before the CI work, so the
+          first gate can kill the project before anyone builds infrastructure for nobody.
+        </Text>
+      }
     >
       <div {...stylex.props(styles.rail)}>
         {STEPS.map((s) => (

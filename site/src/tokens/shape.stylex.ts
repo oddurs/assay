@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { palette, scale } from './primitives.stylex';
+import { palette, scale, blurLength } from './primitives.stylex';
 
 /** LAYER 2 — RADIUS, ELEVATION, BORDER WIDTH */
 
@@ -15,6 +15,14 @@ export const radius = stylex.defineVars({
 export const stroke = stylex.defineVars({
   hair: '1px',
   bold: '2px',
+});
+
+/** Named by what the blur is FOR, not how many pixels it is. */
+export const blur = stylex.defineVars({
+  none: blurLength.none,
+  glass: blurLength.glass,
+  veil: blurLength.veil,
+  ambient: blurLength.ambient,
 });
 
 export const elevation = stylex.defineVars({

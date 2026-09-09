@@ -95,7 +95,14 @@ export function Themes({
       ruled
       eyebrow="Why StyleX"
       title="One object re-skins everything. Including this page."
-      intro="This is the capability no other styling system can match cleanly, and it is the reason a conformance score is even definable. Because layer 2 names roles instead of hues, a theme is a data change — not a find-and-replace across class strings."
+      tail="The capability no other styling system matches cleanly."
+      aside={
+        <Text role="body">
+          It is also why a conformance score is definable at all. Because layer 2 names
+          roles instead of hues, a theme is a data change — not a find-and-replace
+          across class strings.
+        </Text>
+      }
     >
       <div {...stylex.props(styles.layout)}>
         <div {...stylex.props(styles.stage)}>

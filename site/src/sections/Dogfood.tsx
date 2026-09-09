@@ -5,7 +5,7 @@ import { type as t } from '../tokens/type.stylex';
 import { radius, stroke } from '../tokens/shape.stylex';
 import { Section } from '../components/Section';
 import { Text } from '../components/Text';
-import { Card } from '../components/Card';
+import { Glass } from '../components/Glass';
 import { Meter } from '../components/Meter';
 import { Badge } from '../components/Badge';
 import report from '../generated/report.json';
@@ -105,12 +105,20 @@ export function Dogfood() {
       id="dogfood"
       ruled
       sunken
+      grid="top"
       eyebrow="Dogfood"
       title="This page is measured by the thing it is selling."
-      intro="Every number below was produced by running the real Assay over this site’s own source at build time, then writing the result into a JSON file the page imports. Nothing here is typed in by hand. Hardcode a hex tomorrow and this score drops on the next deploy."
+      tail="Every number below was produced by running the real Assay over this site’s own source."
+      aside={
+        <Text role="body">
+          The build writes the result into a JSON file the page imports, so nothing here
+          is typed in by hand. Hardcode a hex tomorrow and this score drops on the next
+          deploy.
+        </Text>
+      }
     >
       <div {...stylex.props(styles.layout)}>
-        <Card>
+        <Glass>
           <div {...stylex.props(styles.panel)}>
             <div {...stylex.props(styles.head)}>
               <Badge tone="pass">Gate passing</Badge>
@@ -156,10 +164,10 @@ export function Dogfood() {
               </div>
             </div>
           </div>
-        </Card>
+        </Glass>
 
         <div {...stylex.props(styles.panel)}>
-          <Card>
+          <Glass>
             <Text role="title">By family</Text>
             <div>
               {report.families.map((f) => (
@@ -174,7 +182,7 @@ export function Dogfood() {
                 </div>
               ))}
             </div>
-          </Card>
+          </Glass>
 
           <div {...stylex.props(styles.note)}>
             <Text role="title">Why the dynamic count is not zero</Text>

@@ -107,7 +107,7 @@ export function renderSummary(r, opts = {}) {
       );
     }
     if (r.contrast.unpaired) {
-      push(dim(`    ${r.contrast.unpaired} pairings not checkable — background comes from a parent`));
+      push(dim(`    ${r.contrast.unpaired} pairings not checkable — background is inherited or translucent`));
     }
     push();
   }
@@ -184,8 +184,9 @@ export function renderContrast(r) {
   push('  ' + dim('─'.repeat(58)));
   if (!r.contrast.checked) {
     push('  No co-declared foreground/background pairs found.');
-    push(dim('  Assay only checks colours declared together in one style rule —'));
-    push(dim('  a background inherited from a parent cannot be resolved statically.'));
+    push(dim('  Assay only checks colours declared together in one style rule, on an'));
+    push(dim('  opaque background — inherited and translucent backdrops depend on what'));
+    push(dim('  is painted behind them, which is not knowable from the style rule.'));
     push();
     return L.join('\n');
   }
@@ -199,7 +200,7 @@ export function renderContrast(r) {
   }
   push();
   if (r.contrast.unpaired) {
-    push(dim(`  ${r.contrast.unpaired} pairings not checkable — background comes from a parent.`));
+    push(dim(`  ${r.contrast.unpaired} pairings not checkable — background is inherited or translucent.`));
     push();
   }
   return L.join('\n');

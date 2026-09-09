@@ -21,4 +21,5 @@ export const space = stylex.defineVars({
   chapter: scale.s10,
   act: scale.s11,
   vista: scale.s12,
+  cell: scale.cell,
 });

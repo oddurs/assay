@@ -93,7 +93,7 @@ export function Measures() {
       ruled
       eyebrow="What it measures"
       title="Four questions, one compiler pass."
-      intro="Assay rides the compile that is already happening, so the whole analysis is a build artifact rather than a separate tool you have to remember to run."
+      tail="Assay rides the compile that is already happening, so the whole analysis is a build artifact rather than a separate tool you have to remember to run."
     >
       <div {...stylex.props(styles.layout)}>
         <div {...stylex.props(styles.list)}>

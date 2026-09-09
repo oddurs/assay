@@ -14,9 +14,11 @@ export const motion = stylex.defineVars({
   easeLinear: curve.linear,
 });
 
+/** Numbers, not strings — z-index is a number, and typing it as one lets the
+ *  compiler catch a layer token used where a length belongs. */
 export const layer = stylex.defineVars({
-  base: '0',
-  raised: '10',
-  sticky: '100',
-  overlay: '1000',
+  base: 0,
+  raised: 10,
+  sticky: 100,
+  overlay: 1000,
 });

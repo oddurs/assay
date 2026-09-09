@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { palette } from './primitives.stylex';
+import { palette, film } from './primitives.stylex';
 
 /**
  * LAYER 2 — SEMANTIC COLOR
@@ -29,6 +29,20 @@ export const colors = stylex.defineVars({
   borderStrong: palette.ink400,
   borderFocus: palette.violet400,
 
+  // Structure. The hairline grid is a first-class surface here, not decoration:
+  // this is a measurement tool, and graph paper is its native material.
+  gridLine: film.light04,
+  gridLineStrong: film.light06,
+
+  // Glass. A translucent plate over whatever it sits on, with a bright hairline
+  // edge and a brighter top highlight — the two details that stop a dark
+  // translucent panel reading as flat grey.
+  glassFill: film.light04,
+  glassFillStrong: film.light06,
+  glassEdge: film.light10,
+  glassHighlight: film.light16,
+  scrim: film.dark60,
+
   // Interactive. `accentHover` is a FILL and goes darker, so the white label
   // keeps its contrast; `accentText` is the light variant for accent-coloured
   // text on a dark surface. Assay caught these being the same token.
@@ -46,7 +60,9 @@ export const colors = stylex.defineVars({
   warn: palette.amber400,
   fail: palette.red400,
 
-  // The gradient band, Stripe-idiom
+  // The gradient ribbon. Four stops, warm to cool, so the sweep has somewhere
+  // to travel — a three-stop ramp reads as a single hue with a tint.
+  gradientWarm: palette.amber400,
   gradientFrom: palette.rose500,
   gradientVia: palette.violet500,
   gradientTo: palette.teal500,

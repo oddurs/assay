@@ -63,9 +63,17 @@ export function Gap() {
     <Section
       id="gap"
       ruled
+      grid="side"
       eyebrow="The gap"
       title="Nobody can tell you what styles actually shipped."
-      intro="Not because it doesn’t matter — because until StyleX, it wasn’t computable. Tailwind assembles strings at runtime. styled-components interpolates props into template literals. CSS Modules hands you opaque class references. You cannot statically answer “did this padding come from a token” in any of them."
+      tail="Not because it doesn’t matter — because until StyleX, it wasn’t computable."
+      aside={
+        <Text role="body">
+          Tailwind assembles strings at runtime. styled-components interpolates props
+          into template literals. CSS Modules hands you opaque class references. You
+          cannot statically answer “did this padding come from a token” in any of them.
+        </Text>
+      }
     >
       <div {...stylex.props(styles.stat)}>
         <div {...stylex.props(styles.statItem)}>

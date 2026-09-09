@@ -108,9 +108,17 @@ export function System() {
     <Section
       id="system"
       ruled
+      grid="centre"
       eyebrow="Design system"
       title="Four layers, strictly one-directional."
-      intro="The structure is the argument. Each layer may only reference the one above it, which is a rule you can state in a sentence and — unusually — actually enforce, because the compiler makes the violations countable."
+      tail="The structure is the argument."
+      aside={
+        <Text role="body">
+          Each layer may only reference the one above it — a rule you can state in a
+          sentence and, unusually, actually enforce, because the compiler makes the
+          violations countable.
+        </Text>
+      }
     >
       <div {...stylex.props(styles.layout)}>
         <div>

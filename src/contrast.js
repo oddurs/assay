@@ -206,6 +206,13 @@ export function analyzeContrast(pairs, resolve, opts = {}) {
       const bg = parseColor(bgVal);
       if (!fg || !bg) { unpaired += 1; continue; }
 
+      // A TRANSLUCENT background is as unknowable as an inherited one: the
+      // effective colour depends on whatever is painted behind it, which is not
+      // in this style rule. Treating the film itself as the backdrop makes a
+      // glass panel over a dark page look like light text on near-white.
+      // Report it as unresolvable rather than inventing a verdict.
+      if (bg.a < 1) { unpaired += 1; continue; }
+
       // The same colours under several conditions are one pairing, not three.
       const dedupe = `${fgVal}|${bgVal}`;
       if (seen.has(dedupe)) continue;

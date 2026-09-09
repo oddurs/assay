@@ -50,6 +50,30 @@ export const palette = stylex.defineConsts({
   green500: '#27B865',
 });
 
+/**
+ * Translucency. A glass surface cannot be built from the opaque ink ramp — it
+ * needs alpha, and alpha is a raw value, so it belongs in layer 1 with
+ * everything else literal.
+ */
+export const film = stylex.defineConsts({
+  light02: 'rgba(255, 255, 255, 0.02)',
+  light04: 'rgba(255, 255, 255, 0.04)',
+  light06: 'rgba(255, 255, 255, 0.06)',
+  light10: 'rgba(255, 255, 255, 0.10)',
+  light16: 'rgba(255, 255, 255, 0.16)',
+  dark04: 'rgba(4, 6, 10, 0.04)',
+  dark40: 'rgba(4, 6, 10, 0.40)',
+  dark60: 'rgba(4, 6, 10, 0.60)',
+  dark80: 'rgba(4, 6, 10, 0.80)',
+});
+
+export const blurLength = stylex.defineConsts({
+  none: '0px',
+  glass: '14px',
+  veil: '32px',
+  ambient: '90px',
+});
+
 export const scale = stylex.defineConsts({
   // 4px base, doubling at the top for section rhythm
   s0: '0px',
@@ -65,6 +89,8 @@ export const scale = stylex.defineConsts({
   s10: '96px',
   s11: '128px',
   s12: '176px',
+  // The structural grid rhythm. Every hairline field steps on this.
+  cell: '72px',
 });
 
 export const size = stylex.defineConsts({

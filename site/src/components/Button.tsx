@@ -30,7 +30,15 @@ const styles = stylex.create({
     transform: { default: null, ':active': 'translateY(1px)' },
   },
   md: { paddingBlock: space.snug, paddingInline: space.gutter },
-  lg: { paddingBlock: space.cozy, paddingInline: space.roomy, fontSize: t.leadSize },
+  lg: { paddingBlock: space.cozy, paddingInline: space.roomy },
+  chevron: {
+    fontFamily: t.familyMono,
+    opacity: 0.7,
+    marginInlineStart: space.hair,
+    transitionProperty: 'transform',
+    transitionDuration: motion.quick,
+    transitionTimingFunction: motion.easeStandard,
+  },
 
   primary: {
     backgroundColor: { default: colors.accent, ':hover': colors.accentHover },
@@ -57,6 +65,7 @@ export function Button({
   href,
   variant = 'primary',
   size = 'md',
+  chevron,
   onClick,
   style,
 }: {
@@ -64,6 +73,7 @@ export function Button({
   href?: string;
   variant?: Variant;
   size?: 'md' | 'lg';
+  chevron?: boolean;
   onClick?: () => void;
   style?: stylex.StyleXStyles;
 }) {
@@ -73,13 +83,15 @@ export function Button({
     styles[variant],
     style,
   );
+  const body = (
+    <>
+      {children}
+      {chevron ? <span {...stylex.props(styles.chevron)} aria-hidden>&rsaquo;</span> : null}
+    </>
+  );
   return href ? (
-    <a href={href} {...sx}>
-      {children}
-    </a>
+    <a href={href} {...sx}>{body}</a>
   ) : (
-    <button type="button" onClick={onClick} {...sx}>
-      {children}
-    </button>
+    <button type="button" onClick={onClick} {...sx}>{body}</button>
   );
 }
