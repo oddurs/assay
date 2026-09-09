@@ -176,8 +176,24 @@ cmd_done() {
   [ "$state" = "MERGED" ] || die "pull request for $branch is $state, not MERGED"
 
   dir=$(git rev-parse --show-toplevel)
+
+  # Refuse while real work is still here. Ignored build output does not count —
+  # every worktree has node_modules, and refusing on that would make `done`
+  # useless — but a tracked modification or a new file might be work.
+  leftover=$(git status --porcelain)
+  if [ -n "$leftover" ]; then
+    echo "error: $dir still has uncommitted changes:" >&2
+    printf '%s\n' "$leftover" >&2
+    echo "  the pull request is merged, so this is probably disposable — but decide, do not guess" >&2
+    exit 1
+  fi
+
+  # The MAIN worktree, not this one: $ROOT points at the directory we are about
+  # to delete, and cd-ing there pulls the rug out from under the script.
+  main_wt=$(git worktree list --porcelain | awk '/^worktree /{print $2; exit}')
+  cd "$main_wt"
+
   say "removing worktree $dir"
-  cd "$ROOT"
   git worktree remove "$dir"
 
   say "deleting local branch $branch"

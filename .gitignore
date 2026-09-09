@@ -2,6 +2,10 @@ node_modules/
 dist/
 .worktrees/
 
+# Written by scripts/task on every build. Tracking it makes the tree dirty
+# after any build; `npm run build --prefix site` regenerates it via prebuild.
+site/src/generated/
+
 *.log
 .DS_Store
 .idea/

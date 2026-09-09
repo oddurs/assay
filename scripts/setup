@@ -12,6 +12,12 @@ npm ci --prefix site --no-audit --no-fund
 echo "→ pointing git at the tracked hooks"
 git config core.hooksPath .githooks
 
+# The site imports a report the tool generates. It is not tracked, so a fresh
+# clone has none — produce it here rather than leaving a broken import until
+# somebody's first build.
+echo "→ generating the site's measured report"
+node site/scripts/assay-report.mjs >/dev/null
+
 echo
 echo "Ready. Next:"
 echo "  scripts/task check          run everything CI runs"
