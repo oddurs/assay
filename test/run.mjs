@@ -167,5 +167,34 @@ console.log('\n  diff');
   check('identical graphs: no token churn', same.summary.tokensChanged, 0);
 }
 
+console.log('\n  regressions');
+{
+  const r = await analyze('./test/bug-fixtures');
+
+  // A `:hover` colour must not be paired with the `default` background.
+  // This reported a 14.59:1 PASS on text that is invisible at rest.
+  const tricky = r.contrast.results.filter((x) => x.styleRule === 'tricky');
+  check('both conditions are checked', tricky.length, 2);
+  check('default state fails', tricky.find((x) => x.cond === 'default').passes, false);
+  check('default state is 1:1', tricky.find((x) => x.cond === 'default').ratio, 1);
+  check('hover state passes', tricky.find((x) => x.cond === ':hover').passes, true);
+
+  // Zero needs no token, with or without a unit.
+  const zeroViolations = r.violations.filter((v) => v.styleRule === 'zeros');
+  check('0px/0rem/0 are not violations', zeroViolations.length, 0);
+
+  // Allow-listing must remove a file's tokens AND its literals. Removing only
+  // the literals lets a team raise the score by allow-listing good files.
+  const all = await analyze('./test/bug-fixtures');
+  const allowed = await analyze('./test/bug-fixtures', { overrides: { allow: ['Cases.tsx'] } });
+  check('allow-list removes tokens too', allowed.token, 0);
+  check('allow-list removes literals too', allowed.literal, 0);
+  check('unallowed baseline has both', all.token > 0 && all.literal > 0, true);
+
+  // rgb(0 0 0 / 50%) is legal CSS; parseFloat made alpha 50 instead of 0.5.
+  check('percentage alpha', parseColor('rgb(0 0 0 / 50%)').a, 0.5);
+  check('percentage alpha composites', Math.round(ratio(parseColor('rgb(0 0 0 / 50%)'), parseColor('#fff'))), 4);
+}
+
 console.log(`\n  ${fail === 0 ? `✓ ${pass} passed` : `✗ ${fail} failed, ${pass} passed`}\n`);
 process.exit(fail === 0 ? 0 : 1);

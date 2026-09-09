@@ -81,6 +81,9 @@ export const NEUTRAL_VALUES = new Set([
  */
 export const GEOMETRY = /^-?\d*\.?\d+(%|v[hwib]|vmin|vmax|fr)$|^(calc|min|max|clamp)\(/;
 
+/** Zero needs no token, whatever unit is stapled to it: 0, 0px, 0rem, 0%. */
+export const ZERO = /^-?0(\.0+)?[a-z%]*$/i;
+
 /** Outcomes. Only TOKEN and LITERAL move the number. */
 export const CAT = {
   TOKEN: 'token',

@@ -43,6 +43,7 @@ export async function analyze(root, opts = {}) {
     byCat: {}, byFamily: {},
     violations: [], unparsed: [],
     tokens: new Map(), referenced: new Set(), pairs: new Map(), units: new Map(),
+    byFile: new Map(),
   };
 
   // Absolute, so module identity matches between definitions and references.
@@ -71,8 +72,26 @@ export async function analyze(root, opts = {}) {
     suppressedByFamily[v.family] = (suppressedByFamily[v.family] || 0) + 1;
   }
 
-  const token = out.byCat[CAT.TOKEN] || 0;
-  const literal = Math.max(0, (out.byCat[CAT.LITERAL] || 0) - suppressed.length);
+  // An allow-listed file leaves the score ENTIRELY — both its tokens and its
+  // literals. Dropping only the literals would let a team raise their number by
+  // allow-listing their best files, which is exactly how a metric becomes a
+  // vanity metric.
+  let allowedToken = 0;
+  let allowedLiteral = 0;
+  const allowedFamilies = {};
+  for (const [file, counts] of out.byFile) {
+    if (!isAllowed(file)) continue;
+    allowedToken += counts.token;
+    allowedLiteral += counts.literal;
+    for (const [fam, c] of Object.entries(counts.families)) {
+      allowedFamilies[fam] = allowedFamilies[fam] || { token: 0, literal: 0 };
+      allowedFamilies[fam].token += c.token;
+      allowedFamilies[fam].literal += c.literal;
+    }
+  }
+
+  const token = Math.max(0, (out.byCat[CAT.TOKEN] || 0) - allowedToken);
+  const literal = Math.max(0, (out.byCat[CAT.LITERAL] || 0) - allowedLiteral);
   const scored = token + literal;
   const score = scored === 0 ? null : token / scored;
 
@@ -89,17 +108,20 @@ export async function analyze(root, opts = {}) {
 
   const familyRows = Object.entries(out.byFamily)
     .map(([name, v]) => {
-      const lit = Math.max(0, v.literal - (suppressedByFamily[name] || 0));
-      const total = v.token + lit;
+      const off = allowedFamilies[name] ?? { token: 0, literal: 0 };
+      const tok = Math.max(0, v.token - off.token);
+      const lit = Math.max(0, v.literal - off.literal);
+      const total = tok + lit;
       return {
         name,
-        token: v.token,
+        token: tok,
         literal: lit,
         total,
-        score: total === 0 ? 1 : v.token / total,
+        score: total === 0 ? 1 : tok / total,
         rule: FAMILIES.find((f) => f.id === name)?.rule ?? null,
       };
     })
+    .filter((f) => f.total > 0)
     .sort((a, b) => b.total - a.total);
 
   const byOwner = {};

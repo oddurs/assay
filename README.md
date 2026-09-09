@@ -146,7 +146,7 @@ Every declaration lands in one of five outcomes, and **only two move the number*
 | `token` | Resolves to a `*.stylex` module export. **The numerator.** |
 | `literal` | A hardcoded design value in a scored family. **The violation.** |
 | `dynamic` | Runtime value → CSS custom property. Never a pass *or* a violation. |
-| `neutral` | Keyword, zero, `null`, or layout geometry (`50%`, `calc()`). |
+| `neutral` | Keyword, `null`, zero in any unit (`0`, `0px`, `0rem`), or layout geometry (`50%`, `calc()`). |
 | `cssvar` / `expr` | A raw `var(--x)`, or an expression we could not resolve. |
 
 `dynamic` is the important one. It is genuinely unknowable at compile time, and
@@ -166,6 +166,21 @@ actually render. Assay resolves both through the token chain
 (`semantic.fg → palette.ink900 → '#E4E9F1'`), composites any alpha, and applies
 the WCAG large-text threshold when a co-declared `fontSize`/`fontWeight` earns it.
 
+**Every condition is checked separately**, inheriting from `default` the way the
+cascade does. A rule like this renders invisible text at rest and is only
+readable on hover:
+
+```js
+tricky: {
+  color: { default: c.light, ':hover': c.dark },
+  backgroundColor: c.light,
+}
+```
+
+Assay reports it as two pairings — `default` failing at 1.00:1 and `:hover`
+passing at 14.59:1 — because collapsing them into one would report a pass on
+text nobody can read.
+
 The honest limit: a component whose background comes from a parent cannot be
 resolved statically. Those are reported as `unpaired` — never as passes.
 
@@ -176,7 +191,7 @@ resolved statically. Those are reported as `unpaired` — never as passes.
 ```jsonc
 {
   "exclude": ["generated", "**/*.gen.ts"],
-  "allow": ["src/legacy/**"],        // still reported, kept out of the score
+  "allow": ["src/legacy/**"],        // reported, but out of the score entirely
   "disableFamilies": ["motion"],
   "threshold": 0.95,                  // gate without passing --gate
   "publishesTokens": false,           // true disables dead-token analysis
@@ -191,6 +206,10 @@ resolved statically. Those are reported as `unpaired` — never as passes.
 
 With `owners` set, violations roll up per team — which is the number a design
 system lead actually needs.
+
+`allow` removes a file's **tokens and literals both**. Dropping only its
+violations would let a team raise their score by allow-listing their best files,
+which is how a metric becomes a vanity metric.
 
 ## Programmatic
 
@@ -219,7 +238,7 @@ console.log(r.score, r.violations, r.contrast.failing, r.tokens.dead);
 ## Development
 
 ```bash
-npm test        # 66 assertions, including the original hand count
+npm test        # 76 assertions, including the original hand count
 npm run assay   # run the CLI from source
 ```
 

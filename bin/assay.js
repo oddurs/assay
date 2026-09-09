@@ -10,7 +10,7 @@ import {
 } from '../src/report.js';
 import { buildGraph, diffGraphs, blastRadius, GRAPH_VERSION } from '../src/graph.js';
 import { resolveSide } from '../src/gitref.js';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 
 const HELP = `
   assay — what your design system actually shipped
@@ -152,17 +152,33 @@ async function main() {
   }
 
   if (cmd === 'impact') {
-    // Everything before the last arg is a token pattern; the last may be a path.
+    // The last argument is a directory only if it IS one. Popping it blindly
+    // turns `assay impact colors.accent colors.signal` into a search of a
+    // directory named after the second token.
     const parts = [...args._];
     let dir = '.';
-    if (parts.length > 1) dir = parts.pop();
+    if (parts.length > 1) {
+      const last = parts[parts.length - 1];
+      if (existsSync(last) && statSync(last).isDirectory()) dir = parts.pop();
+    }
     if (!parts.length) throw new Error('impact needs a token name: assay impact colors.accent [path]');
+
     const graph = await graphOf(dir);
-    const seeds = Object.keys(graph.tokens).filter((id) =>
-      parts.some((p) => id === p || id.split('#').pop().includes(p)));
+    const nameOf = (id) => id.split('#').pop();
+    // Prefer exact names. Otherwise `colors.accent` silently drags in
+    // accentHover, accentSubtle and accentText and reports their union.
+    const exact = Object.keys(graph.tokens).filter((id) =>
+      parts.some((p) => id === p || nameOf(id) === p));
+    const seeds = exact.length
+      ? exact
+      : Object.keys(graph.tokens).filter((id) => parts.some((p) => nameOf(id).includes(p)));
+
     if (!seeds.length) {
       console.error(`no token matches ${parts.join(', ')}`);
       return 1;
+    }
+    if (!exact.length && !args.flags.has('json')) {
+      console.log(dim(`\n  no exact match; matching by substring on ${seeds.length} token(s)`));
     }
     const r = blastRadius(graph, seeds);
     if (args.flags.has('json')) { console.log(JSON.stringify(r, null, 2)); return 0; }

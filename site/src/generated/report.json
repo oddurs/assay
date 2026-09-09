@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-09T19:37:15.449Z",
+  "generatedAt": "2026-09-09T19:44:24.323Z",
   "score": 1,
   "token": 473,
   "literal": 0,
@@ -33,9 +33,9 @@
   ],
   "contrast": {
     "level": "AA",
-    "checked": 15,
+    "checked": 18,
     "failing": 0,
-    "unpaired": 77
+    "unpaired": 84
   },
   "families": [
     {

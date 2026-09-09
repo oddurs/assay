@@ -18,6 +18,9 @@ const NAMED = {
   green: '#008000', gray: '#808080', grey: '#808080', silver: '#c0c0c0',
 };
 
+/** `rgb(0 0 0 / 50%)` is legal CSS; a bare parseFloat turns 50% into alpha 50. */
+const alphaOf = (p) => (String(p).endsWith('%') ? parseFloat(p) / 100 : parseFloat(p));
+
 export function parseColor(input) {
   if (typeof input !== 'string') return null;
   const s = input.trim().toLowerCase();
@@ -48,7 +51,7 @@ export function parseColor(input) {
       const num = (p) => (p.endsWith('%') ? (parseFloat(p) / 100) * 255 : parseFloat(p));
       return {
         r: num(parts[0]), g: num(parts[1]), b: num(parts[2]),
-        a: parts[3] != null ? parseFloat(parts[3]) : 1,
+        a: parts[3] != null ? alphaOf(parts[3]) : 1,
       };
     }
   }
@@ -60,7 +63,7 @@ export function parseColor(input) {
       const h = parseFloat(parts[0]);
       const sat = parseFloat(parts[1]) / 100;
       const l = parseFloat(parts[2]) / 100;
-      const a = parts[3] != null ? parseFloat(parts[3]) : 1;
+      const a = parts[3] != null ? alphaOf(parts[3]) : 1;
       const c = (1 - Math.abs(2 * l - 1)) * sat;
       const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
       const mm = l - c / 2;
@@ -179,39 +182,59 @@ export function analyzeContrast(pairs, resolve, opts = {}) {
   const results = [];
   let unpaired = 0;
 
+  const valueOf = (slot) => (slot ? (slot.token ? resolve(slot.token) : slot.literal) : undefined);
+
   for (const p of pairs.values()) {
-    const fgRaw = p.color;
-    const bgRaw = p.backgroundColor;
-    if (!fgRaw || !bgRaw) { if (fgRaw || bgRaw) unpaired += 1; continue; }
+    const byCond = p.byCond ?? {};
+    const base = byCond.default ?? {};
+    const seen = new Set();
 
-    const fgVal = fgRaw.token ? resolve(fgRaw.token) : fgRaw.literal;
-    const bgVal = bgRaw.token ? resolve(bgRaw.token) : bgRaw.literal;
-    const fg = parseColor(fgVal);
-    const bg = parseColor(bgVal);
-    if (!fg || !bg) { unpaired += 1; continue; }
+    // Every condition renders its own pairing. `:hover` inherits whatever the
+    // default state declared, exactly as the cascade does — so a hover colour
+    // is checked against the default background, and the DEFAULT colour is
+    // still checked on its own. Merging them into one pairing reports a pass
+    // on text that is invisible at rest.
+    for (const cond of Object.keys(byCond)) {
+      const eff = { ...base, ...byCond[cond] };
+      const fgRaw = eff.color;
+      const bgRaw = eff.backgroundColor;
+      if (!fgRaw || !bgRaw) { if (fgRaw || bgRaw) unpaired += 1; continue; }
 
-    const sizePx = pxOf(p.fontSize?.token ? resolve(p.fontSize.token) : p.fontSize?.literal);
-    const weight = p.fontWeight?.token ? resolve(p.fontWeight.token) : p.fontWeight?.literal;
-    const bold = weight != null && (Number(weight) >= 700 || weight === 'bold');
-    const large = sizePx != null && (sizePx >= LARGE_PX || (bold && sizePx >= LARGE_BOLD_PX));
+      const fgVal = valueOf(fgRaw);
+      const bgVal = valueOf(bgRaw);
+      const fg = parseColor(fgVal);
+      const bg = parseColor(bgVal);
+      if (!fg || !bg) { unpaired += 1; continue; }
 
-    const need = level === 'AAA' ? (large ? 4.5 : 7) : large ? 3 : 4.5;
-    const r = ratio(fg, bg);
+      // The same colours under several conditions are one pairing, not three.
+      const dedupe = `${fgVal}|${bgVal}`;
+      if (seen.has(dedupe)) continue;
+      seen.add(dedupe);
 
-    results.push({
-      file: p.file,
-      line: p.line,
-      styleRule: p.rule,
-      fg: fgVal, bg: bgVal,
-      fgToken: fgRaw.token ?? null,
-      bgToken: bgRaw.token ?? null,
-      large,
-      ratio: Math.round(r * 100) / 100,
-      required: need,
-      passes: r >= need,
-      level,
-      rule: 'contrast-below-threshold',
-    });
+      const sizePx = pxOf(valueOf(eff.fontSize));
+      const weight = valueOf(eff.fontWeight);
+      const bold = weight != null && (Number(weight) >= 700 || weight === 'bold');
+      const large = sizePx != null && (sizePx >= LARGE_PX || (bold && sizePx >= LARGE_BOLD_PX));
+
+      const need = level === 'AAA' ? (large ? 4.5 : 7) : large ? 3 : 4.5;
+      const r = ratio(fg, bg);
+
+      results.push({
+        file: p.file,
+        line: p.line,
+        styleRule: p.rule,
+        cond,
+        fg: fgVal, bg: bgVal,
+        fgToken: fgRaw.token ?? null,
+        bgToken: bgRaw.token ?? null,
+        large,
+        ratio: Math.round(r * 100) / 100,
+        required: need,
+        passes: r >= need,
+        level,
+        rule: 'contrast-below-threshold',
+      });
+    }
   }
 
   results.sort((a, b) => a.ratio - b.ratio);

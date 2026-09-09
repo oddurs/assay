@@ -9,7 +9,7 @@ import { readFileSync, existsSync, statSync } from 'node:fs';
 import { resolveModule } from './resolve.js';
 import { parse } from '@babel/parser';
 import _traverse from '@babel/traverse';
-import { CAT, NEUTRAL_VALUES, GEOMETRY, familyOf } from './taxonomy.js';
+import { CAT, NEUTRAL_VALUES, GEOMETRY, ZERO, familyOf } from './taxonomy.js';
 
 const traverse = _traverse.default ?? _traverse;
 
@@ -309,6 +309,7 @@ export function classify(node, ctx) {
     case 'StringLiteral': {
       const v = node.value.trim();
       if (NEUTRAL_VALUES.has(v)) return { cat: CAT.NEUTRAL };
+      if (ZERO.test(v)) return { cat: CAT.NEUTRAL };
       if (GEOMETRY.test(v)) return { cat: CAT.NEUTRAL };
       if (/var\(\s*--/.test(v)) return { cat: CAT.CSSVAR };
       return { cat: CAT.LITERAL, value: v };
@@ -323,6 +324,7 @@ export function classify(node, ctx) {
       if (node.expressions.length === 0) {
         const v = node.quasis.map((q) => q.value.cooked).join('').trim();
         if (NEUTRAL_VALUES.has(v)) return { cat: CAT.NEUTRAL };
+        if (ZERO.test(v)) return { cat: CAT.NEUTRAL };
         if (GEOMETRY.test(v)) return { cat: CAT.NEUTRAL };
         if (/var\(\s*--/.test(v)) return { cat: CAT.CSSVAR };
         return { cat: CAT.LITERAL, value: v };
@@ -444,11 +446,16 @@ function record(prop, valueNode, ctx, families, propNode, ruleName, pairAcc, con
   }
   unit.declarations.push(decl);
 
-  // Collect co-declared foreground/background/size for contrast analysis.
+  // Collect co-declared foreground/background/size for contrast analysis,
+  // keyed by CONDITION. A `:hover` colour must never be paired with the
+  // `default` background — that reports a pass on text that is invisible at
+  // rest, which is the worst mistake an accessibility check can make.
   if (prop === 'color' || prop === 'backgroundColor' || prop === 'fontSize' || prop === 'fontWeight') {
     const key = `${ctx.file}::${ruleName}`;
-    pairAcc[key] = pairAcc[key] || { file: ctx.file, rule: ruleName, line };
-    pairAcc[key][prop] = res.cat === CAT.TOKEN ? { token: res.token } : { literal: res.value };
+    pairAcc[key] = pairAcc[key] || { file: ctx.file, rule: ruleName, line, byCond: {} };
+    const condKey = cond.length ? cond.join(' > ') : 'default';
+    const slot = (pairAcc[key].byCond[condKey] = pairAcc[key].byCond[condKey] || {});
+    slot[prop] = res.cat === CAT.TOKEN ? { token: res.token } : { literal: res.value };
     out.pairs.set(key, pairAcc[key]);
   }
 
@@ -457,6 +464,17 @@ function record(prop, valueNode, ctx, families, propNode, ruleName, pairAcc, con
   out.byCat[res.cat] = (out.byCat[res.cat] || 0) + 1;
   out.byFamily[fam.id] = out.byFamily[fam.id] || { token: 0, literal: 0 };
   if (res.cat === CAT.TOKEN) out.byFamily[fam.id].token += 1;
+
+  // Per-file tallies. An allow-listed file must leave the score entirely —
+  // dropping only its literals while keeping its tokens would let a team raise
+  // their number by allow-listing their BEST files.
+  if (res.cat === CAT.TOKEN || res.cat === CAT.LITERAL) {
+    let f = out.byFile.get(ctx.file);
+    if (!f) { f = { token: 0, literal: 0, families: {} }; out.byFile.set(ctx.file, f); }
+    f[res.cat] += 1;
+    f.families[fam.id] = f.families[fam.id] || { token: 0, literal: 0 };
+    f.families[fam.id][res.cat] += 1;
+  }
 
   if (res.cat === CAT.LITERAL) {
     out.byFamily[fam.id].literal += 1;
