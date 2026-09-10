@@ -231,14 +231,11 @@ cmd_pr() {
   say "opening the pull request"
   # --fill takes the title and body from the commits; the template covers the rest.
   gh pr create --base "$base" --head "$branch" --fill $draft
-  url=$(gh pr view --json url --jq .url)
-  echo "$url"
-
-  it=$(item_from_branch)
-  if [ -n "$it" ] && command -v cairn >/dev/null 2>&1; then
-    cairn note "$it" "Pull request: $url" >/dev/null 2>&1 \
-      && say "recorded the pull request on item $it"
-  fi
+  gh pr view --json url --jq .url
+  # Deliberately does NOT write the URL back onto the item. The note can only
+  # land after the commit that created the PR, so it leaves the worktree dirty
+  # forever and `done` then refuses to clean up. The link is already there: the
+  # branch name carries the item id and the PR contains the item file.
 }
 
 cmd_sync() {
