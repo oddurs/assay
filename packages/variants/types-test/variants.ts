@@ -35,9 +35,12 @@ button({ size: 'xl' });
 // @ts-expect-error 'colour' is not an axis
 button({ colour: 'red' });
 
-// @ts-expect-error a default must be a value the axis actually has
+// A default must be a value the axis actually has. Written with the offending
+// value on its own line, because `@ts-expect-error` suppresses only the line
+// that follows it and a formatter is free to reflow a multi-line call.
 defineVariants({
   variants: { size: { sm: style } },
+  // @ts-expect-error 'nope' is not a size
   defaultVariants: { size: 'nope' },
 });
 
