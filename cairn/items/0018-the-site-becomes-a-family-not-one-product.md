@@ -2,7 +2,7 @@
 id: 18
 title: The site becomes a family, not one product
 type: feature
-status: doing
+status: done
 milestone: v0.1
 assignee: Oddur Sigurdsson
 labels:

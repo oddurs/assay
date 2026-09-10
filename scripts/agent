@@ -225,6 +225,20 @@ cmd_pr() {
   say "running scripts/task check"
   scripts/task check
 
+  it=$(item_from_branch)
+  if [ -n "$it" ] && command -v cairn >/dev/null 2>&1; then
+    state=$(cairn show "$it" --json 2>/dev/null | sed -n 's/.*"status"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
+    if [ "$state" != "done" ]; then
+      say "closing item $it"
+      cairn close "$it" >/dev/null 2>&1 || true
+      cairn render >/dev/null 2>&1 || true
+      if [ -n "$(git status --porcelain cairn ROADMAP.md 2>/dev/null)" ]; then
+        git add cairn ROADMAP.md >/dev/null 2>&1
+        git commit -q -m "chore: close item $it" || true
+      fi
+    fi
+  fi
+
   say "pushing $branch"
   git push -u origin "$branch"
 
@@ -283,13 +297,6 @@ cmd_done() {
   git worktree prune
   git fetch --prune origin --quiet
 
-  if [ -n "$it" ] && command -v cairn >/dev/null 2>&1; then
-    state=$(cairn show "$it" --json 2>/dev/null | sed -n 's/.*"status"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
-    if [ "$state" != "done" ]; then
-      say "closing item $it"
-      cairn close "$it" >/dev/null 2>&1 || true
-    fi
-  fi
   say "done"
 }
 
