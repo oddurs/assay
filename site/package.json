@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "prebuild": "node scripts/assay-report.mjs",
+    "prebuild": "node scripts/assay-report.mjs && node scripts/gen-pages.mjs",
     "predev": "node scripts/assay-report.mjs",
     "dev": "vite",
     "build": "vite build",
