@@ -2,8 +2,9 @@
 id: 1
 title: Freeze the graph format at v1
 type: feature
-status: backlog
+status: done
 milestone: v0.1
+assignee: Oddur Sigurdsson
 labels:
   - spec
 created: 2026-09-10

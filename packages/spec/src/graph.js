@@ -21,22 +21,6 @@ import { createHash } from 'node:crypto';
 
 export const GRAPH_VERSION = 1;
 
-/** A graph this build can read, or a reason it cannot. */
-export function validateGraph(graph) {
-  if (!graph || typeof graph !== 'object')
-    return { ok: false, reason: 'not an object' };
-  if (graph.version !== GRAPH_VERSION) {
-    return {
-      ok: false,
-      reason: `assay-graph v${graph.version}; this build reads v${GRAPH_VERSION}`,
-    };
-  }
-  for (const field of ['tokens', 'units', 'summary']) {
-    if (!graph[field]) return { ok: false, reason: `missing "${field}"` };
-  }
-  return { ok: true };
-}
-
 export function hashOf(value) {
   return createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 16);
 }

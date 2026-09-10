@@ -15,7 +15,14 @@ import {
   red,
 } from '../src/report.js';
 import { buildGraph } from '@stylegraph/extract';
-import { diffGraphs, blastRadius, GRAPH_VERSION } from '@stylegraph/spec';
+import {
+  diffGraphs,
+  blastRadius,
+  GRAPH_VERSION,
+  validateGraph,
+  runConformance,
+  formatErrors,
+} from '@stylegraph/spec';
 import { resolveSide } from '../src/gitref.js';
 import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 
@@ -101,6 +108,7 @@ const COMMANDS = new Set([
   'graph',
   'diff',
   'impact',
+  'validate',
 ]);
 
 async function main() {
@@ -156,6 +164,36 @@ async function main() {
       throw e;
     }
   };
+
+  if (cmd === 'validate') {
+    const file = args._[0];
+    if (!file) throw new Error('usage: stylegraph validate <graph.json>');
+    const graph = JSON.parse(readFileSync(file, 'utf8'));
+
+    const result = validateGraph(graph);
+    if (!result.ok) {
+      console.error(red(`  ✗ ${file} is not a valid stylegraph v${GRAPH_VERSION}`));
+      console.error(formatErrors(result.errors).replace(/^/gm, '    '));
+      return 1;
+    }
+
+    // Validating is necessary but not sufficient: a producer also has to be
+    // rejected for the things the format forbids.
+    const suite = runConformance(graph);
+    if (!suite.ok) {
+      console.error(red(`  ✗ ${suite.failures.length} conformance case(s) failed`));
+      for (const f of suite.failures) console.error(`    ${f.case}: ${f.reason}`);
+      return 1;
+    }
+
+    console.log(green(`  ✓ valid stylegraph v${GRAPH_VERSION}`));
+    console.log(
+      dim(
+        `    ${Object.keys(graph.units).length} units · ${Object.keys(graph.tokens).length} tokens · ${suite.ran} conformance cases passed`,
+      ),
+    );
+    return 0;
+  }
 
   if (cmd === 'diff') {
     if (args._.length < 2)

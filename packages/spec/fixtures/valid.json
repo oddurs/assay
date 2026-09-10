@@ -1,0 +1,310 @@
+{
+  "version": 1,
+  "generator": {
+    "name": "assay",
+    "version": "1.0.0",
+    "adapter": "stylex"
+  },
+  "generatedAt": "2026-01-01T00:00:00.000Z",
+  "root": "test/fixtures",
+  "summary": {
+    "score": 0.375,
+    "token": 6,
+    "literal": 10,
+    "scored": 16,
+    "excluded": {
+      "dynamic": 1,
+      "neutral": 3,
+      "cssvar": 0,
+      "expr": 0,
+      "untokenizable": 5
+    },
+    "files": 4,
+    "units": 4,
+    "tokens": 7,
+    "dead": 2,
+    "themes": 0,
+    "contrastFailing": 0
+  },
+  "tokens": {
+    "tokens.stylex.ts#colors.accent": {
+      "id": "tokens.stylex.ts#colors.accent",
+      "file": "tokens.stylex.ts",
+      "name": "accent",
+      "value": "#2A2FD6",
+      "raw": "'#2A2FD6'",
+      "refs": []
+    },
+    "tokens.stylex.ts#colors.bg": {
+      "id": "tokens.stylex.ts#colors.bg",
+      "file": "tokens.stylex.ts",
+      "name": "bg",
+      "value": "#FFFFFF",
+      "raw": "{ default: '#FFFFFF', [DARK]: '#0E1014' }",
+      "refs": []
+    },
+    "tokens.stylex.ts#colors.fg": {
+      "id": "tokens.stylex.ts#colors.fg",
+      "file": "tokens.stylex.ts",
+      "name": "fg",
+      "value": "#101317",
+      "raw": "{ default: '#101317', [DARK]: '#ECEEF2' }",
+      "refs": []
+    },
+    "tokens.stylex.ts#colors.unusedBorder": {
+      "id": "tokens.stylex.ts#colors.unusedBorder",
+      "file": "tokens.stylex.ts",
+      "name": "unusedBorder",
+      "value": "#DDDDDD",
+      "raw": "'#DDDDDD'",
+      "refs": []
+    },
+    "tokens.stylex.ts#space.lg": {
+      "id": "tokens.stylex.ts#space.lg",
+      "file": "tokens.stylex.ts",
+      "name": "lg",
+      "value": "16px",
+      "raw": "'16px'",
+      "refs": []
+    },
+    "tokens.stylex.ts#space.md": {
+      "id": "tokens.stylex.ts#space.md",
+      "file": "tokens.stylex.ts",
+      "name": "md",
+      "value": "8px",
+      "raw": "'8px'",
+      "refs": []
+    },
+    "tokens.stylex.ts#space.sm": {
+      "id": "tokens.stylex.ts#space.sm",
+      "file": "tokens.stylex.ts",
+      "name": "sm",
+      "value": "4px",
+      "raw": "'4px'",
+      "refs": []
+    }
+  },
+  "themes": {},
+  "units": {
+    "Banner.tsx#banner": {
+      "id": "Banner.tsx#banner",
+      "file": "Banner.tsx",
+      "name": "banner",
+      "line": 6,
+      "declarations": [
+        {
+          "prop": "color",
+          "cond": ":hover",
+          "cat": "literal",
+          "family": "color",
+          "value": "#B01455",
+          "rule": "no-raw-color"
+        },
+        {
+          "prop": "color",
+          "cond": "default",
+          "cat": "token",
+          "family": "color",
+          "token": "tokens.stylex.ts#colors.fg"
+        },
+        {
+          "prop": "fontSize",
+          "cond": "default",
+          "cat": "literal",
+          "family": "type",
+          "value": "14px",
+          "rule": "no-raw-type"
+        },
+        {
+          "prop": "paddingBlock",
+          "cond": "default",
+          "cat": "token",
+          "family": "space",
+          "token": "tokens.stylex.ts#space.lg"
+        },
+        {
+          "prop": "position",
+          "cond": "default",
+          "cat": "literal",
+          "value": "relative"
+        }
+      ],
+      "tokens": ["tokens.stylex.ts#colors.fg", "tokens.stylex.ts#space.lg"],
+      "hash": "5b8d8ad718c4b0e6"
+    },
+    "Banner.tsx#sized": {
+      "id": "Banner.tsx#sized",
+      "file": "Banner.tsx",
+      "name": "sized",
+      "line": 12,
+      "declarations": [
+        {
+          "prop": "color",
+          "cond": "default",
+          "cat": "token",
+          "family": "color",
+          "token": "tokens.stylex.ts#colors.accent"
+        },
+        {
+          "prop": "height",
+          "cond": "default",
+          "cat": "dynamic"
+        },
+        {
+          "prop": "marginTop",
+          "cond": "default",
+          "cat": "dynamic",
+          "family": "space"
+        }
+      ],
+      "tokens": ["tokens.stylex.ts#colors.accent"],
+      "hash": "4aed0e6de6e2cec7"
+    },
+    "Card.tsx#card": {
+      "id": "Card.tsx#card",
+      "file": "Card.tsx",
+      "name": "card",
+      "line": 10,
+      "declarations": [
+        {
+          "prop": "backgroundColor",
+          "cond": "default",
+          "cat": "literal",
+          "family": "color",
+          "value": "#fff",
+          "rule": "no-raw-color"
+        },
+        {
+          "prop": "borderColor",
+          "cond": "default",
+          "cat": "neutral",
+          "family": "color"
+        },
+        {
+          "prop": "borderRadius",
+          "cond": "default",
+          "cat": "literal",
+          "family": "radius",
+          "value": "6px",
+          "rule": "no-raw-radius"
+        },
+        {
+          "prop": "borderWidth",
+          "cond": "default",
+          "cat": "neutral",
+          "family": "border"
+        },
+        {
+          "prop": "boxShadow",
+          "cond": "default",
+          "cat": "literal",
+          "family": "shadow",
+          "value": "0 1px 2px rgba(0,0,0,.06)",
+          "rule": "no-raw-shadow"
+        },
+        {
+          "prop": "color",
+          "cond": "default",
+          "cat": "token",
+          "family": "color",
+          "token": "tokens.stylex.ts#colors.fg"
+        },
+        {
+          "prop": "display",
+          "cond": "default",
+          "cat": "literal",
+          "value": "flex"
+        },
+        {
+          "prop": "flexDirection",
+          "cond": "default",
+          "cat": "literal",
+          "value": "column"
+        },
+        {
+          "prop": "gap",
+          "cond": "default",
+          "cat": "token",
+          "family": "space",
+          "token": "tokens.stylex.ts#space.sm"
+        },
+        {
+          "prop": "padding",
+          "cond": "default",
+          "cat": "token",
+          "family": "space",
+          "token": "tokens.stylex.ts#space.md"
+        }
+      ],
+      "tokens": [
+        "tokens.stylex.ts#colors.fg",
+        "tokens.stylex.ts#space.md",
+        "tokens.stylex.ts#space.sm"
+      ],
+      "hash": "0db936b318d42a45"
+    },
+    "Legacy.tsx#box": {
+      "id": "Legacy.tsx#box",
+      "file": "Legacy.tsx",
+      "name": "box",
+      "line": 6,
+      "declarations": [
+        {
+          "prop": "backgroundColor",
+          "cond": "default",
+          "cat": "literal",
+          "family": "color",
+          "value": "#eeeeee",
+          "rule": "no-raw-color"
+        },
+        {
+          "prop": "color",
+          "cond": "default",
+          "cat": "literal",
+          "family": "color",
+          "value": "#333333",
+          "rule": "no-raw-color"
+        },
+        {
+          "prop": "margin",
+          "cond": "default",
+          "cat": "neutral",
+          "family": "space"
+        },
+        {
+          "prop": "opacity",
+          "cond": "default",
+          "cat": "literal",
+          "value": "0.5"
+        },
+        {
+          "prop": "padding",
+          "cond": "default",
+          "cat": "literal",
+          "family": "space",
+          "value": "12px",
+          "rule": "no-raw-space"
+        },
+        {
+          "prop": "transitionDuration",
+          "cond": "default",
+          "cat": "literal",
+          "family": "motion",
+          "value": "150ms",
+          "rule": "no-raw-motion"
+        },
+        {
+          "prop": "zIndex",
+          "cond": "default",
+          "cat": "literal",
+          "family": "layer",
+          "value": "10",
+          "rule": "no-raw-z-index"
+        }
+      ],
+      "tokens": [],
+      "hash": "7d0448e9dae66d0c"
+    }
+  },
+  "dead": ["tokens.stylex.ts#colors.bg", "tokens.stylex.ts#colors.unusedBorder"]
+}

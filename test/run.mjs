@@ -5,7 +5,14 @@
  */
 import { audit as analyze, parseColor, ratio } from '@stylegraph/audit';
 import { buildGraph } from '@stylegraph/extract';
-import { diffGraphs, blastRadius, graphHash } from '@stylegraph/spec';
+import {
+  diffGraphs,
+  blastRadius,
+  graphHash,
+  validateGraph,
+  runConformance,
+  hashOf,
+} from '@stylegraph/spec';
 import { globToRegExp } from '@stylegraph/extract';
 
 let pass = 0,
@@ -303,6 +310,44 @@ console.log('\n  theme-aware contrast');
     'the graph carries resolved override values',
     Object.values(washed.overrides)[0],
     '#BBBBBB',
+  );
+}
+
+console.log('\n  format conformance');
+{
+  const { readFileSync } = await import('node:fs');
+  const fixture = JSON.parse(
+    readFileSync(
+      new URL('../packages/spec/fixtures/valid.json', import.meta.url),
+      'utf8',
+    ),
+  );
+
+  check('the fixture validates', validateGraph(fixture).ok, true);
+
+  // Every mutation must be rejected AND name the field it broke. A validator
+  // that says "invalid" is useless to whoever has to fix the producer.
+  const suite = runConformance(fixture);
+  check('every conformance case passes', suite.ok, true);
+  check('the suite is not empty', suite.ran > 10, true);
+  if (!suite.ok) console.log('   ', JSON.stringify(suite.failures, null, 1));
+
+  // What a real producer emits must satisfy the spec, not just the fixture.
+  const live = buildGraph(await analyze('./site/src'));
+  check('a real graph validates', validateGraph(live).ok, true);
+
+  // The agreement that lets a diff be a hash comparison: two producers ordering
+  // declarations differently must still agree.
+  const unit = Object.values(live.units).find((u) => u.declarations.length > 2);
+  const shuffled = [...unit.declarations].reverse();
+  check(
+    'hash is independent of declaration order',
+    hashOf(
+      [...shuffled].sort((a, b) =>
+        a.prop === b.prop ? (a.cond < b.cond ? -1 : 1) : a.prop < b.prop ? -1 : 1,
+      ),
+    ),
+    unit.hash,
   );
 }
 

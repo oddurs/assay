@@ -182,6 +182,43 @@ A diff compares two graphs of the same `version`.
   then every unit whose `tokens` intersects that closure. Removed tokens are
   closed over the _base_ graph, since they have no node in head.
 
+## Checking a producer
+
+The claim that a second producer can be built from this document is only a claim
+until something can check the result. `@stylegraph/spec` ships the checker, so a
+producer can be verified without adopting any of this project's tooling:
+
+```js
+import { validateGraph, runConformance, formatErrors } from '@stylegraph/spec';
+
+const result = validateGraph(myGraph);
+if (!result.ok) console.error(formatErrors(result.errors));
+
+// Validating is necessary but not sufficient — a conforming producer must also
+// be REJECTED for the things the format forbids.
+const suite = runConformance(myGraph);
+```
+
+Or from the command line:
+
+```sh
+stylegraph validate graph.json
+```
+
+Every failure names the exact path it was found at —
+`units["Card.tsx#card"].declarations[2].cat` rather than "invalid graph" —
+because a validator that will not say where is a validator nobody can act on.
+
+`runConformance` takes a graph the producer believes is valid, mutates it in
+fifteen individual ways, and requires each mutation to be rejected _and_ the
+error to name the broken field. A known-good graph produced by the reference
+implementation lives at `packages/spec/fixtures/valid.json`.
+
+The rules the suite enforces are exactly the ones a diff depends on: ids are
+relative and POSIX-separated, `(prop, cond)` is unique within a unit, a `token`
+declaration names a token that exists, and a unit's `hash` agrees with its
+declarations.
+
 ## Writing another producer
 
 Emit the shape above. The rules that actually matter:
@@ -199,6 +236,9 @@ is adapter-agnostic. There is exactly one adapter today — the seam exists so a
 second stays possible, not because writing one now would be useful.
 
 ## Stability
+
+**v1 is frozen.** The shape above is what a v1 graph is, and
+`runConformance` is the definition of agreeing with it.
 
 Within v1: fields may be **added**. Nothing will be removed or repurposed, and
 `hash` semantics will not change — a v1 hash computed today must equal one

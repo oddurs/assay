@@ -4,17 +4,17 @@
 
 ## v0.1 — The format and the audit
 
-`#######···` 67% · 4 of 6 done · due 2026-10-15
+`#########·` 83% · 5 of 6 done · due 2026-10-15
 
 The graph is specified and one tool reads it well enough to run a real project's design system.
 
 ### backlog
 
-- [ ] `0001` Freeze the graph format at v1 <sup>feature · p0 · spec</sup>
 - [ ] `0004` Buy stylegraph.dev and point Pages at it <sup>chore · p1 · needs-a-card</sup>
 
 ### done
 
+- [x] `0001` Freeze the graph format at v1 <sup>feature · p0 · spec</sup>
 - [x] `0002` Theme-aware contrast <sup>bug · p0 · audit</sup>
 - [x] `0003` Rename the site from Assay to stylegraph <sup>docs · p1 · site</sup>
 - [x] `0016` Make starting work one command <sup>chore · p0 · tooling</sup>
