@@ -7,6 +7,7 @@ import { motion } from './tokens/motion.stylex';
 import { THEMES, type ThemeId } from './themes/themes';
 import { Nav } from './sections/Nav';
 import { Hero } from './sections/Hero';
+import { Family } from './sections/Family';
 import { Gap } from './sections/Gap';
 import { Measures } from './sections/Measures';
 import { Dogfood } from './sections/Dogfood';
@@ -47,6 +48,7 @@ export function App() {
       <Nav />
       <main {...stylex.props(styles.main)}>
         <Hero />
+        <Family />
         <Gap />
         <Measures />
         <Dogfood />

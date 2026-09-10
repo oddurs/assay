@@ -12,6 +12,7 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { audit as analyze } from '@stylegraph/audit';
+import { readPackages } from './packages.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const SRC = resolve(here, '../src');
@@ -52,6 +53,13 @@ const report = {
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, JSON.stringify(report, null, 2));
+
+// The family, measured the same way: what exists is read from the packages, not
+// typed into a page.
+writeFileSync(
+  resolve(here, '../src/generated/packages.json'),
+  JSON.stringify(readPackages(), null, 2),
+);
 
 const pct = (report.score * 100).toFixed(1);
 console.log(`\n  assay · this site`);
