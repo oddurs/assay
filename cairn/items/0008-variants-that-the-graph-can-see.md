@@ -2,8 +2,9 @@
 id: 8
 title: Variants that the graph can see
 type: feature
-status: backlog
+status: doing
 milestone: v0.3
+assignee: Oddur Sigurdsson
 labels:
   - variants
 created: 2026-09-10
