@@ -14,6 +14,14 @@ import {
   hashOf,
 } from '@stylegraph/spec';
 import { globToRegExp } from '@stylegraph/extract';
+import {
+  createMatchers,
+  createSerializer,
+  forEachTheme,
+  format,
+  styleOf,
+  themesOf,
+} from '@stylegraph/test';
 
 let pass = 0,
   fail = 0;
@@ -300,16 +308,25 @@ console.log('\n  theme-aware contrast');
   check(
     'themes touching no colour are skipped',
     r.contrastByTheme.map((t) => t.theme),
-    ['washed'],
+    ['washed', 'inked'],
   );
 
   const g = buildGraph(r);
-  check('themes reach the graph', Object.keys(g.themes).length, 2);
-  const washed = Object.values(g.themes).find((t) => t.name === 'washed');
+  check('themes reach the graph', Object.keys(g.themes).length, 3);
+  const themeNamed = (n) => Object.values(g.themes).find((t) => t.name === n);
   check(
     'the graph carries resolved override values',
-    Object.values(washed.overrides)[0],
+    Object.values(themeNamed('washed').overrides)[0],
     '#BBBBBB',
+  );
+
+  // Override values were once keyed by token alone, so two themes overriding
+  // the same token both reported whichever was extracted last. Asserted as a
+  // pair: checking either one alone passes by luck when it is the last.
+  check(
+    'each theme keeps its own value for a shared token',
+    ['washed', 'inked'].map((n) => Object.values(themeNamed(n).overrides)[0]),
+    ['#BBBBBB', '#1A3D5C'],
   );
 }
 
@@ -481,6 +498,206 @@ console.log('\n  variants');
   check('the graph records the variant group', v?.name, 'button');
   check('with its axes', Object.keys(v?.axes ?? {}).sort(), ['size', 'tone']);
   check('and their values', v?.axes.size, ['sm', 'md']);
+}
+
+console.log('\n  test matchers');
+{
+  const g = buildGraph(await analyze('./test/fixtures'));
+  const m = createMatchers(g);
+
+  // A test names a component the way a person does, not by the atomic classes
+  // it compiles to.
+  check('a unit reads as declarations', styleOf(g, 'Banner.tsx#banner'), {
+    'color@:hover': '#B01455',
+    color: 'colors.fg',
+    fontSize: '14px',
+    paddingBlock: 'space.lg',
+    position: 'relative',
+  });
+  check(
+    'conditions keep their own entry',
+    styleOf(g, 'Banner.tsx#banner')['color@:hover'],
+    '#B01455',
+  );
+  // A runtime value is genuinely unknowable; naming it beats inventing one.
+  check('dynamic values say so', styleOf(g, 'Banner.tsx#sized').height, '<dynamic>');
+  check('an unknown unit is null, not a throw', styleOf(g, 'Nope.tsx#gone'), null);
+
+  check(
+    'toUseToken passes on a token in use',
+    m.toUseToken('Banner.tsx#banner', 'colors.fg').pass,
+    true,
+  );
+  check(
+    'and on the bare token name',
+    m.toUseToken('Banner.tsx#banner', 'fg').pass,
+    true,
+  );
+  check(
+    'and fails on one that is not',
+    m.toUseToken('Banner.tsx#banner', 'colors.accent').pass,
+    false,
+  );
+
+  // The whole point of the matcher: a failure that does not send someone to
+  // the compiler output to work out why.
+  const why = m.toUseToken('Banner.tsx#banner', 'colors.accent').message();
+  check('the failure lists what is used', why.includes('colors.fg'), true);
+  check(
+    'and says when the token does not exist at all',
+    m
+      .toUseToken('Banner.tsx#banner', 'colors.nope')
+      .message()
+      .includes('No token named'),
+    true,
+  );
+  check(
+    'a missing unit explains the naming',
+    m.toUseToken('Nope.tsx#gone', 'colors.fg').message().includes('<file>#<key>'),
+    true,
+  );
+
+  check(
+    'toHaveTokenStyle matches tokens and literals',
+    m.toHaveTokenStyle('Banner.tsx#banner', {
+      color: 'colors.fg',
+      'color@:hover': '#B01455',
+    }).pass,
+    true,
+  );
+  const wrong = m.toHaveTokenStyle('Banner.tsx#banner', { color: 'colors.accent' });
+  check(
+    'and reports the value it found',
+    wrong.message().includes('found "colors.fg"'),
+    true,
+  );
+
+  check(
+    'toBeFullyTokenized fails on a raw value',
+    m.toBeFullyTokenized('Banner.tsx#banner').pass,
+    false,
+  );
+  check(
+    'naming the property and the rule',
+    m
+      .toBeFullyTokenized('Banner.tsx#banner')
+      .message()
+      .includes('fontSize: 14px  (no-raw-type)'),
+    true,
+  );
+
+  const clean = buildGraph(await analyze('./test/theme-fixtures'));
+  check(
+    'and passes when every value is a token',
+    createMatchers(clean).toBeFullyTokenized('Card.tsx#card').pass,
+    true,
+  );
+}
+
+console.log('\n  snapshot serializer');
+{
+  const g = buildGraph(await analyze('./test/fixtures'));
+  const s = createSerializer();
+  const print = (v) => JSON.stringify(v);
+
+  // The reason this exists: `x1e2nbdu x78zum5` is not reviewable.
+  check('props output is claimed', s.test({ className: 'x1e2nbdu x78zum5' }), true);
+  check('a normal className is not', s.test({ className: 'btn btn-primary' }), false);
+  check('a unit is claimed', s.test(Object.values(g.units)[0]), true);
+  check('anything else is left alone', s.test({ a: 1 }), false);
+
+  check(
+    'classes collapse to a count, not names',
+    s.serialize({ className: 'x1e2nbdu x78zum5' }, {}, '', 0, [], print),
+    '{"classes":"2 atomic classes"}',
+  );
+  check(
+    'dynamic custom properties are kept',
+    s.serialize(
+      { className: 'x1e2nbdu', style: { '--h': '4px' } },
+      {},
+      '',
+      0,
+      [],
+      print,
+    ),
+    '{"classes":"1 atomic class","dynamic":{"--h":"4px"}}',
+  );
+
+  const block = format(g, 'Banner.tsx#banner');
+  check('format leads with the unit id', block.split('\n')[0], 'Banner.tsx#banner');
+  check('and aligns declarations', block.includes('color         colors.fg'), true);
+  check(
+    'a unit can be found by suffix',
+    format(g, 'Banner.tsx#sized').startsWith('Banner.tsx#sized'),
+    true,
+  );
+  check(
+    'an unknown unit says so',
+    format(g, 'Nope.tsx#gone'),
+    '(no unit named Nope.tsx#gone)',
+  );
+}
+
+console.log('\n  theme matrix');
+{
+  const g = buildGraph(await analyze('./test/theme-fixtures'));
+
+  // The base is included deliberately: a suite that ran only the alternates
+  // would stop testing the theme most people see.
+  check(
+    'every theme runs, base first',
+    themesOf(g).map((t) => t.name),
+    ['base', 'inked', 'softer', 'washed'],
+  );
+
+  const seen = [];
+  forEachTheme(g, ({ name, valueOf }) => seen.push([name, valueOf('c.ink')]));
+  check('base resolves to the defined value', seen[0], ['base', '#111111']);
+  check(
+    'a theme resolves to its override',
+    seen.find((s) => s[0] === 'washed'),
+    ['washed', '#BBBBBB'],
+  );
+  check(
+    'a theme that does not touch the token keeps the base',
+    seen.find((s) => s[0] === 'softer'),
+    ['softer', '#111111'],
+  );
+  check(
+    'tokens resolve by bare name too',
+    seen.find((s) => s[0] === 'inked')[1],
+    '#1A3D5C',
+  );
+
+  const only = [];
+  forEachTheme(g, ({ name }) => only.push(name), { only: 'washed' });
+  check('only narrows to one theme', only, ['washed']);
+
+  // A theme in an app is usually several createTheme calls applied together;
+  // nothing in the source says which, so the suite says it.
+  const bundled = [];
+  forEachTheme(
+    g,
+    ({ name, valueOf }) =>
+      bundled.push([name, valueOf('c.ink'), valueOf('radii.round')]),
+    { bundles: { paper: ['washed', 'softer'] } },
+  );
+  check('a bundle applies every member', bundled[1], ['paper', '#BBBBBB', '16px']);
+  check('and replaces the one-per-theme default', bundled.length, 2);
+
+  let threw = '';
+  try {
+    themesOf(g, { paper: ['wahsed'] });
+  } catch (e) {
+    threw = e.message;
+  }
+  check(
+    'a misspelled member is an error, not a silent base',
+    threw.includes('not in the graph'),
+    true,
+  );
+  check('and lists the real names', threw.includes('washed'), true);
 }
 
 console.log(
