@@ -23,6 +23,12 @@ usage: scripts/task <target>
 USAGE
 }
 
+# The site imports a report this tool generates. It is not tracked, so a clean
+# checkout has none — and typechecking a file that imports it fails without it.
+ensure_report() {
+  node site/scripts/assay-report.mjs >/dev/null
+}
+
 need_deps() {
   if [ ! -d node_modules ]; then
     echo "dependencies are missing; run scripts/setup" >&2
@@ -43,6 +49,7 @@ case "${1:-}" in
   types)
     # `vite build` does not typecheck. Without this, a type error reaches main.
     need_deps
+    ensure_report
     npx --no-install tsc --noEmit --project site/tsconfig.json
     ;;
   test)
