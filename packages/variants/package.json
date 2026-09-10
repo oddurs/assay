@@ -1,0 +1,28 @@
+{
+  "name": "@stylegraph/variants",
+  "version": "0.1.0",
+  "description": "Compile-time variants for StyleX.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stylegraphjs/stylegraph.git",
+    "directory": "packages/variants"
+  },
+  "homepage": "https://stylegraph.dev",
+  "publishConfig": {
+    "access": "public"
+  }
+}

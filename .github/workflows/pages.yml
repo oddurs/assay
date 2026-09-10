@@ -3,6 +3,9 @@ name: pages
 on:
   push:
     branches: [main]
+    # A packages-only change can still move the score the site reports, so this
+    # filter is generous on purpose.
+    paths: ['site/**', 'packages/**', 'spec/**', '.github/workflows/pages.yml']
   workflow_dispatch:
 
 concurrency:
@@ -27,7 +30,6 @@ jobs:
             site/package-lock.json
 
       - run: npm ci --no-audit --no-fund
-      - run: npm ci --prefix site --no-audit --no-fund
 
       # The site is gated at 100% conformance; a drop fails the deploy, which is
       # the whole point of publishing a page that measures itself.

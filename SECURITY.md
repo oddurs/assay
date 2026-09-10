@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Assay is pre-1.0. Only the latest published version receives fixes.
+stylegraph is pre-1.0. Only the latest published version receives fixes.
 
 | Version | Supported |
 | ------- | --------- |
@@ -13,7 +13,7 @@ Assay is pre-1.0. Only the latest published version receives fixes.
 
 Report privately through GitHub Security Advisories:
 
-**https://github.com/oddurs/assay/security/advisories/new**
+**https://github.com/stylegraphjs/stylegraph/security/advisories/new**
 
 Please do not open a public issue for a security report.
 
@@ -29,8 +29,8 @@ Include what you can: affected version, reproduction steps, and impact.
 
 ## Scope
 
-Assay reads source files and writes reports. It executes no project code, makes
+stylegraph reads source files and writes reports. It executes no project code, makes
 no network requests, and sends nothing anywhere. Findings of most interest are
 therefore ones where analysing a hostile repository could read files outside the
 analysed root, or where a crafted config could cause arbitrary code execution
-(for example through `assay.config.js`, which is imported by design).
+(for example through `stylegraph.config.js`, which is imported by design).

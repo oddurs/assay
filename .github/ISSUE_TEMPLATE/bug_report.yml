@@ -1,11 +1,11 @@
 name: Bug report
-description: Something Assay reports is wrong, or it crashes.
+description: Something stylegraph reports is wrong, or it crashes.
 labels: [bug]
 body:
   - type: markdown
     attributes:
       value: |
-        A wrong number matters more than a crash here — if Assay scored something
+        A wrong number matters more than a crash here — if stylegraph scored something
         incorrectly, the smallest source snippet that reproduces it is the most
         useful thing you can give us.
 
@@ -13,7 +13,7 @@ body:
     id: what
     attributes:
       label: What happened
-      description: What Assay reported, and what you expected instead.
+      description: What stylegraph reported, and what you expected instead.
     validations:
       required: true
 
@@ -32,7 +32,7 @@ body:
     id: command
     attributes:
       label: Command
-      placeholder: npx assay ./src --violations
+      placeholder: npx stylegraph ./src --violations
     validations:
       required: true
 
@@ -45,7 +45,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: Assay version
+      label: stylegraph version
       placeholder: 0.2.0
     validations:
       required: true

@@ -1,4 +1,4 @@
-# assay-graph v1
+# The stylegraph format
 
 A description of every style in a codebase and where each value came from.
 
@@ -8,8 +8,8 @@ tool on purpose: **the format is the durable thing, and the tool is one
 implementation of it.**
 
 ```bash
-assay graph ./src --out graph.json
-assay diff base.json head.json
+stylegraph graph ./src --out graph.json
+stylegraph diff base.json head.json
 ```
 
 ## Design constraints

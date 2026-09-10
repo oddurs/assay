@@ -2,9 +2,8 @@
 /**
  * assay — compile-time design system conformance for StyleX.
  */
-import { analyze } from '../src/index.js';
-import { loadConfig } from '../src/config.js';
-import { FAMILIES, CAT_DOC } from '../src/taxonomy.js';
+import { audit } from '../src/index.js';
+import { loadConfig, FAMILIES, CAT_DOC } from '@stylegraph/extract';
 import {
   renderSummary,
   renderTokens,
@@ -15,28 +14,29 @@ import {
   green,
   red,
 } from '../src/report.js';
-import { buildGraph, diffGraphs, blastRadius, GRAPH_VERSION } from '../src/graph.js';
+import { buildGraph } from '@stylegraph/extract';
+import { diffGraphs, blastRadius, GRAPH_VERSION } from '@stylegraph/spec';
 import { resolveSide } from '../src/gitref.js';
 import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 
 const HELP = `
-  assay — what your design system actually shipped
+  stylegraph — what your design system actually shipped
 
   Usage
-    assay [path]                 score a tree (default: .)
-    assay tokens [path]          token inventory, resolved values, dead tokens
-    assay contrast [path]        contrast on pairings that actually occur
-    assay graph [path]           emit assay-graph.json v1
-    assay diff <base> <head>     what changed, and what it reaches
-    assay impact <token…> [path] blast radius of changing a token
-    assay rules                  the taxonomy: every rule and why it exists
-    assay explain                how the score is defined, and what it excludes
+    stylegraph [path]                 score a tree (default: .)
+    stylegraph tokens [path]          token inventory, resolved values, dead tokens
+    stylegraph contrast [path]        contrast on pairings that actually occur
+    stylegraph graph [path]           emit stylegraph.json v1
+    stylegraph diff <base> <head>     what changed, and what it reaches
+    stylegraph impact <token…> [path] blast radius of changing a token
+    stylegraph rules                  the taxonomy: every rule and why it exists
+    stylegraph explain                how the score is defined, and what it excludes
 
   diff / impact
     base and head may each be a path on disk or a git ref:
-      assay diff main HEAD
-      assay diff base-graph.json head-graph.json
-      assay diff ./old-src ./src
+      stylegraph diff main HEAD
+      stylegraph diff base-graph.json head-graph.json
+      stylegraph diff ./old-src ./src
     --out <file>                 write the graph (graph) or the diff (diff) as JSON
 
   Options
@@ -133,7 +133,7 @@ async function main() {
 
   const graphOf = async (dir) => {
     const cfg = await loadConfig(dir, buildOverrides());
-    const res = await analyze(dir, { config: cfg });
+    const res = await audit(dir, { config: cfg });
     return buildGraph(res, { version: VERSION, adapter: res.adapter });
   };
 
@@ -143,7 +143,7 @@ async function main() {
       const g = JSON.parse(readFileSync(arg, 'utf8'));
       if (g.version !== GRAPH_VERSION) {
         throw new Error(
-          `${arg} is assay-graph v${g.version}; this build reads v${GRAPH_VERSION}`,
+          `${arg} is stylegraph v${g.version}; this build reads v${GRAPH_VERSION}`,
         );
       }
       return { graph: g, label: arg, cleanup: () => {} };
@@ -159,7 +159,7 @@ async function main() {
 
   if (cmd === 'diff') {
     if (args._.length < 2)
-      throw new Error('diff needs two arguments: assay diff <base> <head>');
+      throw new Error('diff needs two arguments: stylegraph diff <base> <head>');
     const [baseArg, headArg] = args._;
     const base = await loadSide(baseArg);
     let head;
@@ -184,7 +184,7 @@ async function main() {
 
   if (cmd === 'impact') {
     // The last argument is a directory only if it IS one. Popping it blindly
-    // turns `assay impact colors.accent colors.signal` into a search of a
+    // turns `stylegraph impact colors.accent colors.signal` into a search of a
     // directory named after the second token.
     const parts = [...args._];
     let dir = '.';
@@ -193,7 +193,9 @@ async function main() {
       if (existsSync(last) && statSync(last).isDirectory()) dir = parts.pop();
     }
     if (!parts.length)
-      throw new Error('impact needs a token name: assay impact colors.accent [path]');
+      throw new Error(
+        'impact needs a token name: stylegraph impact colors.accent [path]',
+      );
 
     const graph = await graphOf(dir);
     const nameOf = (id) => id.split('#').pop();
@@ -254,14 +256,14 @@ async function main() {
     config.exclude = [...new Set([...(config.exclude ?? []), ...args.exclude])];
   }
 
-  const result = await analyze(root, { config });
+  const result = await audit(root, { config });
 
   if (cmd === 'graph') {
     const g = buildGraph(result, { version: VERSION, adapter: result.adapter });
     const json = JSON.stringify(g, null, 2);
     if (args.out) {
       writeFileSync(args.out, json);
-      console.log(`  assay-graph v${g.version} → ${args.out}`);
+      console.log(`  stylegraph v${g.version} → ${args.out}`);
       console.log(
         dim(
           `  ${g.summary.units} units · ${g.summary.tokens} tokens · ${g.summary.files} files`,
@@ -331,7 +333,7 @@ async function main() {
 main().then(
   (code) => process.exit(code),
   (err) => {
-    console.error(`assay: ${err.message}`);
+    console.error(`stylegraph: ${err.message}`);
     if (process.env.ASSAY_DEBUG) console.error(err.stack);
     process.exit(1);
   },

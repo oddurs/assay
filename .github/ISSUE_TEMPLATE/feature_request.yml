@@ -1,5 +1,5 @@
 name: Feature request
-description: Propose a capability Assay does not have.
+description: Propose a capability stylegraph does not have.
 labels: [enhancement]
 body:
   - type: textarea

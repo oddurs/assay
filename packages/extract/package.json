@@ -1,0 +1,33 @@
+{
+  "name": "@stylegraph/extract",
+  "version": "0.1.0",
+  "description": "Reads StyleX source and produces a stylegraph.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stylegraphjs/stylegraph.git",
+    "directory": "packages/extract"
+  },
+  "homepage": "https://stylegraph.dev",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@stylegraph/spec": "0.1.0",
+    "@babel/parser": "^7.26.0",
+    "@babel/traverse": "^7.26.0"
+  }
+}

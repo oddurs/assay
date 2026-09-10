@@ -1,36 +1,26 @@
 {
-  "name": "assay",
-  "type": "module",
-  "description": "Compile-time design system conformance for StyleX. Tells you what your design system actually shipped.",
-  "scripts": {
-    "test": "node test/run.mjs",
-    "assay": "node bin/assay.js",
-    "check": "scripts/task check"
-  },
-  "dependencies": {
-    "@babel/parser": "^7.26.0",
-    "@babel/traverse": "^7.26.0"
-  },
-  "version": "0.2.0",
+  "name": "stylegraph",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A specified graph of every style in a codebase, and the tools that read it. For StyleX.",
   "license": "MIT",
-  "bin": {
-    "assay": "./bin/assay.js"
-  },
-  "main": "./src/index.js",
-  "exports": {
-    ".": "./src/index.js",
-    "./taxonomy": "./src/taxonomy.js"
-  },
-  "files": [
-    "bin",
-    "src",
-    "README.md",
-    "GRAPH.md",
-    "LICENSE"
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "site"
   ],
   "engines": {
     "node": ">=18"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oddurs/assay.git"
+  },
+  "bugs": {
+    "url": "https://github.com/oddurs/assay/issues"
+  },
+  "homepage": "https://stylegraph.dev",
+  "author": "Oddur Sigurdsson",
   "keywords": [
     "stylex",
     "design-system",
@@ -41,6 +31,10 @@
     "a11y",
     "contrast"
   ],
+  "scripts": {
+    "test": "node test/run.mjs",
+    "check": "scripts/task check"
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "eslint": "^9.39.5",
@@ -48,13 +42,7 @@
     "prettier": "^3.9.6",
     "typescript-eslint": "^8.70.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/oddurs/assay.git"
-  },
-  "bugs": {
-    "url": "https://github.com/oddurs/assay/issues"
-  },
-  "homepage": "https://oddurs.github.io/assay/",
-  "author": "Oddur Sigurdsson"
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
 }

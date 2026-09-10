@@ -5,8 +5,7 @@ import tseslint from 'typescript-eslint';
 export default [
   {
     ignores: [
-      'node_modules/**',
-      'site/node_modules/**',
+      '**/node_modules/**',
       'site/dist/**',
       'site/src/generated/**',
       // Fixtures are inputs to the analyser, not code we ship. They contain
@@ -20,7 +19,13 @@ export default [
   },
   js.configs.recommended,
   {
-    files: ['**/*.{js,mjs}'],
+    files: [
+      'packages/**/*.{js,mjs}',
+      'scripts/**/*.{js,mjs}',
+      'test/**/*.mjs',
+      'site/scripts/**/*.mjs',
+      'eslint.config.js',
+    ],
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: 'module',

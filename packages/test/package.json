@@ -1,0 +1,31 @@
+{
+  "name": "@stylegraph/test",
+  "version": "0.1.0",
+  "description": "Test matchers, a readable serializer for atomic classes, and a theme-matrix runner.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stylegraphjs/stylegraph.git",
+    "directory": "packages/test"
+  },
+  "homepage": "https://stylegraph.dev",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@stylegraph/spec": "0.1.0"
+  }
+}

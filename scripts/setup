@@ -7,7 +7,6 @@ cd "$ROOT"
 
 echo "→ installing dependencies"
 npm ci --no-audit --no-fund
-npm ci --prefix site --no-audit --no-fund
 
 echo "→ pointing git at the tracked hooks"
 git config core.hooksPath .githooks

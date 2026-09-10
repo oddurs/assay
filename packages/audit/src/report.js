@@ -32,7 +32,7 @@ export function renderSummary(r, opts = {}) {
   const push = (s = '') => L.push(s);
 
   push();
-  push(`  ${bold('assay')}  ${dim(r.root)}`);
+  push(`  ${bold('stylegraph')}  ${dim(r.root)}`);
   if (r.config.configFile) push(`  ${dim(r.config.configFile)}`);
   push('  ' + dim('─'.repeat(58)));
 

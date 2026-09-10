@@ -6,8 +6,8 @@ enforced by hooks and by branch protection, not by etiquette.
 ## Setup
 
 ```sh
-git clone git@github.com:oddurs/assay.git
-cd assay
+git clone git@github.com:stylegraphjs/stylegraph.git
+cd stylegraph
 scripts/setup
 ```
 
@@ -23,7 +23,7 @@ a checkout.
 ```sh
 scripts/agent doctor                    # is this machine ready
 scripts/agent start feat/blast-radius   # branch + worktree from origin/main
-cd ../.worktrees/assay/feat/blast-radius
+cd ../.worktrees/stylegraph/feat/blast-radius
 
 # ... work ...
 
@@ -88,5 +88,5 @@ Two rules, both load-bearing:
    from the first prototype and are the regression net for every refactor.
 
 If you change the taxonomy in `src/taxonomy.js`, say why in the rule's `why`
-field — it is printed by `assay rules` and is the argument a user will judge the
+field — it is printed by `stylegraph rules` and is the argument a user will judge the
 score by.

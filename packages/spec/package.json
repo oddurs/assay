@@ -1,0 +1,28 @@
+{
+  "name": "@stylegraph/spec",
+  "version": "0.1.0",
+  "description": "The stylegraph format: version, validation, hashing, diff and blast radius.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stylegraphjs/stylegraph.git",
+    "directory": "packages/spec"
+  },
+  "homepage": "https://stylegraph.dev",
+  "publishConfig": {
+    "access": "public"
+  }
+}
