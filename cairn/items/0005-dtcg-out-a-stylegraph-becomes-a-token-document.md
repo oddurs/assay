@@ -2,8 +2,9 @@
 id: 5
 title: 'DTCG out: a stylegraph becomes a token document'
 type: feature
-status: backlog
+status: doing
 milestone: v0.2
+assignee: Oddur Sigurdsson
 labels:
   - tokens
 created: 2026-09-10

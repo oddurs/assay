@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@stylegraph/spec": "0.1.0",
-    "@stylegraph/extract": "0.1.0"
+    "@stylegraph/extract": "0.1.0",
+    "@stylegraph/tokens": "0.1.0"
   }
 }

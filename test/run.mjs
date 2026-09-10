@@ -351,6 +351,70 @@ console.log('\n  format conformance');
   );
 }
 
+console.log('\n  DTCG bridge');
+{
+  const { toDTCG, fromDTCG, toColor, fromColor } = await import('@stylegraph/tokens');
+
+  // 2025.10 takes a structured colour, not a hex string. Emitting "#7350F5"
+  // produces a document that looks right and validates nowhere.
+  const c = toColor('#7350F5');
+  check('colour is an object, not a string', typeof c, 'object');
+  check('colour space is named', c.colorSpace, 'srgb');
+  check(
+    'sRGB components are 0-1',
+    c.components.every((n) => n >= 0 && n <= 1),
+    true,
+  );
+  check('hex fallback is carried', c.hex, '#7350f5');
+  check('opaque colours omit alpha', 'alpha' in c, false);
+  check('alpha survives', toColor('rgba(0, 0, 0, 0.5)').alpha, 0.5);
+  check('colour round-trips', fromColor(toColor('#7350F5')), '#7350f5');
+
+  const g = buildGraph(await analyze('./site/src'));
+  const { document, lossy } = toDTCG(g);
+
+  // The whole reason to do this properly: structure survives.
+  check(
+    'an alias stays an alias',
+    document.colors.accent.$value,
+    '{palette.violet500}',
+  );
+  check(
+    'a primitive carries a real value',
+    typeof document.palette.violet500.$value,
+    'object',
+  );
+  check('$type is hoisted onto a uniform group', document.space.$type, 'dimension');
+  check('and removed from its leaves', 'type' in (document.space.gutter ?? {}), false);
+
+  // What cannot be carried is reported, never dropped silently.
+  check('lossy values are reported', lossy.length > 0, true);
+  check(
+    'and each says why',
+    lossy.every((l) => typeof l.reason === 'string'),
+    true,
+  );
+
+  const { files } = fromDTCG(document);
+  check('one file per group', files['colors.stylex.ts'] !== undefined, true);
+  // An alias inlined as a hex value throws away the structure the designer set.
+  check(
+    'an alias becomes an import, not a value',
+    /import \{ palette \} from '\.\/palette\.stylex';/.test(files['colors.stylex.ts']),
+    true,
+  );
+  check(
+    'and is referenced, not inlined',
+    /accent: palette\.violet500,/.test(files['colors.stylex.ts']),
+    true,
+  );
+  check(
+    'regenerating is byte-identical',
+    fromDTCG(JSON.parse(JSON.stringify(document))).files['colors.stylex.ts'],
+    files['colors.stylex.ts'],
+  );
+}
+
 console.log(
   `\n  ${fail === 0 ? `✓ ${pass} passed` : `✗ ${fail} failed, ${pass} passed`}\n`,
 );

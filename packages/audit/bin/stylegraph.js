@@ -72,6 +72,7 @@ function parseArgs(argv) {
     } else if (a === '--contrast-level') args.contrastLevel = argv[++i];
     else if (a === '--out') args.out = argv[++i];
     else if (a === '--path') args.path = argv[++i];
+    else if (a === '--from') args.from = argv[++i];
     else if (a.startsWith('--')) args.flags.add(a.slice(2));
     else args._.push(a);
   }
@@ -109,6 +110,7 @@ const COMMANDS = new Set([
   'diff',
   'impact',
   'validate',
+  'dtcg',
 ]);
 
 async function main() {
@@ -164,6 +166,44 @@ async function main() {
       throw e;
     }
   };
+
+  if (cmd === 'dtcg') {
+    const { toDTCG, fromDTCG } = await import('@stylegraph/tokens');
+
+    // --from reverses the bridge: a token document becomes StyleX sources.
+    if (args.from) {
+      const doc = JSON.parse(readFileSync(args.from, 'utf8'));
+      const { files, lossy } = fromDTCG(doc);
+      const outDir = args.out ?? '.';
+      const { mkdirSync } = await import('node:fs');
+      mkdirSync(outDir, { recursive: true });
+      for (const [name, source] of Object.entries(files)) {
+        writeFileSync(`${outDir}/${name}`, source);
+        console.log(`  ${outDir}/${name}`);
+      }
+      for (const l of lossy) console.log(dim(`  ! ${l.token}: ${l.reason}`));
+      return 0;
+    }
+
+    const cfg = await loadConfig(args._[0] ?? '.', buildOverrides());
+    const res = await audit(args._[0] ?? '.', { config: cfg });
+    const { document, lossy } = toDTCG(buildGraph(res, { version: VERSION }));
+    const json = JSON.stringify(document, null, 2);
+
+    if (args.out) {
+      writeFileSync(args.out, json);
+      console.log(`  DTCG 2025.10 → ${args.out}`);
+      console.log(dim(`  ${Object.keys(document).length} groups`));
+    } else {
+      console.log(json);
+    }
+    // Never silent: a lossy conversion the user does not know about is worse
+    // than one that fails.
+    for (const l of lossy) {
+      console.error(dim(`  ! ${l.token.split('#').pop()}: ${l.reason}`));
+    }
+    return 0;
+  }
 
   if (cmd === 'validate') {
     const file = args._[0];
