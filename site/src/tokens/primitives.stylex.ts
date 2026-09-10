@@ -27,7 +27,7 @@ export const palette = stylex.defineConsts({
   ink900: '#E4E9F1',
   ink950: '#FFFFFF',
 
-  // Signal — plotter rose, carried over from the Assay report identity
+  // Signal — plotter rose, carried over from the stylegraph report identity
   rose300: '#FFB3CF',
   rose400: '#FF7FAE',
   rose500: '#F5468C',

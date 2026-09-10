@@ -73,36 +73,38 @@ const styles = stylex.create({
   },
 });
 
-const STEPS = [
-  {
-    when: 'Sep',
-    name: 'M0 Spike',
-    body: 'Babel visitor, one number, verified against a hand count.',
-    state: 'done' as const,
-  },
+type StepState = 'done' | 'now' | 'next';
+
+const STEPS: { when: string; name: string; body: string; state: StepState }[] = [
   {
     when: 'Oct',
-    name: 'M1 The number',
-    body: 'CLI, config, dead tokens, contrast on real pairings. Published MIT.',
-    state: 'done' as const,
-  },
-  {
-    when: 'Nov',
-    name: 'M2 Graph format',
-    body: 'Versioned assay-graph.json, then diffing and blast radius on top.',
-    state: 'done' as const,
+    name: 'v0.1 The format',
+    body: 'The graph is specified and one tool reads it well enough to run a real design system.',
+    state: 'now',
   },
   {
     when: 'Dec',
-    name: 'M3 The gate',
-    body: 'GitHub Action, PR comment, fail-on-regression.',
-    state: 'now' as const,
+    name: 'v0.2 Tokens',
+    body: 'DTCG both directions. StyleX stops being outside the industry token pipeline.',
+    state: 'next',
   },
   {
     when: 'Feb',
-    name: 'M4 The bill',
-    body: '--only change sets feeding Chromatic and Playwright.',
-    state: 'next' as const,
+    name: 'v0.3 Authoring',
+    body: 'Variants to write with, and tests that assert on tokens rather than class names.',
+    state: 'next',
+  },
+  {
+    when: 'Apr',
+    name: 'v1.0 Stable',
+    body: 'The format frozen at v1, every package documented, safe to depend on.',
+    state: 'next',
+  },
+  {
+    when: 'later',
+    name: 'An agent surface',
+    body: 'MCP over the graph, so an agent can check a change before it writes it.',
+    state: 'next',
   },
 ];
 
@@ -157,9 +159,9 @@ export function Roadmap() {
       </div>
 
       <div {...stylex.props(styles.gate)}>
-        <Badge tone="signal">Gate 1 · 13 Nov 2026</Badge>
+        <Badge tone="signal">The bet</Badge>
         <div {...stylex.props(styles.gateBody)}>
-          <Text role="title">The traction gate</Text>
+          <Text role="title">Why the format comes first</Text>
           <Text role="body">
             Thirty days after the launch post, the question is not whether people liked
             it — it is whether anyone ran it on their own codebase unasked. Three teams

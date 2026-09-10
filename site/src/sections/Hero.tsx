@@ -144,7 +144,7 @@ export function Hero() {
 
           <Statement
             scale="mega"
-            tail="Assay reads the style graph the StyleX compiler already builds, and tells you what actually shipped."
+            tail="stylegraph reads the style graph the StyleX compiler already builds, and tells you what actually shipped."
           >
             Your design system is the only thing you{' '}
             <span {...stylex.props(styles.gradientWord)}>can&rsquo;t measure</span>.
@@ -159,7 +159,7 @@ export function Hero() {
             </Button>
           </div>
 
-          <CopyField command="npx assay ." note="MIT · no account · no server" />
+          <CopyField command="npx stylegraph ." note="MIT · no account · no server" />
 
           <div {...stylex.props(styles.facts)}>
             <FactRow facts={FACTS} ruled />

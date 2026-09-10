@@ -38,7 +38,7 @@ const styles = stylex.create({
     overflow: 'hidden',
   },
   // A StyleX dynamic style: compiles to a CSS custom property set inline.
-  // Assay reports these as `dynamic` — genuinely unknowable at build time,
+  // stylegraph reports these as `dynamic` — genuinely unknowable at build time,
   // and never counted as either a pass or a violation.
   fill: (width: string) => ({
     position: 'absolute',

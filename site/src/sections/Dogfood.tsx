@@ -93,7 +93,7 @@ export function Dogfood() {
       grid="top"
       eyebrow="Dogfood"
       title="This page is measured by the thing it is selling."
-      tail="Every number below was produced by running the real Assay over this site’s own source."
+      tail="Every number below was produced by running the real tool over this site’s own source."
       aside={
         <Text role="body">
           The build writes the result into a JSON file the page imports, so nothing here
@@ -107,7 +107,7 @@ export function Dogfood() {
           <div {...stylex.props(styles.panel)}>
             <div {...stylex.props(styles.head)}>
               <Badge tone="pass">Gate passing</Badge>
-              <Text role="caption">assay · src/</Text>
+              <Text role="caption">stylegraph · src/</Text>
               <span {...stylex.props(styles.stamp)}>built {STAMP}Z</span>
             </div>
 
@@ -176,8 +176,8 @@ export function Dogfood() {
             <Text role="body">
               The meter above sets its own width from a prop, which StyleX compiles to a
               CSS custom property. That value is genuinely unknowable at build time, so
-              Assay reports it in its own category and never counts it as either a pass
-              or a violation. A metric that hides its blind spot is worse than no
+              stylegraph reports it in its own category and never counts it as either a
+              pass or a violation. A metric that hides its blind spot is worse than no
               metric.
             </Text>
           </div>

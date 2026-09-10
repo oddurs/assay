@@ -16,6 +16,7 @@ usage: scripts/task <target>
   fmt         format in place
   fmt:check   verify formatting, non-zero on drift
   lint        lint; warnings are errors
+  types       typecheck; vite build does not do this for you
   test        the tool's test suite, plus the site's own conformance gate
   build       build the site (also regenerates its measured report)
   check       fmt:check && lint && test && build
@@ -39,6 +40,11 @@ case "${1:-}" in
   lint)
     npx --no-install eslint . --max-warnings=0 --no-warn-ignored
     ;;
+  types)
+    # `vite build` does not typecheck. Without this, a type error reaches main.
+    need_deps
+    npx --no-install tsc --noEmit --project site/tsconfig.json
+    ;;
   test)
     need_deps
     node test/run.mjs
@@ -55,6 +61,7 @@ case "${1:-}" in
   check)
     "$0" fmt:check
     "$0" lint
+    "$0" types
     "$0" test
     "$0" build
     ;;
