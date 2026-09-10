@@ -22,9 +22,9 @@ usage: scripts/task <target>
 USAGE
 }
 
-need_site_deps() {
-  if [ ! -d site/node_modules ]; then
-    echo "site dependencies are missing; run scripts/setup" >&2
+need_deps() {
+  if [ ! -d node_modules ]; then
+    echo "dependencies are missing; run scripts/setup" >&2
     exit 1
   fi
 }
@@ -40,15 +40,17 @@ case "${1:-}" in
     npx --no-install eslint . --max-warnings=0 --no-warn-ignored
     ;;
   test)
+    need_deps
     node test/run.mjs
     # Dogfooding is not decoration: the site must stay 100% conformant, and the
     # gate that enforces that is part of the test suite, not a separate ritual.
-    need_site_deps
-    node bin/assay.js site/src
+    # It runs against the workspace, so a regression fails here rather than
+    # waiting for a release.
+    node packages/audit/bin/stylegraph.js site/src
     ;;
   build)
-    need_site_deps
-    npm run build --prefix site
+    need_deps
+    npm run build --workspace site
     ;;
   check)
     "$0" fmt:check

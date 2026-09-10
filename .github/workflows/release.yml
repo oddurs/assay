@@ -19,12 +19,9 @@ jobs:
         with:
           node-version-file: .node-version
           cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            site/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - run: npm ci --no-audit --no-fund
-      - run: npm ci --prefix site --no-audit --no-fund
       - run: scripts/task check
 
       - name: Create the release

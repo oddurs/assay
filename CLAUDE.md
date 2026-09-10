@@ -10,7 +10,7 @@ share a checkout.
 ```sh
 scripts/agent doctor                 # verify the environment first
 scripts/agent start <type>/<slug>    # branch + worktree from origin/main
-cd ../.worktrees/assay/<type>/<slug> # the script prints this path; it will not cd for you
+cd ../.worktrees/stylegraph/<type>/<slug> # the script prints this path; it will not cd for you
 scripts/agent check                  # everything CI runs
 scripts/agent commit "<message>"
 scripts/agent pr
@@ -49,7 +49,7 @@ hook rejects these, and the release workflow strips them from generated notes.
 
 ## What this project is
 
-Assay reads the style graph the StyleX compiler produces and reports what a
+stylegraph reads the style graph the StyleX compiler produces and reports what a
 codebase actually shipped: token conformance, dead tokens, contrast on real
 pairings, and a versioned graph that diffing and blast radius are built on.
 

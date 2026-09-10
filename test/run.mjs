@@ -3,9 +3,10 @@
  * was counted by hand from test/fixtures, with the reasoning written into the
  * fixture comments. They are the regression net for every refactor since.
  */
-import { analyze, parseColor, ratio } from '../src/index.js';
-import { buildGraph, diffGraphs, blastRadius, graphHash } from '../src/graph.js';
-import { globToRegExp } from '../src/config.js';
+import { audit as analyze, parseColor, ratio } from '@stylegraph/audit';
+import { buildGraph } from '@stylegraph/extract';
+import { diffGraphs, blastRadius, graphHash } from '@stylegraph/spec';
+import { globToRegExp } from '@stylegraph/extract';
 
 let pass = 0,
   fail = 0;

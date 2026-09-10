@@ -1,0 +1,35 @@
+{
+  "name": "@stylegraph/audit",
+  "version": "0.1.0",
+  "description": "Scores a stylegraph: conformance, contrast on real pairings, dead tokens, blast radius.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stylegraphjs/stylegraph.git",
+    "directory": "packages/audit"
+  },
+  "homepage": "https://stylegraph.dev",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "stylegraph": "./bin/stylegraph.js"
+  },
+  "dependencies": {
+    "@stylegraph/spec": "0.1.0",
+    "@stylegraph/extract": "0.1.0"
+  }
+}

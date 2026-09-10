@@ -11,7 +11,7 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { analyze } from '../../src/index.js';
+import { audit as analyze } from '@stylegraph/audit';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const SRC = resolve(here, '../src');

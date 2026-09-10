@@ -1,0 +1,32 @@
+{
+  "name": "@stylegraph/mcp",
+  "version": "0.1.0",
+  "description": "MCP server exposing a stylegraph to agents.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stylegraphjs/stylegraph.git",
+    "directory": "packages/mcp"
+  },
+  "homepage": "https://stylegraph.dev",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@stylegraph/spec": "0.1.0",
+    "@stylegraph/audit": "0.1.0"
+  }
+}

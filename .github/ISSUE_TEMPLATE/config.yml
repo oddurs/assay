@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Question or idea
-    url: https://github.com/oddurs/assay/discussions
+    url: https://github.com/stylegraphjs/stylegraph/discussions
     about: Ask about usage, or float an idea before it becomes an issue.
   - name: Security report
-    url: https://github.com/oddurs/assay/security/advisories/new
+    url: https://github.com/stylegraphjs/stylegraph/security/advisories/new
     about: Report a vulnerability privately. Do not open a public issue.

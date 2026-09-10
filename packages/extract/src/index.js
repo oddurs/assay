@@ -9,7 +9,7 @@ import { join, relative, extname, resolve as resolvePath } from 'node:path';
 import { stylexAdapter } from './adapters/stylex.js';
 import { buildFamilies, CAT, CAT_DOC, FAMILIES } from './taxonomy.js';
 import { loadConfig, matcher, ownerOf } from './config.js';
-import { analyzeContrast, makeResolver } from './contrast.js';
+import { makeResolver } from './values.js';
 
 const EXTS = new Set(['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs']);
 
@@ -127,9 +127,6 @@ export async function analyze(root, opts = {}) {
     : [...out.tokens.keys()].filter((id) => !out.referenced.has(id));
 
   const resolve = makeResolver(out.tokens);
-  const contrast = cfg.contrast.enabled
-    ? analyzeContrast(out.pairs, resolve, { level: cfg.contrast.level })
-    : { level: cfg.contrast.level, checked: 0, failing: [], results: [], unpaired: 0 };
 
   const familyRows = Object.entries(out.byFamily)
     .map(([name, v]) => {
@@ -183,7 +180,7 @@ export async function analyze(root, opts = {}) {
     suppressed,
     byOwner,
     byRule,
-    contrast,
+    pairs: out.pairs,
     tokens: {
       defined: [...out.tokens.keys()],
       referenced: [...out.referenced],
@@ -202,12 +199,8 @@ export async function analyze(root, opts = {}) {
 }
 
 export { FAMILIES, CAT, CAT_DOC } from './taxonomy.js';
-export { loadConfig, DEFAULTS } from './config.js';
-export { parseColor, ratio } from './contrast.js';
-export {
-  buildGraph,
-  diffGraphs,
-  blastRadius,
-  graphHash,
-  GRAPH_VERSION,
-} from './graph.js';
+export { loadConfig, DEFAULTS, globToRegExp, matcher, ownerOf } from './config.js';
+export { buildGraph } from './build.js';
+export { makeResolver } from './values.js';
+// Re-exported for convenience so a consumer needs one import, not two.
+export { GRAPH_VERSION, validateGraph } from '@stylegraph/spec';

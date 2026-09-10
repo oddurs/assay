@@ -22,12 +22,9 @@ jobs:
         with:
           node-version-file: .node-version
           cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            site/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - run: npm ci --no-audit --no-fund
-      - run: npm ci --prefix site --no-audit --no-fund
 
       # One command, the same one the hooks run. CI and local cannot drift.
       - run: scripts/task check
