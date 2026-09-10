@@ -13,7 +13,12 @@ cd "$ROOT"
 # a differently named folder, and the worktree layout should not depend on that.
 REPO=$(git config --get remote.origin.url 2>/dev/null | sed -e 's|.*[:/]||' -e 's|\.git$||')
 [ -z "${REPO:-}" ] && REPO=$(basename "$ROOT")
-WORKTREES="$ROOT/../.worktrees/$REPO"
+# Always relative to the MAIN worktree. $ROOT is wherever this script was run
+# from, which inside a worktree is that worktree — and nesting worktrees inside
+# worktrees is how you end up with .worktrees/x/chore/.worktrees/x/chore/...
+MAIN=$(git worktree list --porcelain 2>/dev/null | awk '/^worktree /{print $2; exit}')
+[ -n "${MAIN:-}" ] || MAIN="$ROOT"
+WORKTREES="$MAIN/../.worktrees/$REPO"
 BRANCH_PATTERN='^(feat|fix|chore|docs|perf|refactor|test)/[a-z0-9][a-z0-9._-]*$'
 
 say()  { printf '→ %s\n' "$*"; }

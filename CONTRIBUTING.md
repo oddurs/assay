@@ -21,9 +21,10 @@ one worktree, one branch, and one PR — so two people (or two agents) never sha
 a checkout.
 
 ```sh
-scripts/agent doctor                    # is this machine ready
-scripts/agent start feat/blast-radius   # branch + worktree from origin/main
-cd ../.worktrees/stylegraph/feat/blast-radius
+cairn next                       # what is ready to work on
+scripts/agent start --item 12    # branch named from the item, worktree ready,
+                                 # dependencies installed, hooks wired, item claimed
+cd ../.worktrees/stylegraph/...  # the path it prints
 
 # ... work ...
 

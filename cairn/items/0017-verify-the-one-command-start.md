@@ -2,8 +2,9 @@
 id: 17
 title: Verify the one-command start
 type: chore
-status: backlog
+status: done
 milestone: later
+assignee: Oddur Sigurdsson
 created: 2026-09-10
 updated: 2026-09-10
 priority: p2
