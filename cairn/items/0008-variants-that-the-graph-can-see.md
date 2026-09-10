@@ -2,7 +2,7 @@
 id: 8
 title: Variants that the graph can see
 type: feature
-status: doing
+status: done
 milestone: v0.3
 assignee: Oddur Sigurdsson
 labels:

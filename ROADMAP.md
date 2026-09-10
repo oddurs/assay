@@ -34,16 +34,19 @@ DTCG both directions. StyleX stops being outside the industry's token toolchain.
 
 ## v0.3 — Authoring and verification
 
-`··········` 0% · 0 of 4 done · due 2027-02-01
+`###·······` 25% · 1 of 4 done · due 2027-02-01
 
 Variants to write with, and tests that assert on tokens rather than on generated class names.
 
 ### backlog
 
-- [ ] `0008` Variants that the graph can see <sup>feature · p0 · variants</sup>
 - [ ] `0009` Matchers that assert on tokens, not class names <sup>feature · p0 · test</sup>
 - [ ] `0010` A snapshot serializer a human can review <sup>feature · p1 · test</sup>
 - [ ] `0011` Run a suite under every theme <sup>feature · p1 · test</sup>
+
+### done
+
+- [x] `0008` Variants that the graph can see <sup>feature · p0 · variants</sup>
 
 ## v1.0 — Stable
 
