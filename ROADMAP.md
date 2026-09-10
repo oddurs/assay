@@ -4,19 +4,21 @@
 
 ## v0.1 — The format and the audit
 
-`###·······` 25% · 1 of 4 done · due 2026-10-15
+`#######···` 67% · 4 of 6 done · due 2026-10-15
 
 The graph is specified and one tool reads it well enough to run a real project's design system.
 
 ### backlog
 
 - [ ] `0001` Freeze the graph format at v1 <sup>feature · p0 · spec</sup>
-- [ ] `0003` Rename the site from Assay to stylegraph <sup>docs · p1 · site</sup>
 - [ ] `0004` Buy stylegraph.dev and point Pages at it <sup>chore · p1 · needs-a-card</sup>
 
 ### done
 
 - [x] `0002` Theme-aware contrast <sup>bug · p0 · audit</sup>
+- [x] `0003` Rename the site from Assay to stylegraph <sup>docs · p1 · site</sup>
+- [x] `0016` Make starting work one command <sup>chore · p0 · tooling</sup>
+- [x] `0018` The site becomes a family, not one product <sup>feature · p0 · site</sup>
 
 ## v0.2 — Into the token pipeline
 
@@ -57,10 +59,14 @@ The format is frozen at v1, every package is documented, and the whole family is
 
 ## later — Someday
 
-`··········` 0% · 0 of 1 done
+`#####·····` 50% · 1 of 2 done
 
 Good ideas without a date yet.
 
 ### backlog
 
 - [ ] `0015` Interactive token catalog on the site <sup>feature · p2 · site</sup>
+
+### done
+
+- [x] `0017` Verify the one-command start <sup>chore · p2</sup>

@@ -2,7 +2,7 @@
 id: 3
 title: Rename the site from Assay to stylegraph
 type: docs
-status: backlog
+status: done
 milestone: v0.1
 labels:
   - site

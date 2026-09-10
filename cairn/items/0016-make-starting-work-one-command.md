@@ -2,7 +2,7 @@
 id: 16
 title: Make starting work one command
 type: chore
-status: backlog
+status: done
 milestone: v0.1
 labels:
   - tooling
