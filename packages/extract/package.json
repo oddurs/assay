@@ -28,6 +28,6 @@
   "dependencies": {
     "@stylegraph/spec": "0.1.0",
     "@babel/parser": "^7.26.0",
-    "@babel/traverse": "^7.26.0"
+    "@babel/traverse": "^8.0.4"
   }
 }
