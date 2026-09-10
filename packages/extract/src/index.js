@@ -60,6 +60,7 @@ export async function analyze(root, opts = {}) {
     referenced: new Set(),
     pairs: new Map(),
     units: new Map(),
+    themes: new Map(),
     byFile: new Map(),
   };
 
@@ -163,6 +164,14 @@ export async function analyze(root, opts = {}) {
     adapter: adapter.name,
     units: out.units,
     rawTokens: out.tokens,
+    themes: out.themes,
+    // Each theme's overrides, resolved — the graph carries values, not ASTs.
+    themeValues: Object.fromEntries(
+      [...out.themes.values()].flatMap((t) => {
+        const r = makeResolver(out.tokens, t.overrides);
+        return [...t.overrides.keys()].map((id) => [id, r(id)]);
+      }),
+    ),
     config: cfg,
     score,
     token,

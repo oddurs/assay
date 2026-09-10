@@ -298,7 +298,8 @@ async function main() {
   if (gate == null) return 0;
 
   const pct = (result.score ?? 1) * 100;
-  const contrastFails = result.contrast.failing.length;
+  // Every theme counts, not only the default one.
+  const contrastFails = (result.contrastFailing ?? result.contrast.failing).length;
 
   if (pct + 1e-9 < gate) {
     if (!args.flags.has('json')) {

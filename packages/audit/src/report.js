@@ -110,19 +110,22 @@ export function renderSummary(r, opts = {}) {
   push();
 
   if (r.config.contrast.enabled && r.contrast.checked) {
-    const f = r.contrast.failing.length;
-    const head =
-      f === 0
-        ? green(
-            `  ✓ contrast ${r.contrast.level}: ${r.contrast.checked} real pairings, all pass`,
-          )
-        : red(
-            `  ✗ contrast ${r.contrast.level}: ${f} of ${r.contrast.checked} real pairings fail`,
-          );
-    push(head);
-    for (const x of r.contrast.failing.slice(0, 8)) {
+    // Every theme counts. Reporting only the base theme's result is how three
+    // of four themes on our own site passed while carrying AA failures.
+    const all = r.contrastFailing ?? r.contrast.failing;
+    const themed = (r.contrastByTheme ?? []).length;
+    const scope = themed
+      ? `${r.contrast.checked} real pairings across ${themed + 1} themes`
+      : `${r.contrast.checked} real pairings`;
+    push(
+      all.length === 0
+        ? green(`  ✓ contrast ${r.contrast.level}: ${scope}, all pass`)
+        : red(`  ✗ contrast ${r.contrast.level}: ${all.length} failing · ${scope}`),
+    );
+    for (const x of all.slice(0, 8)) {
+      const where = x.theme ? magenta(` [${x.theme}]`) : '';
       push(
-        `    ${x.file}:${x.line} ${dim(x.styleRule)}  ` +
+        `    ${x.file}:${x.line} ${dim(x.styleRule)}${where}  ` +
           `${x.ratio}:1 ${dim(`needs ${x.required}`)}  ${x.fg} on ${x.bg}`,
       );
     }
@@ -216,7 +219,10 @@ export function renderContrast(r) {
   const L = [];
   const push = (s = '') => L.push(s);
   push();
-  push(`  ${bold('contrast')}  ${dim(`${r.contrast.level} · real pairings only`)}`);
+  const themeCount = (r.contrastByTheme ?? []).length;
+  push(
+    `  ${bold('contrast')}  ${dim(`${r.contrast.level} · real pairings` + (themeCount ? ` · ${themeCount + 1} themes` : ''))}`,
+  );
   push('  ' + dim('─'.repeat(58)));
   if (!r.contrast.checked) {
     push('  No co-declared foreground/background pairs found.');
@@ -228,11 +234,19 @@ export function renderContrast(r) {
     push();
     return L.join('\n');
   }
-  for (const x of r.contrast.results) {
+  const rows = [
+    ...r.contrast.results.map((x) => ({ ...x, theme: null })),
+    ...(r.contrastByTheme ?? []).flatMap((run) =>
+      run.results.filter((x) => !x.passes).map((x) => ({ ...x, theme: run.theme })),
+    ),
+  ].sort((a, b) => a.ratio - b.ratio);
+
+  for (const x of rows) {
     const mark = x.passes ? green('pass') : red('FAIL');
     push(
       `  ${mark}  ${pad(x.ratio.toFixed(2), 6)}:1 ${dim(`needs ${x.required}`)}` +
-        `${x.large ? dim(' large') : '     '}  ${x.file}:${x.line} ${dim(x.styleRule)}`,
+        `${x.large ? dim(' large') : '     '}  ${x.file}:${x.line} ${dim(x.styleRule)}` +
+        (x.theme ? magenta(` [${x.theme}]`) : ''),
     );
     push(
       dim(

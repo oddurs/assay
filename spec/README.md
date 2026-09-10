@@ -34,6 +34,7 @@ every hash.
   "root": "site/src",
   "summary": { … },
   "tokens": { "<tokenId>": Token },
+  "themes": { "<themeId>": Theme },
   "units":  { "<unitId>":  Unit },
   "dead":   ["<tokenId>", …]
 }
@@ -79,6 +80,34 @@ report a blast radius of zero for the most dangerous change in the system.
 conditional value resolves to its `default` branch, since that is what renders
 absent a media query. Producers that cannot resolve a value must emit `null`
 rather than a guess.
+
+## Theme
+
+A theme is a `createTheme` call: a set of alternate values for one var group.
+
+```jsonc
+{
+  "id": "themes/themes.ts#daylight",
+  "file": "themes/themes.ts",
+  "name": "daylight",
+  "group": "tokens/color.stylex.ts#colors",
+  "overrides": {
+    "tokens/color.stylex.ts#colors.accent": "#5F3AE8",
+    "tokens/color.stylex.ts#colors.bgBase": "#FFFFFF",
+  },
+}
+```
+
+Themes are part of the format because **a token's value is only true under one
+of them.** A consumer asking "what does `colors.accent` render as" cannot answer
+from `tokens` alone, and re-extracting to find out defeats the point of having a
+format.
+
+`overrides` carries resolved values, following the same chain rules as a token's
+`value`, with the theme's own overrides taking precedence. A theme that
+overrides a group unrelated to a question — corner radii, for a contrast check —
+cannot change that question's answer, and a consumer should skip it rather than
+report a duplicate result under a misleading name.
 
 ## Unit
 
