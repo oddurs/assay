@@ -30,7 +30,8 @@ usage() {
 usage: scripts/agent <command>
 
   doctor              check the environment and report every problem
-  start <type>/<slug> branch + worktree from origin/<default>
+  start <type>/<slug> branch + worktree, installed, hooked, ready
+  start --item <id>   the same, named and claimed from the roadmap
   check               scripts/task check
   commit <msg>        validate Conventional Commits, then commit
   pr [--draft]        check, push, open a PR, print the URL
@@ -83,7 +84,9 @@ cmd_doctor() {
   if [ "$hooks" = ".githooks" ]; then
     report OK "hooks wired to .githooks"
   else
-    report FAIL "hooks not wired; run: git config core.hooksPath .githooks"
+    # Safe and unambiguous, so repair it rather than making someone read an
+    # error and retype the fix.
+    git config core.hooksPath .githooks && report OK "hooks wired to .githooks (repaired)"
   fi
 
   for t in fmt fmt:check lint types test build check; do
@@ -104,9 +107,49 @@ cmd_doctor() {
   say "all good"
 }
 
+# A cairn item type maps to a branch prefix; the roadmap already knows what
+# kind of work an item is, so there is no reason to type it twice.
+branch_prefix_for() {
+  case "$1" in
+    bug) echo fix ;;
+    feature) echo feat ;;
+    docs) echo docs ;;
+    chore) echo chore ;;
+    *) echo chore ;;
+  esac
+}
+
+slugify() {
+  printf '%s' "$1" | tr '[:upper:]' '[:lower:]' \
+    | sed -e 's/[^a-z0-9]\{1,\}/-/g' -e 's/^-//' -e 's/-$//' | cut -c1-48
+}
+
 cmd_start() {
-  branch=${1:-}
-  [ -n "$branch" ] || die "usage: scripts/agent start <type>/<slug>"
+  item=''
+  branch=''
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --item) item=$2; shift 2 ;;
+      *) branch=$1; shift ;;
+    esac
+  done
+
+  # `start --item 12` derives everything from the roadmap.
+  if [ -n "$item" ]; then
+    command -v cairn >/dev/null 2>&1 || die "--item needs cairn on PATH"
+    meta=$(cairn show "$item" --json 2>/dev/null) || die "no such item: $item"
+    title=$(printf '%s' "$meta" | sed -n 's/.*"title"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
+    kind=$(printf '%s' "$meta" | sed -n 's/.*"type"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
+    [ -n "$title" ] || die "could not read item $item"
+    # Strip leading zeros before formatting: printf reads 0017 as OCTAL, which
+    # silently produces 0015, and 0008 is not valid octal at all.
+    n=$(printf '%s' "$item" | sed 's/^0*//'); [ -n "$n" ] || n=0
+    id=$(printf '%04d' "$n")
+    branch="$(branch_prefix_for "$kind")/$id-$(slugify "$title")"
+    say "item $id · $title"
+  fi
+
+  [ -n "$branch" ] || die "usage: scripts/agent start <type>/<slug> | --item <id>"
   echo "$branch" | grep -Eq "$BRANCH_PATTERN" \
     || die "branch must match $BRANCH_PATTERN (got: $branch)"
 
@@ -124,9 +167,29 @@ cmd_start() {
   mkdir -p "$(dirname "$dir")"
   git worktree add -b "$branch" "$dir" "origin/$base" >/dev/null
 
+  # A worktree that needs three manual commands before it can be worked in is
+  # three chances to forget the hooks, and forgetting them disables every guard.
+  say "wiring the tracked hooks"
+  git -C "$dir" config core.hooksPath .githooks
+
+  say "installing dependencies"
+  (cd "$dir" && npm install --no-audit --no-fund --silent >/dev/null 2>&1) \
+    || die "npm install failed in $dir"
+
+  say "generating the site report"
+  (cd "$dir" && node site/scripts/assay-report.mjs >/dev/null 2>&1) || true
+
+  # Claim inside the worktree: claiming in the main checkout dirties it, and a
+  # dirty main blocks the next pull.
+  if [ -n "$item" ]; then
+    say "claiming item $item"
+    (cd "$dir" && cairn claim "$item" >/dev/null 2>&1) || say "could not claim $item (continuing)"
+  fi
+
   echo
   say "ready — move into it yourself:"
-  echo "  cd $dir"
+  # Normalised: the raw path contains a ../ and is unpleasant to read or paste.
+  echo "  cd $(CDPATH= cd -- "$dir" && pwd)"
 }
 
 cmd_commit() {
@@ -137,6 +200,13 @@ cmd_commit() {
     || die "not a Conventional Commit: $msg"
   say "committing"
   git commit -m "$msg"
+}
+
+# `fix/0002-slug` carries its item id. Deriving it from the branch means the
+# link survives without a state file to get out of sync.
+item_from_branch() {
+  git rev-parse --abbrev-ref HEAD 2>/dev/null \
+    | sed -n 's|^[a-z]\{1,\}/0*\([0-9]\{1,\}\)-.*|\1|p'
 }
 
 cmd_pr() {
@@ -156,7 +226,14 @@ cmd_pr() {
   say "opening the pull request"
   # --fill takes the title and body from the commits; the template covers the rest.
   gh pr create --base "$base" --head "$branch" --fill $draft
-  gh pr view --json url --jq .url
+  url=$(gh pr view --json url --jq .url)
+  echo "$url"
+
+  it=$(item_from_branch)
+  if [ -n "$it" ] && command -v cairn >/dev/null 2>&1; then
+    cairn note "$it" "Pull request: $url" >/dev/null 2>&1 \
+      && say "recorded the pull request on item $it"
+  fi
 }
 
 cmd_sync() {
@@ -169,6 +246,7 @@ cmd_sync() {
 
 cmd_done() {
   branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')
+  it=$(item_from_branch)
   base=$(default_branch)
   [ "$branch" = "$base" ] && die "run this from the branch's worktree, not $base"
 
@@ -202,6 +280,14 @@ cmd_done() {
   say "pruning"
   git worktree prune
   git fetch --prune origin --quiet
+
+  if [ -n "$it" ] && command -v cairn >/dev/null 2>&1; then
+    state=$(cairn show "$it" --json 2>/dev/null | sed -n 's/.*"status"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
+    if [ "$state" != "done" ]; then
+      say "closing item $it"
+      cairn close "$it" >/dev/null 2>&1 || true
+    fi
+  fi
   say "done"
 }
 
