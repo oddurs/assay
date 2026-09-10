@@ -2,7 +2,7 @@
 id: 9
 title: Matchers that assert on tokens, not class names
 type: feature
-status: doing
+status: done
 milestone: v0.3
 assignee: Oddur Sigurdsson
 labels:
