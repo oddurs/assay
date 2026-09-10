@@ -232,6 +232,9 @@ cmd_pr() {
       say "closing item $it"
       cairn close "$it" >/dev/null 2>&1 || true
       cairn render >/dev/null 2>&1 || true
+      # cairn writes plain Markdown; the repo formats Markdown. Committing it
+      # unformatted fails the very check this function is about to run.
+      scripts/task fmt >/dev/null 2>&1 || true
       if [ -n "$(git status --porcelain cairn ROADMAP.md 2>/dev/null)" ]; then
         git add cairn ROADMAP.md >/dev/null 2>&1
         git commit -q -m "chore: close item $it" || true
