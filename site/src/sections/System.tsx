@@ -118,7 +118,7 @@ const RUNGS = [
   {
     id: 'L4',
     name: 'Components & sections',
-    desc: 'Every style in the site. Reads from layer 2 exclusively. Assay fails the build if a single literal appears here.',
+    desc: 'Every style in the site. Reads from layer 2 exclusively. stylegraph fails the build if a single literal appears here.',
     accent: false,
   },
 ];
@@ -159,9 +159,9 @@ export function System() {
             <Badge tone="signal">The enforced rule</Badge>
             <Text role="body">
               <strong>A literal outside layer 1 fails the build.</strong> Not a lint
-              warning somebody mutes — <code>npm run check</code> runs Assay with a 100%
-              gate, and CI refuses the merge. That is the difference between a design
-              system and a suggestion.
+              warning somebody mutes — <code>npm run check</code> runs stylegraph with a
+              100% gate, and CI refuses the merge. That is the difference between a
+              design system and a suggestion.
             </Text>
           </div>
         </div>

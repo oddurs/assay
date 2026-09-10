@@ -7,7 +7,7 @@ import { radius, stroke, blur } from '../tokens/shape.stylex';
 import { motion } from '../tokens/motion.stylex';
 
 /**
- * A command you can actually take. Printing `npx assay .` and making the reader
+ * A command you can actually take. Printing `npx stylegraph .` and making the reader
  * retype it is the smallest possible failure of a developer landing page.
  */
 const styles = stylex.create({

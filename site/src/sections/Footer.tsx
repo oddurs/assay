@@ -153,7 +153,7 @@ export function Footer() {
               Compile-time design system conformance for StyleX. Free and MIT, because
               it only works if it is in everyone&rsquo;s build.
             </Text>
-            <CopyField command="npx assay ." />
+            <CopyField command="npx stylegraph ." />
           </div>
           {COLS.map((c) => (
             <nav key={c.head} {...stylex.props(styles.col)} aria-label={c.head}>
@@ -180,7 +180,7 @@ export function Footer() {
 
         <div {...stylex.props(styles.bottom)}>
           <span {...stylex.props(styles.fine)}>
-            Built with StyleX · measured by Assay on every build
+            Built with StyleX · measured by stylegraph on every build
           </span>
           <span {...stylex.props(styles.fine, styles.spacer)}>
             {report.files} files ·{' '}

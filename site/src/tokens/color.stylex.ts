@@ -45,7 +45,7 @@ export const colors = stylex.defineVars({
 
   // Interactive. `accentHover` is a FILL and goes darker, so the white label
   // keeps its contrast; `accentText` is the light variant for accent-coloured
-  // text on a dark surface. Assay caught these being the same token.
+  // text on a dark surface. stylegraph caught these being the same token.
   accent: palette.violet500,
   accentHover: palette.violet600,
   accentText: palette.violet400,

@@ -86,7 +86,7 @@ cmd_doctor() {
     report FAIL "hooks not wired; run: git config core.hooksPath .githooks"
   fi
 
-  for t in fmt fmt:check lint test build check; do
+  for t in fmt fmt:check lint types test build check; do
     grep -q "^  $t)" scripts/task || report FAIL "scripts/task is missing target: $t"
   done
   report OK "scripts/task exposes every target"

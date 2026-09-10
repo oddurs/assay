@@ -83,7 +83,7 @@ const LAYERS = [
   {
     tone: 'accent' as const,
     verdict: 'The compiled style graph',
-    title: 'Assay',
+    title: 'stylegraph',
     who: 'this',
     body: 'Every declaration, with provenance: did this value come from a token, a literal, or a runtime expression. The gap between the spec and the pixels, closed.',
   },

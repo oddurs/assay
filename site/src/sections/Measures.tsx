@@ -75,7 +75,7 @@ const CAPS = [
 ];
 
 const OUTPUT = [
-  { text: '$ npx assay .', tone: 'prompt' as const },
+  { text: '$ npx stylegraph .', tone: 'prompt' as const },
   { text: '' },
   { text: '  ██████████████░░░░░░░░░░░░░░░░░░░░  42.4%', tone: 'warn' as const },
   { text: '' },
@@ -111,7 +111,7 @@ export function Measures() {
       ruled
       eyebrow="What it measures"
       title="Four questions, one compiler pass."
-      tail="Assay rides the compile that is already happening, so the whole analysis is a build artifact rather than a separate tool you have to remember to run."
+      tail="stylegraph rides the compile that is already happening, so the whole analysis is a build artifact rather than a separate tool you have to remember to run."
     >
       <div {...stylex.props(styles.list)}>
         {CAPS.map((c) => (

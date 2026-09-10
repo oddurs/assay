@@ -21,7 +21,7 @@ const styles = stylex.create({
   },
 });
 
-/** A meniscus in a sample dish — the assay, literally. */
+/** A node with an edge running under it: the graph, in one glyph. */
 export function Logo({ href = '#top' }: { href?: string }) {
   return (
     <a href={href} {...stylex.props(styles.root)}>
@@ -49,7 +49,7 @@ export function Logo({ href = '#top' }: { href?: string }) {
         />
         <circle cx="11" cy="8.2" r="1.6" fill="currentColor" />
       </svg>
-      <span {...stylex.props(styles.word)}>assay</span>
+      <span {...stylex.props(styles.word)}>stylegraph</span>
     </a>
   );
 }

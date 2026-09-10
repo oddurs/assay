@@ -49,7 +49,7 @@ const styles = stylex.create({
 });
 
 const LINES = [
-  { text: '$ npx assay .', tone: 'prompt' as const },
+  { text: '$ npx stylegraph .', tone: 'prompt' as const },
   { text: '' },
   { text: '  ████████████████████████████████░░  94.2%', tone: 'good' as const },
   { text: '' },
@@ -60,7 +60,7 @@ const LINES = [
   { text: '      31  src/features/billing/Invoice.tsx' },
   { text: '      18  src/features/onboarding/Step.tsx' },
   { text: '' },
-  { text: '$ npx assay diff main HEAD', tone: 'prompt' as const },
+  { text: '$ npx stylegraph diff main HEAD', tone: 'prompt' as const },
   { text: '  space.md changed → 218 components, 6 teams', tone: 'signal' as const },
   { text: '  3 of them outside your org', tone: 'warn' as const },
 ];
@@ -80,8 +80,11 @@ export function Install() {
                 three percent of build time — or it is a command people forget to run.
               </Text>
               <div {...stylex.props(styles.commands)}>
-                <CopyField command="npx assay ." note="score a repo" />
-                <CopyField command="npx assay diff main HEAD" note="what changed" />
+                <CopyField command="npx stylegraph ." note="score a repo" />
+                <CopyField
+                  command="npx stylegraph diff main HEAD"
+                  note="what changed"
+                />
               </div>
               <div {...stylex.props(styles.actions)}>
                 <Button size="lg" chevron>
@@ -98,7 +101,7 @@ export function Install() {
                 </Text>
               </div>
             </div>
-            <Terminal title="assay · a real monorepo" lines={LINES} />
+            <Terminal title="stylegraph · a real monorepo" lines={LINES} />
           </div>
         </Section>
       </div>
