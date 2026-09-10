@@ -21,6 +21,8 @@ const DEFINE_APIS = new Set([
   'unstable_defineConstsNested',
 ]);
 const THEME_APIS = new Set(['createTheme', 'unstable_createThemeNested']);
+const VARIANT_API = 'defineVariants';
+const VARIANT_PACKAGE = '@stylegraph/variants';
 
 const isStylexPkg = (s) => s === '@stylexjs/stylex' || s.startsWith('@stylexjs/');
 
@@ -117,6 +119,8 @@ export function analyzeFile({ file, absFile, src, families, out, aliases = {} })
 
   const stylexNames = new Set();
   const bareApis = new Map();
+  /** Local name bound to @stylegraph/variants' defineVariants. */
+  let variantsLocal = null;
   /** local name -> { module, exportName } */
   const tokenImports = new Map();
 
@@ -136,7 +140,10 @@ export function analyzeFile({ file, absFile, src, families, out, aliases = {} })
         } else if (s.type === 'ImportSpecifier') {
           const imported = s.imported.name ?? s.imported.value;
           if (isStylexPkg(spec)) bareApis.set(s.local.name, imported);
-          else if (fromTokens)
+          else if (spec === VARIANT_PACKAGE && imported === VARIANT_API) {
+            // Tracked by its local name, because it can be renamed on import.
+            variantsLocal = s.local.name;
+          } else if (fromTokens)
             tokenImports.set(s.local.name, { module: mod, exportName: imported });
         }
       }
@@ -190,6 +197,17 @@ export function analyzeFile({ file, absFile, src, families, out, aliases = {} })
 
   traverse(ast, {
     CallExpression(path) {
+      // Checked BEFORE the stylex-api guard below: defineVariants is not a
+      // StyleX API, so anything after `if (!api) return` never sees it.
+      if (
+        variantsLocal &&
+        path.node.callee.type === 'Identifier' &&
+        path.node.callee.name === variantsLocal
+      ) {
+        collectVariants(path, ctx);
+        return;
+      }
+
       const api = apiOf(path.node.callee);
       if (!api) return;
       const arg = path.node.arguments[0];
@@ -277,6 +295,39 @@ function collectTheme(path, ctx) {
     name: name ?? '(anonymous)',
     group: groupId,
     overrides: local,
+  });
+}
+
+/** The axes and values of one `defineVariants` call. */
+function collectVariants(path, ctx) {
+  const [config] = path.node.arguments;
+  if (!config || config.type !== 'ObjectExpression') return;
+
+  const name = declaredName(path) ?? '(anonymous)';
+  const axes = {};
+
+  for (const prop of config.properties) {
+    if (prop.type !== 'ObjectProperty' || propName(prop) !== 'variants') continue;
+    if (prop.value.type !== 'ObjectExpression') continue;
+
+    for (const axis of prop.value.properties) {
+      if (axis.type !== 'ObjectProperty') continue;
+      const axisName = propName(axis);
+      if (!axisName || axis.value.type !== 'ObjectExpression') continue;
+
+      axes[axisName] = axis.value.properties
+        .filter((v) => v.type === 'ObjectProperty')
+        .map((v) => propName(v))
+        .filter(Boolean);
+    }
+  }
+
+  if (Object.keys(axes).length === 0) return;
+  ctx.out.variants.set(`${ctx.file}#${name}`, {
+    id: `${ctx.file}#${name}`,
+    file: ctx.file,
+    name,
+    axes,
   });
 }
 

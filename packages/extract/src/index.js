@@ -61,6 +61,7 @@ export async function analyze(root, opts = {}) {
     pairs: new Map(),
     units: new Map(),
     themes: new Map(),
+    variants: new Map(),
     byFile: new Map(),
   };
 
@@ -165,6 +166,7 @@ export async function analyze(root, opts = {}) {
     units: out.units,
     rawTokens: out.tokens,
     themes: out.themes,
+    variants: out.variants,
     // Each theme's overrides, resolved — the graph carries values, not ASTs.
     themeValues: Object.fromEntries(
       [...out.themes.values()].flatMap((t) => {

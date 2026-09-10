@@ -1,12 +1,15 @@
 {
   "name": "@stylegraph/variants",
   "version": "0.1.0",
-  "description": "Compile-time variants for StyleX.",
+  "description": "Compile-time variants for StyleX: typed size, tone and state APIs the graph can see.",
   "license": "MIT",
   "type": "module",
   "main": "./src/index.js",
   "exports": {
-    ".": "./src/index.js"
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    }
   },
   "files": [
     "src",
@@ -24,5 +27,9 @@
   "homepage": "https://stylegraph.dev",
   "publishConfig": {
     "access": "public"
+  },
+  "types": "./src/index.d.ts",
+  "peerDependencies": {
+    "@stylexjs/stylex": ">=0.15.0"
   }
 }

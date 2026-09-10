@@ -17,6 +17,7 @@ usage: scripts/task <target>
   fmt:check   verify formatting, non-zero on drift
   lint        lint; warnings are errors
   types       typecheck; vite build does not do this for you
+  size        enforce the bundle budget on packages that ship to users
   test        the tool's test suite, plus the site's own conformance gate
   build       build the site (also regenerates its measured report)
   check       fmt:check && lint && types && test && build
@@ -52,6 +53,20 @@ case "${1:-}" in
     need_deps
     ensure_report
     npx --no-install tsc --noEmit --project site/tsconfig.json
+    # The variants package ships types as its feature, so they are tested.
+    npx --no-install tsc --noEmit --project packages/variants/types-test/tsconfig.json
+    ;;
+  size)
+    # `variants` is the only package that enters a user's production bundle.
+    # A budget is the difference between meaning that and merely saying it.
+    need_deps
+    budget=4096
+    actual=$(cat packages/variants/src/index.js | wc -c | tr -d ' ')
+    if [ "$actual" -gt "$budget" ]; then
+      echo "size: packages/variants is ${actual}B, over the ${budget}B budget" >&2
+      exit 1
+    fi
+    echo "size: packages/variants ${actual}B of ${budget}B"
     ;;
   test)
     need_deps
@@ -116,6 +131,7 @@ MD
     "$0" fmt:check
     "$0" lint
     "$0" types
+    "$0" size
     "$0" test
     "$0" build
     ;;

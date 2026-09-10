@@ -415,6 +415,74 @@ console.log('\n  DTCG bridge');
   );
 }
 
+console.log('\n  variants');
+{
+  const { defineVariants, describeVariants } = await import('@stylegraph/variants');
+
+  const base = { b: 1 };
+  const sm = { s: 1 };
+  const md = { m: 1 };
+  const loud = { l: 1 };
+  const big = { g: 1 };
+
+  const button = defineVariants({
+    base,
+    variants: { size: { sm, md }, tone: { quiet: {}, loud } },
+    defaultVariants: { size: 'md', tone: 'quiet' },
+    compoundVariants: [{ size: 'md', tone: 'loud', style: big }],
+  });
+
+  check('base is always applied', button()[0], base);
+  check('defaults fill in', button().includes(md), true);
+  check(
+    'an explicit value wins over the default',
+    button({ size: 'sm' }).includes(sm),
+    true,
+  );
+  check(
+    'and the default is not also applied',
+    button({ size: 'sm' }).includes(md),
+    false,
+  );
+
+  // null is how a caller says "no size", which is not the same as "the default".
+  check('null opts out of an axis', button({ size: null }).includes(md), false);
+
+  // Order is the contract: StyleX merges by application order, so a component
+  // the caller cannot override is a component people fork.
+  const own = { own: 1 };
+  check('caller overrides come last', button({ style: own }).at(-1), own);
+
+  const compound = button({ size: 'md', tone: 'loud' });
+  check('compound rules apply when matched', compound.includes(big), true);
+  check(
+    'and after their own axes',
+    compound.indexOf(big) > compound.indexOf(loud),
+    true,
+  );
+  check(
+    'compound rules do not apply otherwise',
+    button({ size: 'sm', tone: 'loud' }).includes(big),
+    false,
+  );
+
+  check(
+    'axes can be enumerated',
+    describeVariants({
+      variants: { size: { sm, md } },
+      defaultVariants: { size: 'md' },
+    }),
+    [{ axis: 'size', values: ['sm', 'md'], default: 'md' }],
+  );
+
+  // The point of doing this at compile time: the graph can see the structure.
+  const g = buildGraph(await analyze('./test/variant-fixtures'));
+  const v = Object.values(g.variants)[0];
+  check('the graph records the variant group', v?.name, 'button');
+  check('with its axes', Object.keys(v?.axes ?? {}).sort(), ['size', 'tone']);
+  check('and their values', v?.axes.size, ['sm', 'md']);
+}
+
 console.log(
   `\n  ${fail === 0 ? `✓ ${pass} passed` : `✗ ${fail} failed, ${pass} passed`}\n`,
 );

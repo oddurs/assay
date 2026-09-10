@@ -101,6 +101,16 @@ export function buildGraph(result, opts = {}) {
     };
   }
 
+  const variants = {};
+  for (const [id, v] of result.variants ?? []) {
+    variants[toPosix(id)] = {
+      id: toPosix(id),
+      file: toPosix(v.file),
+      name: v.name,
+      axes: v.axes,
+    };
+  }
+
   return {
     version: GRAPH_VERSION,
     generator: {
@@ -125,6 +135,7 @@ export function buildGraph(result, opts = {}) {
     },
     tokens: sortObject(tokens),
     themes: sortObject(themes),
+    variants: sortObject(variants),
     units: sortObject(units),
     dead,
   };
