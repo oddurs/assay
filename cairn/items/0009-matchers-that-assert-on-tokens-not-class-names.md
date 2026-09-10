@@ -2,8 +2,9 @@
 id: 9
 title: Matchers that assert on tokens, not class names
 type: feature
-status: backlog
+status: done
 milestone: v0.3
+assignee: Oddur Sigurdsson
 labels:
   - test
 created: 2026-09-10

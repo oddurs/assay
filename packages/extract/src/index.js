@@ -168,10 +168,15 @@ export async function analyze(root, opts = {}) {
     themes: out.themes,
     variants: out.variants,
     // Each theme's overrides, resolved — the graph carries values, not ASTs.
+    // Keyed BY THEME, because several themes override the same token and a
+    // flat token->value map silently keeps only the last one extracted.
     themeValues: Object.fromEntries(
-      [...out.themes.values()].flatMap((t) => {
+      [...out.themes.entries()].map(([themeId, t]) => {
         const r = makeResolver(out.tokens, t.overrides);
-        return [...t.overrides.keys()].map((id) => [id, r(id)]);
+        return [
+          themeId,
+          Object.fromEntries([...t.overrides.keys()].map((id) => [id, r(id)])),
+        ];
       }),
     ),
     config: cfg,

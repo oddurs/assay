@@ -2,7 +2,7 @@
 id: 11
 title: Run a suite under every theme
 type: feature
-status: backlog
+status: done
 milestone: v0.3
 labels:
   - test

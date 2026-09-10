@@ -95,7 +95,7 @@ export function buildGraph(result, opts = {}) {
       group: theme.group ? pid(theme.group) : null,
       overrides: Object.fromEntries(
         [...theme.overrides.keys()]
-          .map((t) => [pid(t), result.themeValues?.[t] ?? null])
+          .map((t) => [pid(t), result.themeValues?.[id]?.[t] ?? null])
           .sort(),
       ),
     };

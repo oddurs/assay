@@ -2,7 +2,7 @@
 id: 10
 title: A snapshot serializer a human can review
 type: feature
-status: backlog
+status: done
 milestone: v0.3
 labels:
   - test
