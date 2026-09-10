@@ -2,7 +2,7 @@
 id: 7
 title: Decide what DTCG cannot carry, and say so
 type: docs
-status: backlog
+status: done
 milestone: v0.2
 labels:
   - tokens

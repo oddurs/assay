@@ -2,7 +2,7 @@
 id: 6
 title: 'DTCG in: a token document becomes defineVars'
 type: feature
-status: backlog
+status: done
 milestone: v0.2
 labels:
   - tokens
