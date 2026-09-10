@@ -22,15 +22,15 @@ The graph is specified and one tool reads it well enough to run a real project's
 
 ## v0.2 — Into the token pipeline
 
-`··········` 0% · 0 of 3 done · due 2026-12-01
+`##########` 100% · 3 of 3 done · due 2026-12-01
 
 DTCG both directions. StyleX stops being outside the industry's token toolchain.
 
-### backlog
+### done
 
-- [ ] `0005` DTCG out: a stylegraph becomes a token document <sup>feature · p0 · tokens</sup>
-- [ ] `0006` DTCG in: a token document becomes defineVars <sup>feature · p0 · tokens</sup>
-- [ ] `0007` Decide what DTCG cannot carry, and say so <sup>docs · p1 · tokens</sup>
+- [x] `0005` DTCG out: a stylegraph becomes a token document <sup>feature · p0 · tokens</sup>
+- [x] `0006` DTCG in: a token document becomes defineVars <sup>feature · p0 · tokens</sup>
+- [x] `0007` Decide what DTCG cannot carry, and say so <sup>docs · p1 · tokens</sup>
 
 ## v0.3 — Authoring and verification
 

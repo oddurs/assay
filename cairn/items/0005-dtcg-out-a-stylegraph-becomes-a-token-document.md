@@ -2,7 +2,7 @@
 id: 5
 title: 'DTCG out: a stylegraph becomes a token document'
 type: feature
-status: doing
+status: done
 milestone: v0.2
 assignee: Oddur Sigurdsson
 labels:
