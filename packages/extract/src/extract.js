@@ -219,6 +219,9 @@ export function analyzeFile({ file, absFile, src, families, out, aliases = {} })
 
       if (THEME_APIS.has(api)) {
         for (const a of path.node.arguments) recordRefs(a, ctx);
+        // A theme's overrides are the only place alternate token values exist.
+        // Discarding them is why contrast could only ever see the base theme.
+        collectTheme(path, ctx);
         return;
       }
 
@@ -242,6 +245,39 @@ function declaredName(path) {
     p = p.parentPath;
   }
   return null;
+}
+
+/**
+ * A theme: which var group it overrides, and with what.
+ *
+ * `createTheme(colors, { accent: palette.violet600 })` means every consumer of
+ * `colors.accent` renders a different value under this theme. Nothing that
+ * judges a value can be correct without knowing that.
+ */
+function collectTheme(path, ctx) {
+  const [target, overrides] = path.node.arguments;
+  if (!overrides || overrides.type !== 'ObjectExpression') return;
+
+  const name = declaredName(path);
+  const id = `${ctx.modId}#${name ?? '?'}`;
+  // Which var group is being themed, so overrides resolve to real token ids.
+  const groupId = target ? ctx.tokenIdOf(target) : null;
+
+  // Collected into a local map: an override is an alternate value for an
+  // existing token, not a new token definition.
+  const local = new Map();
+  collectTokenDefs(overrides, '', groupId ?? `${ctx.modId}#?`, {
+    ...ctx,
+    out: { ...ctx.out, tokens: local },
+  });
+
+  ctx.out.themes.set(id, {
+    id,
+    file: ctx.file,
+    name: name ?? '(anonymous)',
+    group: groupId,
+    overrides: local,
+  });
 }
 
 /** Token definitions, flattened. A conditional object is a leaf value. */

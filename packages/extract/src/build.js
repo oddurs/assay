@@ -82,6 +82,25 @@ export function buildGraph(result, opts = {}) {
 
   const dead = (result.tokens.dead ?? []).map(pid).sort();
 
+  // Themes are part of the graph because a value is only true under one. A
+  // consumer asking "what does colors.accent render as" cannot answer without
+  // them, and re-extracting to find out defeats having a format at all.
+  const themes = {};
+  for (const [id, theme] of result.themes ?? []) {
+    const key = pid(id);
+    themes[key] = {
+      id: key,
+      file: toPosix(theme.file),
+      name: theme.name,
+      group: theme.group ? pid(theme.group) : null,
+      overrides: Object.fromEntries(
+        [...theme.overrides.keys()]
+          .map((t) => [pid(t), result.themeValues?.[t] ?? null])
+          .sort(),
+      ),
+    };
+  }
+
   return {
     version: GRAPH_VERSION,
     generator: {
@@ -101,9 +120,11 @@ export function buildGraph(result, opts = {}) {
       units: Object.keys(units).length,
       tokens: Object.keys(tokens).length,
       dead: dead.length,
+      themes: Object.keys(themes).length,
       contrastFailing: result.contrast?.failing?.length ?? 0,
     },
     tokens: sortObject(tokens),
+    themes: sortObject(themes),
     units: sortObject(units),
     dead,
   };

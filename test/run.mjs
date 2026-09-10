@@ -275,6 +275,37 @@ console.log('\n  regressions');
   );
 }
 
+console.log('\n  theme-aware contrast');
+{
+  // Resolving tokens to their BASE values only ever checked the default theme.
+  // On our own site that reported three of four themes as passing while they
+  // carried AA failures — a checker returning a false pass.
+  const r = await analyze('./test/theme-fixtures');
+
+  check('base theme passes', r.contrast.failing.length, 0);
+  check('a theme-only failure is caught', r.contrastFailing.length, 1);
+  check('the failure names its theme', r.contrastFailing[0].theme, 'washed');
+  check('and reports the themed value', r.contrastFailing[0].fg, '#BBBBBB');
+  check('ratio is computed under the theme', r.contrastFailing[0].ratio < 2, true);
+
+  // A theme of corner radii cannot change a contrast verdict; running it would
+  // repeat the base result under a misleading name.
+  check(
+    'themes touching no colour are skipped',
+    r.contrastByTheme.map((t) => t.theme),
+    ['washed'],
+  );
+
+  const g = buildGraph(r);
+  check('themes reach the graph', Object.keys(g.themes).length, 2);
+  const washed = Object.values(g.themes).find((t) => t.name === 'washed');
+  check(
+    'the graph carries resolved override values',
+    Object.values(washed.overrides)[0],
+    '#BBBBBB',
+  );
+}
+
 console.log(
   `\n  ${fail === 0 ? `✓ ${pass} passed` : `✗ ${fail} failed, ${pass} passed`}\n`,
 );

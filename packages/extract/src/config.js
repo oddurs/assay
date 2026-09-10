@@ -31,10 +31,12 @@ export const DEFAULTS = {
 };
 
 const NAMES = [
-  'assay.config.js',
-  'assay.config.mjs',
+  'stylegraph.config.js',
+  'stylegraph.config.mjs',
+  'stylegraph.config.json',
+  '.stylegraphrc.json',
+  // The old name, still honoured so an existing checkout keeps working.
   'assay.config.json',
-  '.assayrc.json',
 ];
 
 /**

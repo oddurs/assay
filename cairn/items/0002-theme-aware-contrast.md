@@ -2,7 +2,7 @@
 id: 2
 title: Theme-aware contrast
 type: bug
-status: backlog
+status: done
 milestone: v0.1
 labels:
   - audit
@@ -27,3 +27,15 @@ existing pairing analysis once per theme.
 - [ ] Every theme is checked, not just the base
 - [ ] Output says which theme a failure is in
 - [ ] A fixture with a theme-only failure fails the gate
+
+## 2026-09-10
+
+Themes are captured during extraction and carried in the graph with resolved values, so other packages do not have to re-extract to know them.
+
+Contrast now runs once per theme. Two design decisions worth keeping:
+
+A theme that overrides no colour used by any pairing is skipped rather than run — otherwise a theme of corner radii reports a full set of duplicate results under a misleading name.
+
+The gate counts failures across every theme, not just the base. Reporting only the base is exactly how three of four themes on this site passed while carrying AA failures.
+
+Added test/theme-fixtures with a theme-only failure so this cannot regress: base passes at 18.88:1, the washed theme fails at 1.92:1.

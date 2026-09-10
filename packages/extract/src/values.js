@@ -12,7 +12,7 @@
  * through defineVars -> defineConsts. Conditional objects resolve to their
  * `default` branch, which is what renders unless a media query overrides it.
  */
-export function makeResolver(tokens) {
+export function makeResolver(tokens, overrides = null) {
   const cache = new Map();
 
   function valueOfNode(node, def, depth) {
@@ -55,7 +55,9 @@ export function makeResolver(tokens) {
   function resolve(id, depth = 0) {
     if (cache.has(id)) return cache.get(id);
     if (depth > 12) return null;
-    const tok = tokens.get(id);
+    // A theme's override replaces the base definition for that token; the
+    // chain below it still resolves normally.
+    const tok = (overrides && overrides.get(id)) || tokens.get(id);
     if (!tok) return null;
     cache.set(id, null); // cycle guard
     const v = valueOfNode(tok.value, tok, depth);
