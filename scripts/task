@@ -19,7 +19,8 @@ usage: scripts/task <target>
   types       typecheck; vite build does not do this for you
   test        the tool's test suite, plus the site's own conformance gate
   build       build the site (also regenerates its measured report)
-  check       fmt:check && lint && test && build
+  check       fmt:check && lint && types && test && build
+  new <name>  scaffold a new package under packages/
 USAGE
 }
 
@@ -64,6 +65,52 @@ case "${1:-}" in
   build)
     need_deps
     npm run build --workspace site
+    ;;
+  new)
+    # A new package is four files that must agree with each other. Generating
+    # them removes the chance of a manifest that says one thing and a README
+    # that says another.
+    name=${2:-}
+    [ -n "$name" ] || { echo "usage: scripts/task new <package-name>" >&2; exit 2; }
+    dir="packages/$name"
+    [ -e "$dir" ] && { echo "already exists: $dir" >&2; exit 1; }
+    mkdir -p "$dir/src"
+    cat > "$dir/package.json" <<JSON
+{
+  "name": "@stylegraph/$name",
+  "version": "0.1.0",
+  "description": "TODO: one sentence, in the present tense.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": { ".": "./src/index.js" },
+  "files": ["src", "bin", "README.md"],
+  "engines": { "node": ">=18" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stylegraphjs/stylegraph.git",
+    "directory": "packages/$name"
+  },
+  "homepage": "https://stylegraph.dev",
+  "publishConfig": { "access": "public" },
+  "dependencies": { "@stylegraph/spec": "0.1.0" }
+}
+JSON
+    cat > "$dir/src/index.js" <<JS
+// Not written yet.
+export const NAME = '@stylegraph/$name';
+JS
+    cat > "$dir/README.md" <<MD
+# @stylegraph/$name
+
+TODO: one sentence, in the present tense.
+
+Part of [stylegraph](https://github.com/stylegraphjs/stylegraph) — a specified
+graph of every style in a codebase, and the tools that read it.
+
+MIT.
+MD
+    echo "created $dir — now: npm install, and fill in the description"
     ;;
   check)
     "$0" fmt:check

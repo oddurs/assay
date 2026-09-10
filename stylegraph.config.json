@@ -1,0 +1,12 @@
+{
+  "exclude": ["packages/*/src", "test", "dist"],
+  "contrast": { "level": "AA" },
+  "owners": {
+    "design-system": [
+      "site/src/components/**",
+      "site/src/tokens/**",
+      "site/src/themes/**"
+    ],
+    "marketing": ["site/src/sections/**"]
+  }
+}

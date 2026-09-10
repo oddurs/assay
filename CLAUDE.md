@@ -8,13 +8,14 @@ One unit of work → one worktree → one branch → one PR. Parallel agents mus
 share a checkout.
 
 ```sh
-scripts/agent doctor                 # verify the environment first
-scripts/agent start <type>/<slug>    # branch + worktree from origin/main
-cd ../.worktrees/stylegraph/<type>/<slug> # the script prints this path; it will not cd for you
+cairn next                           # what is ready to work on
+scripts/agent start --item <id>      # branch named from the item; the worktree
+                                     # arrives installed, hooked and claimed
+cd <the path it prints>              # it will not cd for you
 scripts/agent check                  # everything CI runs
 scripts/agent commit "<message>"
 scripts/agent pr
-scripts/agent done                   # only after the PR is merged
+scripts/agent done                   # only after the PR is merged; closes the item
 ```
 
 Branch names must match
